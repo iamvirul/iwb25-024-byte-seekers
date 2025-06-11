@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -16,7 +15,6 @@ import {
   Lock,
   Zap,
   Users,
-  FileText,
   Award,
   ExternalLink
 } from 'lucide-react';
@@ -139,35 +137,6 @@ const Footer = () => {
                 ශ්‍රී ලංකාවේ නවීනතම බ්ලොක්චේන් ඉඩම් ලේඛනාගාරය. 
                 ආරක්ෂිත, විනිවිද දැකිය හැකි සහ කාර්යක්ෂම ඉඩම් කළමනාකරණය.
               </p>
-
-              {/* Features */}
-              <div className="space-y-3 mb-6">
-                {features.map((feature, index) => {
-                  const Icon = feature.icon;
-                  return (
-                    <div key={index} className="flex items-center text-sm">
-                      <Icon className={`w-4 h-4 mr-3 ${feature.color}`} />
-                      <span className="text-gray-300">{feature.text}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Contact Info */}
-              <div className="space-y-3">
-                <div className="flex items-center text-sm text-gray-300">
-                  <Phone className="w-4 h-4 mr-3 text-green-500" />
-                  <span>+94 11 123 4567</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-300">
-                  <Mail className="w-4 h-4 mr-3 text-blue-500" />
-                  <span>info@landregistry.lk</span>
-                </div>
-                <div className="flex items-start text-sm text-gray-300">
-                  <MapPin className="w-4 h-4 mr-3 mt-0.5 text-red-500 flex-shrink-0" />
-                  <span>ලේඛනාගාර ගොඩනැගිල්ල, කොළඹ 01, ශ්‍රී ලංකාව</span>
-                </div>
-              </div>
             </motion.div>
 
             {/* Links Sections */}
@@ -277,7 +246,7 @@ const Footer = () => {
                 <div className="flex items-center">
                   <span>Made with</span>
                   <Heart className="w-4 h-4 mx-1 text-red-500 animate-pulse" />
-                  <span>for Sri Lanka's Digital Future</span>
+                  <span>for Sri Lanka's Digital Future by Byte Seekers</span>
                 </div>
               </div>
 
@@ -316,10 +285,6 @@ const Footer = () => {
             >
               <div className="flex items-center space-x-6 text-xs text-gray-500">
                 <div className="flex items-center">
-                  <Award className="w-4 h-4 mr-2 text-yellow-500" />
-                  <span>ISO 27001 Certified</span>
-                </div>
-                <div className="flex items-center">
                   <Shield className="w-4 h-4 mr-2 text-green-500" />
                   <span>SOC 2 Type II</span>
                 </div>
@@ -328,7 +293,6 @@ const Footer = () => {
                   <span>GDPR Compliant</span>
                 </div>
               </div>
-              
               <div className="text-xs text-gray-500">
                 <span>Powered by Blockchain Technology • Version 2.1.0</span>
               </div>
