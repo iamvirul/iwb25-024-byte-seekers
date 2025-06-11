@@ -2,9 +2,6 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Shield, 
-  Mail, 
-  Phone, 
-  MapPin, 
   Facebook, 
   Twitter, 
   Linkedin, 
@@ -15,7 +12,6 @@ import {
   Lock,
   Zap,
   Users,
-  Award,
   ExternalLink
 } from 'lucide-react';
 
