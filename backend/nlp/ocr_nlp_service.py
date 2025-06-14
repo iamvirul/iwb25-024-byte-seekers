@@ -20,6 +20,7 @@ DB_CONFIG = {
     'database': os.getenv("DB_NAME")
 }
 
+
 def extract_sinhala_and_english_text(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blur = cv2.medianBlur(gray, 3)
@@ -28,8 +29,9 @@ def extract_sinhala_and_english_text(image):
     text = pytesseract.image_to_string(thresh, config=custom_config)
     return text
 
+
 def extract_fields(text):
-    nic = name  = None
+    nic = name = None
 
     nic_patterns = [
         r'\b(?:NIC|No|අංකය)[: ]*([\dVXvx]{10,12})',
@@ -37,8 +39,8 @@ def extract_fields(text):
     ]
 
     name_patterns = [
-        r'නම[: ]*([^\n]+)',                       # Sinhala full name
-        r'Name[: ]*([A-Z\s]+(?:WICKRAMASINGHE)?)'  # English full name
+        r'නම[: ]*([^\n]+)',  # Sinhala full name
+        r'Name[: ]*([A-Za-z\s]+)'  # English full name
     ]
 
     def match_any(patterns):
@@ -55,12 +57,12 @@ def extract_fields(text):
         name = re.sub(r'[^\u0D80-\u0DFFA-Z\s]', '', name)  # Sinhala and English
         name = re.sub(r'\s+', ' ', name).strip()
 
-
     return {
         'nic': nic,
         'name': name,
         'raw_text': text
     }
+
 
 def verify_in_db(nic, name):
     try:
@@ -85,6 +87,7 @@ def verify_in_db(nic, name):
 
     except mysql.connector.Error as err:
         return {'error': str(err)}
+
 
 @app.route("/process", methods=["POST"])
 def process():
@@ -126,6 +129,7 @@ def process():
         return jsonify(error="Tesseract OCR is not installed"), 500
     except Exception as e:
         return jsonify(error=str(e)), 500
+
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)
