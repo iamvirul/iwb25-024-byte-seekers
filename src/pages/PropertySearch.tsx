@@ -3,7 +3,6 @@ import { useBlockchain } from '../contexts/BlockchainContext';
 import { motion } from 'framer-motion';
 import { 
   Search, 
-  Filter, 
   MapPin, 
   SlidersHorizontal,
   Grid3X3,
@@ -11,7 +10,6 @@ import {
   Sparkles,
   TrendingUp,
   Users,
-  Calendar,
   Hash,
   AlertCircle,
   CheckCircle,
@@ -148,19 +146,13 @@ const PropertySearch = () => {
         >
           <Card className="mb-8">
             <div className="space-y-6">
-              {/* Main Search Bar */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Search className="h-6 w-6 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="ඉඩමේ නම, ස්ථානය, හිමිකරු හෝ ID අංකය ඇතුළත් කරන්න..."
-                />
-              </div>
+              <SearchInput
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e)}
+                placeholder="ඉඩමේ නම, ස්ථානය, හිමිකරු හෝ ID අංකය ඇතුළත් කරන්න..."
+                className="w-full"
+                icon={<Search className="h-6 w-6 text-gray-400" />}
+              />
 
               {/* Filter Controls */}
               <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
@@ -231,7 +223,7 @@ const PropertySearch = () => {
                   exit={{ opacity: 0, height: 0 }}
                   className="border-t border-gray-200 pt-6"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         අවම ප්‍රමාණය (අක්කර)
@@ -308,19 +300,63 @@ const PropertySearch = () => {
                 />
               </Card>
             ) : (
-              <div className={`space-y-4 ${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-4 space-y-0' : ''}`}>
+              <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-4' : 'space-y-4'}`}>
                 {filteredProperties.map((property, index) => (
                   <motion.div
                     key={property.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className={viewMode === 'grid' ? 'h-full' : ''}
                   >
                     {viewMode === 'grid' ? (
-                      <PropertyCard
-                        property={property}
-                        onClick={setSelectedProperty}
-                      />
+                      <div className="h-full">
+                        <Card hover onClick={() => setSelectedProperty(property)} className="cursor-pointer h-full flex flex-col">
+                          <div className="flex items-start justify-between flex-1">
+                            <div className="flex items-start space-x-3 flex-1 min-w-0">
+                              <div className="flex-shrink-0">
+                                <MapPin className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between mb-3">
+                                  <h3 className="text-lg font-semibold text-gray-900 truncate pr-2 flex-1">{property.title}</h3>
+                                  {property.disputes.length > 0 && (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 flex-shrink-0">
+                                      <AlertCircle className="w-3 h-3 mr-1" />
+                                      ගැටළු
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                <div className="space-y-2 text-sm text-gray-600 mb-4">
+                                  <div className="flex items-center">
+                                    <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                                    <span className="truncate">{property.location}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Users className="w-4 h-4 mr-2 flex-shrink-0" />
+                                    <span className="truncate">{property.owner}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Hash className="w-4 h-4 mr-2 flex-shrink-0" />
+                                    <span className="truncate">{property.id}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                            <div className="text-lg font-bold text-blue-600">
+                              {property.area} අක්කර
+                            </div>
+                            <button className="inline-flex items-center px-3 py-1 border border-blue-300 text-blue-700 rounded-md hover:bg-blue-50 transition-colors">
+                              <Eye className="w-4 h-4 mr-1" />
+                              විස්තර
+                            </button>
+                          </div>
+                        </Card>
+                      </div>
                     ) : (
                       <Card hover onClick={() => setSelectedProperty(property)} className="cursor-pointer">
                         <div className="flex items-center justify-between">

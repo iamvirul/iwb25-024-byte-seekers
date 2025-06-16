@@ -17,11 +17,17 @@ import {
   SlidersHorizontal,
   Grid3X3,
   List,
+  Sparkles,
+  TrendingUp,
+  Users,
   ArrowRight,
   BarChart3,
+  Shield,
   Scale,
   Eye,
   Download,
+  Filter,
+  Hash,
   Database
 } from 'lucide-react';
 import Card from '../components/ui/Card';
@@ -231,11 +237,11 @@ const Disputes = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
         >
-          {stats.map((stat) => {
+          {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Card key={stat.label} hover className="text-center">
-                <div className="flex flex-col items-center">
+              <Card key={stat.label} hover className="text-center h-full">
+                <div className="flex flex-col items-center h-full justify-center">
                   <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center mb-3 shadow-lg">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
@@ -577,53 +583,58 @@ const Disputes = () => {
                 />
               </Card>
             ) : (
-              <div className={`space-y-4 ${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-4 space-y-0' : ''}`}>
+              <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-4' : 'space-y-4'}`}>
                 {filteredDisputes.map((dispute, index) => (
                   <motion.div
                     key={dispute.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className={viewMode === 'grid' ? 'h-full' : ''}
                   >
                     {viewMode === 'grid' ? (
-                      <Card hover onClick={() => setSelectedDispute(dispute)} className="cursor-pointer">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3">
-                            <div className="flex-shrink-0">
-                              {getDisputeIcon(dispute.status)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                ගැටළුව #{dispute.id.slice(-6)}
-                              </h3>
-                              <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                                {dispute.description}
-                              </p>
-                              <div className="space-y-1 text-sm text-gray-500">
-                                <div className="flex items-center">
-                                  <FileText className="w-4 h-4 mr-2" />
-                                  ඉඩම්: {dispute.propertyId}
-                                </div>
-                                <div className="flex items-center">
-                                  <User className="w-4 h-4 mr-2" />
-                                  විත්තිකරු: {dispute.defendant}
-                                </div>
-                                <div className="flex items-center">
-                                  <Calendar className="w-4 h-4 mr-2" />
-                                  {formatDate(dispute.filedDate)}
+                      <div className="h-full">
+                        <Card hover onClick={() => setSelectedDispute(dispute)} className="cursor-pointer h-full flex flex-col">
+                          <div className="flex items-start justify-between flex-1">
+                            <div className="flex items-start space-x-3 flex-1 min-w-0">
+                              <div className="flex-shrink-0">
+                                {getDisputeIcon(dispute.status)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                  ගැටළුව #{dispute.id.slice(-6)}
+                                </h3>
+                                <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                                  {dispute.description}
+                                </p>
+                                <div className="space-y-1 text-sm text-gray-500 mb-4">
+                                  <div className="flex items-center">
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    ඉඩම්: {dispute.propertyId}
+                                  </div>
+                                  <div className="flex items-center">
+                                    <User className="w-4 h-4 mr-2" />
+                                    විත්තිකරු: {dispute.defendant}
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Calendar className="w-4 h-4 mr-2" />
+                                    {formatDate(dispute.filedDate)}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="flex flex-col items-end space-y-2">
-                            {getStatusBadge(dispute.status)}
+                          <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                            <div>
+                              {getStatusBadge(dispute.status)}
+                            </div>
                             <button className="inline-flex items-center px-3 py-1 border border-red-300 text-red-700 rounded-md hover:bg-red-50 transition-colors">
                               <Eye className="w-4 h-4 mr-1" />
                               විස්තර
                             </button>
                           </div>
-                        </div>
-                      </Card>
+                        </Card>
+                      </div>
                     ) : (
                       <Card hover onClick={() => setSelectedDispute(dispute)} className="cursor-pointer">
                         <div className="flex items-center justify-between">

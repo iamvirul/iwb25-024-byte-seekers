@@ -311,8 +311,8 @@ const Documents = () => {
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Card key={stat.label} hover className="text-center">
-                <div className="flex flex-col items-center">
+              <Card key={stat.label} hover className="text-center h-full">
+                <div className="flex flex-col items-center h-full justify-center">
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-3 shadow-lg">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
@@ -627,45 +627,50 @@ const Documents = () => {
                 />
               </Card>
             ) : (
-              <div className={`space-y-4 ${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-4 space-y-0' : ''}`}>
+              <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-4' : 'space-y-4'}`}>
                 {filteredDocuments.map((document, index) => (
                   <motion.div
                     key={document.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className={viewMode === 'grid' ? 'h-full' : ''}
                   >
                     {viewMode === 'grid' ? (
-                      <Card hover onClick={() => setSelectedDocument(document)} className="cursor-pointer">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3">
-                            <div className="flex-shrink-0">
-                              {getDocumentIcon(document.type)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
-                                {document.name}
-                              </h3>
-                              <div className="space-y-1 text-sm text-gray-600">
-                                <div>වර්ගය: {getDocumentTypeLabel(document.type)}</div>
-                                <div>ඉඩම්: {document.propertyId}</div>
-                                <div>ප්‍රමාණය: {document.size}</div>
-                                <div className="flex items-center">
-                                  <Calendar className="w-4 h-4 mr-1" />
-                                  {formatDate(document.uploadDate)}
+                      <div className="h-full">
+                        <Card hover onClick={() => setSelectedDocument(document)} className="cursor-pointer h-full flex flex-col">
+                          <div className="flex items-start justify-between flex-1">
+                            <div className="flex items-start space-x-3 flex-1 min-w-0">
+                              <div className="flex-shrink-0">
+                                {getDocumentIcon(document.type)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
+                                  {document.name}
+                                </h3>
+                                <div className="space-y-1 text-sm text-gray-600 mb-4">
+                                  <div>වර්ගය: {getDocumentTypeLabel(document.type)}</div>
+                                  <div>ඉඩම්: {document.propertyId}</div>
+                                  <div>ප්‍රමාණය: {document.size}</div>
+                                  <div className="flex items-center">
+                                    <Calendar className="w-4 h-4 mr-1" />
+                                    {formatDate(document.uploadDate)}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="flex flex-col items-end space-y-2">
-                            {getStatusBadge(document.status)}
+                          <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                            <div>
+                              {getStatusBadge(document.status)}
+                            </div>
                             <button className="inline-flex items-center px-3 py-1 border border-purple-300 text-purple-700 rounded-md hover:bg-purple-50 transition-colors">
                               <Eye className="w-4 h-4 mr-1" />
                               විස්තර
                             </button>
                           </div>
-                        </div>
-                      </Card>
+                        </Card>
+                      </div>
                     ) : (
                       <Card hover onClick={() => setSelectedDocument(document)} className="cursor-pointer">
                         <div className="flex items-center justify-between">
