@@ -24,7 +24,6 @@ import {
 import Card from "../components/ui/Card";
 import EmptyState from "../components/common/EmptyState";
 import SearchInput from "../components/ui/SearchInput";
-import { u } from "framer-motion/client";
 
 const Documents = () => {
   const { user } = useAuth();
