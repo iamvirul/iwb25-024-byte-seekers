@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { useBlockchain } from '../contexts/BlockchainContext';
 import { motion } from 'framer-motion';
 import { 
@@ -18,13 +17,13 @@ import {
   Map,
   BarChart3
 } from 'lucide-react';
-import PageHeader from '../components/common/PageHeader';
 import Card from '../components/ui/Card';
 import SearchInput from '../components/ui/SearchInput';
 import Select from '../components/ui/Select';
 import PropertyCard from '../components/property/PropertyCard';
 import PropertyDetails from '../components/property/PropertyDetails';
 import EmptyState from '../components/common/EmptyState';
+import { useState } from 'react';
 
 const PropertySearch = () => {
   const { properties } = useBlockchain();
@@ -122,7 +121,7 @@ const PropertySearch = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
         >
-          {stats.map((stat, index) => {
+          {stats.map((stat) => {
             const Icon = stat.icon;
             return (
               <Card key={stat.label} hover className="text-center">
@@ -311,51 +310,10 @@ const PropertySearch = () => {
                   >
                     {viewMode === 'grid' ? (
                       <div className="h-full">
-                        <Card hover onClick={() => setSelectedProperty(property)} className="cursor-pointer h-full flex flex-col">
-                          <div className="flex items-start justify-between flex-1">
-                            <div className="flex items-start space-x-3 flex-1 min-w-0">
-                              <div className="flex-shrink-0">
-                                <MapPin className="w-5 h-5 text-blue-600" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between mb-3">
-                                  <h3 className="text-lg font-semibold text-gray-900 truncate pr-2 flex-1">{property.title}</h3>
-                                  {property.disputes.length > 0 && (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 flex-shrink-0">
-                                      <AlertCircle className="w-3 h-3 mr-1" />
-                                      ගැටළු
-                                    </span>
-                                  )}
-                                </div>
-                                
-                                <div className="space-y-2 text-sm text-gray-600 mb-4">
-                                  <div className="flex items-center">
-                                    <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
-                                    <span className="truncate">{property.location}</span>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <Users className="w-4 h-4 mr-2 flex-shrink-0" />
-                                    <span className="truncate">{property.owner}</span>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <Hash className="w-4 h-4 mr-2 flex-shrink-0" />
-                                    <span className="truncate">{property.id}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-                            <div className="text-lg font-bold text-blue-600">
-                              {property.area} අක්කර
-                            </div>
-                            <button className="inline-flex items-center px-3 py-1 border border-blue-300 text-blue-700 rounded-md hover:bg-blue-50 transition-colors">
-                              <Eye className="w-4 h-4 mr-1" />
-                              විස්තර
-                            </button>
-                          </div>
-                        </Card>
+                        <PropertyCard
+                          property={property}
+                          onClick={() => setSelectedProperty(property)}
+                        />
                       </div>
                     ) : (
                       <Card hover onClick={() => setSelectedProperty(property)} className="cursor-pointer">
