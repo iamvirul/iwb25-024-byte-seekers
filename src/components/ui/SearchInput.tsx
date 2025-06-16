@@ -5,6 +5,7 @@ interface SearchInputProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  inputClassName?: string;
   icon?: React.ReactNode;
 }
 
@@ -13,6 +14,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   onChange,
   placeholder = "සොයන්න...",
   className = "",
+  inputClassName = "",
   icon,
 }) => {
   return (
@@ -27,7 +29,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500`}
+        className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 ${inputClassName}`}
       />
     </div>
   );

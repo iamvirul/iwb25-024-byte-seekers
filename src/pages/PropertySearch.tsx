@@ -150,6 +150,7 @@ const PropertySearch = () => {
                 onChange={(e) => setSearchTerm(e)}
                 placeholder="ඉඩමේ නම, ස්ථානය, හිමිකරු හෝ ID අංකය ඇතුළත් කරන්න..."
                 className="w-full"
+                inputClassName="focus:ring-blue-500"
                 icon={<Search className="h-6 w-6 text-gray-400" />}
               />
 
