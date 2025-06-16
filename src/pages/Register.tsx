@@ -15,14 +15,17 @@ import {
   MapPin,
   Clock,
   Globe,
-  XCircle
+  XCircle,
+  Zap,
+  Database,
+  Users
 } from 'lucide-react';
+
 import AuthLayout from '../components/layout/auth/AuthLayout';
 import ProgressSteps from '../components/layout/auth/ProgressSteps';
 import FormInput from '../components/layout/auth/FormInput';
 import RoleSelector from '../components/layout/auth/RoleSelector';
 import PasswordInput from '../components/layout/auth/PasswordInput';
-
 
 const Register = () => {
   const navigate = useNavigate();
@@ -140,357 +143,505 @@ const Register = () => {
     }
   ];
 
-  const benefits = [
+  const features = [
     { icon: Shield, text: 'ආරක්ෂිත ගනුදෙනු', color: 'text-green-600' },
-    { icon: CheckCircle, text: 'ක්ෂණික ප්‍රවේශය', color: 'text-blue-600' },
-    { icon: Globe, text: '24/7 සේවාව', color: 'text-purple-600' },
-    { icon: User, text: 'ඩිජිටල් ලේඛන', color: 'text-orange-600' }
+    { icon: Zap, text: 'ක්ෂණික ප්‍රවේශය', color: 'text-blue-600' },
+    { icon: Database, text: 'ඩිජිටල් ලේඛන', color: 'text-purple-600' },
+    { icon: Users, text: '24/7 සේවාව', color: 'text-orange-600' }
   ];
 
   return (
     <AuthLayout backgroundVariant="purple">
-      <div className="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-4xl w-full"
-        >
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-8 py-8 text-white relative overflow-hidden">
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 to-transparent"></div>
-              </div>
-              
-              <div className="relative">
-                <div className="flex items-center justify-center mb-6">
-                  <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
-                    <UserPlus className="h-8 w-8" />
+      <div className="min-h-screen flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left Side - Branding & Features - Hidden on Mobile */}
+            <div className="hidden lg:block">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-center lg:text-left"
+              >
+                {/* Logo & Brand */}
+                <div className="flex items-center justify-center lg:justify-start mb-8">
+                  <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-xl mr-4">
+                    <Shield className="w-8 h-8 text-white" />
                   </div>
-                </div>
-                <h2 className="text-3xl font-bold text-center mb-2">
-                  නව ගිණුමක් සාදන්න
-                </h2>
-                <p className="text-center text-indigo-100 text-lg">
-                  ශ්‍රී ලංකාවේ නවීනතම ඉඩම් ලේඛනාගාරයට සම්බන්ධ වන්න
-                </p>
-              </div>
-            </div>
-
-            {/* Progress Steps */}
-            <ProgressSteps steps={steps} currentStep={currentStep} />
-
-            {/* Form Content */}
-            <div className="px-8 py-8">
-              {errors.submit && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl mb-8 flex items-center"
-                >
-                  <XCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-                  <span>{errors.submit}</span>
-                </motion.div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                {/* Step 1: Basic Information */}
-                {currentStep === 1 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-6"
-                  >
-                    <div className="text-center mb-8">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">මූලික තොරතුරු</h3>
-                      <p className="text-gray-600">ඔබේ පුද්ගලික තොරතුරු ඇතුළත් කරන්න</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormInput
-                        id="firstName"
-                        name="firstName"
-                        label="මුල් නම"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        error={errors.firstName}
-                        placeholder="ඔබේ මුල් නම"
-                        required
-                      />
-
-                      <FormInput
-                        id="lastName"
-                        name="lastName"
-                        label="අග නම"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        error={errors.lastName}
-                        placeholder="ඔබේ අග නම"
-                        required
-                      />
-                    </div>
-
-                    <FormInput
-                      id="email"
-                      name="email"
-                      type="email"
-                      label="ඊමේල් ලිපිනය"
-                      value={formData.email}
-                      onChange={handleChange}
-                      error={errors.email}
-                      icon={Mail}
-                      placeholder="example@email.com"
-                      required
-                    />
-
-                    <RoleSelector
-                      value={formData.role}
-                      onChange={(value) => setFormData({...formData, role: value as any})}
-                    />
-                  </motion.div>
-                )}
-
-                {/* Step 2: Security */}
-                {currentStep === 2 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-6"
-                  >
-                    <div className="text-center mb-8">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">ගිණුම් ආරක්ෂණය</h3>
-                      <p className="text-gray-600">ඔබේ ගිණුම සඳහා ආරක්ෂිත මුරපදයක් සාදන්න</p>
-                    </div>
-
-                    <PasswordInput
-                      id="password"
-                      name="password"
-                      label="මුරපදය"
-                      value={formData.password}
-                      onChange={handleChange}
-                      error={errors.password}
-                      placeholder="අවම වශයෙන් අක්ෂර 6ක්"
-                      required
-                    />
-
-                    <PasswordInput
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      label="මුරපදය නැවත ඇතුළත් කරන්න"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      error={errors.confirmPassword}
-                      placeholder="මුරපදය නැවත ඇතුළත් කරන්න"
-                      required
-                    />
-
-                    {/* Password Strength Indicator */}
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
-                      <h4 className="font-semibold text-green-800 mb-3 flex items-center">
-                        <Shield className="w-5 h-5 mr-2" />
-                        මුරපද ආරක්ෂණ උපදෙස්
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-green-700">
-                        <div className="flex items-center">
-                          <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                          අවම වශයෙන් අක්ෂර 6ක්
-                        </div>
-                        <div className="flex items-center">
-                          <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                          විශේෂ අක්ෂර භාවිතය
-                        </div>
-                        <div className="flex items-center">
-                          <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                          සංඛ්‍යා ඇතුළත් කිරීම
-                        </div>
-                        <div className="flex items-center">
-                          <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                          ලොකු සහ කුඩා අකුරු
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Step 3: Identity Verification */}
-                {currentStep === 3 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-6"
-                  >
-                    <div className="text-center mb-8">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">හැඳුනුම් සත්‍යාපනය</h3>
-                      <p className="text-gray-600">ඔබේ ඩිජිටල් හැඳුනුම්පත් තොරතුරු ඇතුළත් කරන්න</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormInput
-                        id="nic"
-                        name="nic"
-                        label="ජාතික හැඳුනුම්පත් අංකය"
-                        value={formData.nic}
-                        onChange={handleChange}
-                        error={errors.nic}
-                        icon={CreditCard}
-                        placeholder="199512345678"
-                        required
-                      />
-
-                      <FormInput
-                        id="slUdiId"
-                        name="slUdiId"
-                        label="SL-UDI අංකය"
-                        value={formData.slUdiId}
-                        onChange={handleChange}
-                        error={errors.slUdiId}
-                        icon={Shield}
-                        placeholder="SL-UDI-123456789"
-                        required
-                      />
-                    </div>
-
-                    <FormInput
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      label="දුරකථන අංකය"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      error={errors.phone}
-                      icon={Phone}
-                      placeholder="0771234567"
-                      required
-                    />
-
-                    <FormInput
-                      id="address"
-                      name="address"
-                      label="ලිපිනය"
-                      value={formData.address}
-                      onChange={handleChange}
-                      error={errors.address}
-                      icon={MapPin}
-                      placeholder="ඔබේ සම්පූර්ණ ලිපිනය"
-                      required
-                    />
-
-                    {/* Verification Notice */}
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
-                      <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
-                        <Shield className="w-5 h-5 mr-2" />
-                        ඩිජිටල් හැඳුනුම්පත් සත්‍යාපනය
-                      </h4>
-                      <p className="text-blue-700 text-sm leading-relaxed mb-4">
-                        ඔබේ ගිණුම සාදන ලද පසු, අපගේ පද්ධතිය ඔබේ SL-UDI ඩිජිටල් හැඳුනුම්පත 
-                        ස්වයංක්‍රීයව සත්‍යාපනය කරයි. මෙය ඔබේ ගිණුමේ ආරක්ෂාව සහතික කරයි.
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-blue-700">
-                        <div className="flex items-center">
-                          <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
-                          ස්වයංක්‍රීය සත්‍යාපනය
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="w-4 h-4 mr-2 text-blue-600" />
-                          ක්ෂණික ප්‍රතිචාරය
-                        </div>
-                        <div className="flex items-center">
-                          <Shield className="w-4 h-4 mr-2 text-blue-600" />
-                          සම්පූර්ණ ආරක්ෂාව
-                        </div>
-                        <div className="flex items-center">
-                          <Globe className="w-4 h-4 mr-2 text-blue-600" />
-                          රජයේ සහාය
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Navigation Buttons */}
-                <div className="flex justify-between items-center pt-8 border-t border-gray-200">
                   <div>
-                    {currentStep > 1 && (
-                      <button
-                        type="button"
-                        onClick={handlePrevious}
-                        className="inline-flex items-center px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold"
-                      >
-                        <ArrowLeft className="w-5 h-5 mr-2" />
-                        පෙර
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center space-x-4">
-                    {/* Step Indicator */}
-                    <span className="text-sm text-gray-500">
-                      {currentStep} / {steps.length}
-                    </span>
-                    
-                    {currentStep < 3 ? (
-                      <button
-                        type="button"
-                        onClick={handleNext}
-                        className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                      >
-                        ඊළඟ
-                        <ArrowRight className="w-5 h-5 ml-2" />
-                      </button>
-                    ) : (
-                      <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                      >
-                        {isLoading ? (
-                          <>
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                            ලියාපදිංචි වෙමින්...
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="w-5 h-5 mr-2" />
-                            ගිණුම සාදන්න
-                          </>
-                        )}
-                      </button>
-                    )}
+                    <h1 className="text-2xl font-bold text-gray-900">ඉඩම් ලේඛනාගාරය</h1>
+                    <p className="text-sm text-gray-600">ශ්‍රී ලංකා</p>
                   </div>
                 </div>
-              </form>
-            </div>
 
-            {/* Footer */}
-            <div className="px-8 py-6 bg-gradient-to-r from-gray-50 to-indigo-50/30 border-t border-gray-200/50">
-              <div className="flex flex-col md:flex-row items-center justify-between">
-                <p className="text-sm text-gray-600 mb-4 md:mb-0">
-                  දැනටමත් ගිණුමක් තිබේද?{' '}
-                  <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors duration-200">
-                    ප්‍රවේශ වන්න
-                  </Link>
-                </p>
-                
-                {/* Benefits */}
-                <div className="flex items-center space-x-6">
-                  {benefits.map((benefit, index) => {
-                    const Icon = benefit.icon;
+                {/* Welcome Message */}
+                <div className="mb-8">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-full text-sm font-medium text-purple-700 mb-6"
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    නව ගිණුමක් සාදන්න
+                  </motion.div>
+                  
+                  <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                    ආරම්භ කරන්න! 🚀
+                  </h2>
+                  <p className="text-xl text-gray-600 leading-relaxed">
+                    ශ්‍රී ලංකාවේ නවීනතම බ්ලොක්චේන් ඉඩම් ලේඛනාගාරයට සම්බන්ධ වී 
+                    ඔබේ ඉඩම් කළමනාකරණය ආරක්ෂිතව සිදු කරන්න.
+                  </p>
+                </div>
+
+                {/* Features Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  {features.map((feature, index) => {
+                    const Icon = feature.icon;
                     return (
-                      <div key={index} className="flex items-center text-sm text-gray-600">
-                        <Icon className={`w-4 h-4 mr-2 ${benefit.color}`} />
-                        <span>{benefit.text}</span>
-                      </div>
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.3 + (index * 0.1) }}
+                        className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 group"
+                      >
+                        <div className="flex flex-col items-center text-center">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                            <Icon className={`w-6 h-6 ${feature.color}`} />
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">{feature.text}</span>
+                        </div>
+                      </motion.div>
                     );
                   })}
                 </div>
-              </div>
+
+                {/* Trust Indicators */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.7 }}
+                  className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-gray-600"
+                >
+                  <div className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                    <span className="text-sm">ISO 27001 සහතිකය</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Shield className="w-5 h-5 text-blue-500 mr-2" />
+                    <span className="text-sm">SOC 2 Type II</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Globe className="w-5 h-5 text-purple-500 mr-2" />
+                    <span className="text-sm">GDPR අනුකූල</span>
+                  </div>
+                </motion.div>
+
+                {/* Registration Benefits */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                  className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200"
+                >
+                  <h3 className="text-lg font-semibold text-purple-900 mb-4">ලියාපදිංචි වීමේ ප්‍රතිලාභ</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center text-purple-700">
+                      <CheckCircle className="w-4 h-4 mr-3 text-purple-600" />
+                      <span className="text-sm">ඉඩම් ආරක්ෂිතව ලියාපදිංචි කරන්න</span>
+                    </div>
+                    <div className="flex items-center text-purple-700">
+                      <CheckCircle className="w-4 h-4 mr-3 text-purple-600" />
+                      <span className="text-sm">ස්වයංක්‍රීය ගනුදෙනු සිදු කරන්න</span>
+                    </div>
+                    <div className="flex items-center text-purple-700">
+                      <CheckCircle className="w-4 h-4 mr-3 text-purple-600" />
+                      <span className="text-sm">AI සහායකත්වයෙන් ගැටළු නිරාකරණය</span>
+                    </div>
+                    <div className="flex items-center text-purple-700">
+                      <CheckCircle className="w-4 h-4 mr-3 text-purple-600" />
+                      <span className="text-sm">24/7 ඩිජිටල් ප්‍රවේශය</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
             </div>
+
+            {/* Right Side - Registration Form */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="w-full max-w-2xl mx-auto lg:mx-0"
+            >
+              <div className="bg-white/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                {/* Mobile Header - Only visible on mobile */}
+                <div className="lg:hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-4 sm:px-6 py-6 text-white text-center">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <UserPlus className="h-6 w-6" />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-bold mb-2">
+                    නව ගිණුමක් සාදන්න
+                  </h2>
+                  <p className="text-indigo-100 text-sm sm:text-base">
+                    ඉඩම් ලේඛනාගාරයට සම්බන්ධ වන්න
+                  </p>
+                </div>
+
+                {/* Desktop Header - Only visible on desktop */}
+                <div className="hidden lg:block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-8 py-8 text-white relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 to-transparent"></div>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="flex items-center justify-center mb-6">
+                      <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
+                        <UserPlus className="h-8 w-8" />
+                      </div>
+                    </div>
+                    <h2 className="text-3xl font-bold text-center mb-2">
+                      නව ගිණුමක් සාදන්න
+                    </h2>
+                    <p className="text-center text-indigo-100 text-lg">
+                      ශ්‍රී ලංකාවේ නවීනතම ඉඩම් ලේඛනාගාරයට සම්බන්ධ වන්න
+                    </p>
+                  </div>
+                </div>
+
+                {/* Progress Steps */}
+                <div className="hidden sm:block">
+                  <ProgressSteps steps={steps} currentStep={currentStep} />
+                </div>
+
+                {/* Mobile Progress Indicator */}
+                <div className="sm:hidden px-4 py-4 bg-gray-50 border-b">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-600">
+                      පියවර {currentStep} / {steps.length}
+                    </span>
+                    <div className="flex space-x-1">
+                      {steps.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`w-2 h-2 rounded-full ${
+                            index + 1 <= currentStep ? 'bg-purple-600' : 'bg-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 rounded-full h-1">
+                      <div 
+                        className="bg-gradient-to-r from-purple-600 to-indigo-600 h-1 rounded-full transition-all duration-300"
+                        style={{ width: `${(currentStep / steps.length) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form Content */}
+                <div className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+                  {errors.submit && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center"
+                    >
+                      <XCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+                      <span className="text-sm">{errors.submit}</span>
+                    </motion.div>
+                  )}
+
+                  <form onSubmit={handleSubmit}>
+                    {/* Step 1: Basic Information */}
+                    {currentStep === 1 && (
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-6"
+                      >
+                        <div className="text-center mb-6">
+                          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">මූලික තොරතුරු</h3>
+                          <p className="text-gray-600 text-sm sm:text-base">ඔබේ පුද්ගලික තොරතුරු ඇතුළත් කරන්න</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                          <FormInput
+                            id="firstName"
+                            name="firstName"
+                            label="මුල් නම"
+                            value={formData.firstName}
+                            onChange={handleChange}
+                            error={errors.firstName}
+                            placeholder="ඔබේ මුල් නම"
+                            required
+                          />
+
+                          <FormInput
+                            id="lastName"
+                            name="lastName"
+                            label="අග නම"
+                            value={formData.lastName}
+                            onChange={handleChange}
+                            error={errors.lastName}
+                            placeholder="ඔබේ අග නම"
+                            required
+                          />
+                        </div>
+
+                        <FormInput
+                          id="email"
+                          name="email"
+                          type="email"
+                          label="ඊමේල් ලිපිනය"
+                          value={formData.email}
+                          onChange={handleChange}
+                          error={errors.email}
+                          icon={Mail}
+                          placeholder="example@email.com"
+                          required
+                        />
+
+                        <RoleSelector
+                          value={formData.role}
+                          onChange={(value) => setFormData({...formData, role: value as any})}
+                        />
+                      </motion.div>
+                    )}
+
+                    {/* Step 2: Security */}
+                    {currentStep === 2 && (
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-6"
+                      >
+                        <div className="text-center mb-6">
+                          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">ගිණුම් ආරක්ෂණය</h3>
+                          <p className="text-gray-600 text-sm sm:text-base">ඔබේ ගිණුම සඳහා ආරක්ෂිත මුරපදයක් සාදන්න</p>
+                        </div>
+
+                        <PasswordInput
+                          id="password"
+                          name="password"
+                          label="මුරපදය"
+                          value={formData.password}
+                          onChange={handleChange}
+                          error={errors.password}
+                          placeholder="අවම වශයෙන් අක්ෂර 6ක්"
+                          required
+                        />
+
+                        <PasswordInput
+                          id="confirmPassword"
+                          name="confirmPassword"
+                          label="මුරපදය නැවත ඇතුළත් කරන්න"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          error={errors.confirmPassword}
+                          placeholder="මුරපදය නැවත ඇතුළත් කරන්න"
+                          required
+                        />
+
+                        {/* Password Strength Indicator */}
+                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 sm:p-6">
+                          <h4 className="font-semibold text-green-800 mb-3 flex items-center text-sm sm:text-base">
+                            <Shield className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                            මුරපද ආරක්ෂණ උපදෙස්
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm text-green-700">
+                            <div className="flex items-center">
+                              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-green-600" />
+                              අවම වශයෙන් අක්ෂර 6ක්
+                            </div>
+                            <div className="flex items-center">
+                              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-green-600" />
+                              විශේෂ අක්ෂර භාවිතය
+                            </div>
+                            <div className="flex items-center">
+                              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-green-600" />
+                              සංඛ්‍යා ඇතුළත් කිරීම
+                            </div>
+                            <div className="flex items-center">
+                              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-green-600" />
+                              ලොකු සහ කුඩා අකුරු
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Step 3: Identity Verification */}
+                    {currentStep === 3 && (
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-6"
+                      >
+                        <div className="text-center mb-6">
+                          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">හැඳුනුම් සත්‍යාපනය</h3>
+                          <p className="text-gray-600 text-sm sm:text-base">ඔබේ ඩිජිටල් හැඳුනුම්පත් තොරතුරු ඇතුළත් කරන්න</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                          <FormInput
+                            id="nic"
+                            name="nic"
+                            label="ජාතික හැඳුනුම්පත් අංකය"
+                            value={formData.nic}
+                            onChange={handleChange}
+                            error={errors.nic}
+                            icon={CreditCard}
+                            placeholder="199512345678"
+                            required
+                          />
+
+                          <FormInput
+                            id="slUdiId"
+                            name="slUdiId"
+                            label="SL-UDI අංකය"
+                            value={formData.slUdiId}
+                            onChange={handleChange}
+                            error={errors.slUdiId}
+                            icon={Shield}
+                            placeholder="SL-UDI-123456789"
+                            required
+                          />
+                        </div>
+
+                        <FormInput
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          label="දුරකථන අංකය"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          error={errors.phone}
+                          icon={Phone}
+                          placeholder="0771234567"
+                          required
+                        />
+
+                        <FormInput
+                          id="address"
+                          name="address"
+                          label="ලිපිනය"
+                          value={formData.address}
+                          onChange={handleChange}
+                          error={errors.address}
+                          icon={MapPin}
+                          placeholder="ඔබේ සම්පූර්ණ ලිපිනය"
+                          required
+                        />
+
+                        {/* Verification Notice */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 sm:p-6">
+                          <h4 className="font-semibold text-blue-800 mb-3 flex items-center text-sm sm:text-base">
+                            <Shield className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                            ඩිජිටල් හැඳුනුම්පත් සත්‍යාපනය
+                          </h4>
+                          <p className="text-blue-700 text-xs sm:text-sm leading-relaxed mb-4">
+                            ඔබේ ගිණුම සාදන ලද පසු, අපගේ පද්ධතිය ඔබේ SL-UDI ඩිජිටල් හැඳුනුම්පත 
+                            ස්වයංක්‍රීයව සත්‍යාපනය කරයි. මෙය ඔබේ ගිණුමේ ආරක්ෂාව සහතික කරයි.
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm text-blue-700">
+                            <div className="flex items-center">
+                              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-blue-600" />
+                              ස්වයංක්‍රීය සත්‍යාපනය
+                            </div>
+                            <div className="flex items-center">
+                              <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-blue-600" />
+                              ක්ෂණික ප්‍රතිචාරය
+                            </div>
+                            <div className="flex items-center">
+                              <Shield className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-blue-600" />
+                              සම්පූර්ණ ආරක්ෂාව
+                            </div>
+                            <div className="flex items-center">
+                              <Globe className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-blue-600" />
+                              රජයේ සහාය
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Navigation Buttons */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center pt-6 sm:pt-8 border-gray-200 space-y-4 sm:space-y-0">
+                      <div>
+                        {currentStep > 1 && (
+                          <button
+                            type="button"
+                            onClick={handlePrevious}
+                            className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold text-sm sm:text-base"
+                          >
+                            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                            පෙර
+                          </button>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                        {/* Step Indicator */}
+                        <span className="text-xs sm:text-sm text-gray-500">
+                          {currentStep} / {steps.length}
+                        </span>
+                        
+                        {currentStep < 3 ? (
+                          <button
+                            type="button"
+                            onClick={handleNext}
+                            className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
+                          >
+                            ඊළඟ
+                            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                          </button>
+                        ) : (
+                          <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
+                          >
+                            {isLoading ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-3"></div>
+                                ලියාපදිංචි වෙමින්...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                                ගිණුම සාදන්න
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
+                {/* Footer */}
+                <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-gradient-to-r from-gray-50 to-indigo-50/30 border-t border-gray-200/50">
+                  <div className="text-center">
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      දැනටමත් ගිණුමක් තිබේද?{' '}
+                      <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors duration-200">
+                        ප්‍රවේශ වන්න
+                      </Link>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </AuthLayout>
   );
