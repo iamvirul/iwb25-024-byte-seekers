@@ -10,7 +10,7 @@ interface Props {
 
 export default function NavigationControls({ currentStep, steps, isLoading, onNext, onPrevious }: Props) {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center pt-6 sm:pt-8 border-t border-gray-200 space-y-4 sm:space-y-0">
+    <div className="flex flex-col sm:flex-row justify-between items-center pt-6 sm:pt-8 border-gray-200 space-y-4 sm:space-y-0">
       <div>
         {currentStep > 1 && (
           <button type="button" onClick={onPrevious} className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold text-sm sm:text-base">
