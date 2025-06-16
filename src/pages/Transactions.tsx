@@ -1,4 +1,4 @@
-import{ useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBlockchain } from '../contexts/BlockchainContext';
 import { motion } from 'framer-motion';
@@ -10,16 +10,22 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  Filter,
   Download,
   Eye,
   Search,
   SlidersHorizontal,
   Grid3X3,
   List,
+  Sparkles,
   TrendingUp,
+  Users,
+  FileText,
+  Gavel,
   ArrowUpRight,
   ArrowDownLeft,
   BarChart3,
+  Shield,
   Zap,
   Database
 } from 'lucide-react';
@@ -221,8 +227,8 @@ const Transactions = () => {
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Card key={stat.label} hover className="text-center">
-                <div className="flex flex-col items-center">
+              <Card key={stat.label} hover className="text-center h-full">
+                <div className="flex flex-col items-center h-full justify-center">
                   <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-3 shadow-lg">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
@@ -425,7 +431,7 @@ const Transactions = () => {
                 />
               </Card>
             ) : (
-              <div className={`space-y-4 ${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-4 space-y-0' : ''}`}>
+              <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-4' : 'space-y-4'}`}>
                 {filteredTransactions.map((transaction, index) => {
                   const direction = getTransactionDirection(transaction);
                   const DirectionIcon = direction.icon;
@@ -436,46 +442,51 @@ const Transactions = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
+                      className={viewMode === 'grid' ? 'h-full' : ''}
                     >
                       {viewMode === 'grid' ? (
-                        <Card hover onClick={() => setSelectedTransaction(transaction)} className="cursor-pointer">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start space-x-3">
-                              <div className="flex-shrink-0">
-                                {getTransactionIcon(transaction.type)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                  {getTransactionTitle(transaction.type)}
-                                </h3>
-                                <p className="text-sm text-gray-600 mb-1">
-                                  ඉඩම් ID: {transaction.propertyId}
-                                </p>
-                                <div className="flex items-center text-sm text-gray-500 mb-2">
-                                  <Calendar className="w-4 h-4 mr-1" />
-                                  {formatDate(transaction.timestamp)}
+                        <div className="h-full">
+                          <Card hover onClick={() => setSelectedTransaction(transaction)} className="cursor-pointer h-full flex flex-col">
+                            <div className="flex items-start justify-between flex-1">
+                              <div className="flex items-start space-x-3 flex-1 min-w-0">
+                                <div className="flex-shrink-0">
+                                  {getTransactionIcon(transaction.type)}
                                 </div>
-                                {(transaction.from || transaction.to) && (
-                                  <div className="flex items-center text-sm text-gray-500">
-                                    <DirectionIcon className={`w-4 h-4 mr-1 ${direction.color}`} />
-                                    <span>
-                                      {direction.type === 'incoming' ? `වෙතින්: ${transaction.from}` :
-                                       direction.type === 'outgoing' ? `වෙත: ${transaction.to}` :
-                                       transaction.to}
-                                    </span>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                    {getTransactionTitle(transaction.type)}
+                                  </h3>
+                                  <p className="text-sm text-gray-600 mb-1">
+                                    ඉඩම් ID: {transaction.propertyId}
+                                  </p>
+                                  <div className="flex items-center text-sm text-gray-500 mb-2">
+                                    <Calendar className="w-4 h-4 mr-1" />
+                                    {formatDate(transaction.timestamp)}
                                   </div>
-                                )}
+                                  {(transaction.from || transaction.to) && (
+                                    <div className="flex items-center text-sm text-gray-500 mb-4">
+                                      <DirectionIcon className={`w-4 h-4 mr-1 ${direction.color}`} />
+                                      <span>
+                                        {direction.type === 'incoming' ? `වෙතින්: ${transaction.from}` :
+                                         direction.type === 'outgoing' ? `වෙත: ${transaction.to}` :
+                                         transaction.to}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                            <div className="flex flex-col items-end space-y-2">
-                              {getStatusBadge(transaction.status)}
+                            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                              <div>
+                                {getStatusBadge(transaction.status)}
+                              </div>
                               <button className="inline-flex items-center px-3 py-1 border border-green-300 text-green-700 rounded-md hover:bg-green-50 transition-colors">
                                 <Eye className="w-4 h-4 mr-1" />
                                 විස්තර
                               </button>
                             </div>
-                          </div>
-                        </Card>
+                          </Card>
+                        </div>
                       ) : (
                         <Card hover onClick={() => setSelectedTransaction(transaction)} className="cursor-pointer">
                           <div className="flex items-center justify-between">
