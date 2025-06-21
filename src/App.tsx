@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { BlockchainProvider } from './contexts/BlockchainContext';
@@ -14,6 +13,7 @@ import Transactions from './pages/Transactions';
 import Disputes from './pages/Disputes';
 import Documents from './pages/Documents';
 import SmartContracts from './pages/SmartContracts';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -33,6 +33,7 @@ function App() {
               <Route path="/disputes" element={<Disputes />} />
               <Route path="/documents" element={<Documents />} />
               <Route path="/contracts" element={<SmartContracts />} />
+              <Route path="/profile" element={<Profile />} />
             </Routes>
           </main>
           <Footer />
