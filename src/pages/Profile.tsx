@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
@@ -65,15 +65,6 @@ const Profile = () => {
       uploadDate: Date.now() - 86400000 * 5,
       size: '2.8 MB',
       url: '/documents/birth-cert.pdf'
-    },
-    {
-      id: 'DOC005',
-      name: 'ප්‍රොෆයිල් ඡායාරූපය',
-      type: 'profile_photo',
-      status: 'verified',
-      uploadDate: Date.now() - 86400000 * 20,
-      size: '1.2 MB',
-      url: '/documents/profile.jpg'
     }
   ]);
 
@@ -104,7 +95,33 @@ const Profile = () => {
   const handleDocumentUpload = () => {
     if (newDocuments.length === 0) return;
 
-    const uploadedDocs = newDocuments.map((file, index) => ({
+    // Validate file types based on selected document type
+    const isValidFileType = (file: File, type: string) => {
+      if (type === 'profile_photo') {
+        return file.type.startsWith('image/');
+      }
+      return true; // Allow all file types for other documents
+    };
+
+    // Validate file sizes
+    const maxSize = selectedDocumentType === 'profile_photo' ? 5 * 1024 * 1024 : 10 * 1024 * 1024; // 5MB for images, 10MB for others
+    
+    const validFiles = newDocuments.filter(file => {
+      if (!isValidFileType(file, selectedDocumentType)) {
+        alert(`${file.name}: වලංගු නොවන ගොනු වර්ගය`);
+        return false;
+      }
+      if (file.size > maxSize) {
+        const maxSizeMB = maxSize / (1024 * 1024);
+        alert(`${file.name}: ගොනුව ${maxSizeMB}MB ට වඩා කුඩා විය යුතුයි`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) return;
+
+    const uploadedDocs = validFiles.map((file, index) => ({
       id: 'DOC' + (documents.length + index + 1).toString().padStart(3, '0'),
       name: file.name,
       type: selectedDocumentType,
@@ -116,12 +133,19 @@ const Profile = () => {
 
     setDocuments([...documents, ...uploadedDocs]);
     setNewDocuments([]);
-    alert('ලේඛන සාර්ථකව උඩුගත කරන ලදී');
+    
+    // Show success message
+    const message = selectedDocumentType === 'profile_photo' 
+      ? 'ප්‍රොෆයිල් ඡායාරූපය සාර්ථකව උඩුගත කරන ලදී'
+      : 'ලේඛන සාර්ථකව උඩුගත කරන ලදී';
+    alert(message);
   };
 
   const deleteDocument = (docId: string) => {
-    setDocuments(documents.filter(doc => doc.id !== docId));
-    alert('ලේඛනය ඉවත් කරන ලදී');
+    if (confirm('ඔබට මෙම ලේඛනය ඉවත් කිරීමට අවශ්‍යද?')) {
+      setDocuments(documents.filter(doc => doc.id !== docId));
+      alert('ලේඛනය ඉවත් කරන ලදී');
+    }
   };
 
   const renderTabContent = () => {
