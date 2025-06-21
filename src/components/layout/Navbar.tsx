@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -72,11 +72,18 @@ const Navbar = () => {
             {isAuthenticated ? (
               <div className="flex items-center space-x-3">
                 <Link
-                  to="/dashboard"
+                  to="/profile"
                   className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
                 >
                   <User className="w-4 h-4" />
                   <span>{user?.name}</span>
+                </Link>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
+                >
+                  <Shield className="w-4 h-4" />
+                  <span>ඩෑෂ්බෝඩ්</span>
                 </Link>
                 <Button
                   variant="ghost"
@@ -145,12 +152,20 @@ const Navbar = () => {
             {isAuthenticated ? (
               <div className="border-t border-gray-200 pt-3 mt-3 space-y-1">
                 <Link
-                  to="/dashboard"
+                  to="/profile"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
                 >
                   <User className="w-5 h-5" />
-                  <span>{user?.name}</span>
+                  <span>මගේ ප්‍රොෆයිලය</span>
+                </Link>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
+                >
+                  <Shield className="w-5 h-5" />
+                  <span>ඩෑෂ්බෝඩ්</span>
                 </Link>
                 <button
                   onClick={handleLogout}
