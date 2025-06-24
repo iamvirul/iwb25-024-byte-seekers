@@ -27,7 +27,8 @@ import {
   Zap,
   Award,
   Target,
-  Activity
+  Activity,
+  X
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import Card from '../components/ui/Card';
@@ -39,8 +40,10 @@ const LandOfficerDashboard = () => {
   const { properties, transactions, disputes } = useBlockchain();
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
   const [activeTab, setActiveTab] = useState('overview');
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchCategory, setSearchCategory] = useState('all');
 
   // Mock data for land officer specific metrics
   const pendingRegistrations = [
@@ -197,47 +200,76 @@ const LandOfficerDashboard = () => {
     }
   ];
 
-  const notifications = [
-    {
-      id: 1,
-      title: 'නව ලියාපදිංචි ඉල්ලීමක්',
-      message: 'කොළඹ නගර ඉඩම සඳහා නව ලියාපදිංචි ඉල්ලීමක්',
-      time: '5 මිනිත්තුවකට පෙර',
-      type: 'info',
-      unread: true
-    },
-    {
-      id: 2,
-      title: 'හදිසි සත්‍යාපනය',
-      message: 'PROP001 සඳහා හදිසි ලේඛන සත්‍යාපනය අවශ්‍යයි',
-      time: '15 මිනිත්තුවකට පෙර',
-      type: 'urgent',
-      unread: true
-    },
-    {
-      id: 3,
-      title: 'ගැටළුව නිරාකරණය',
-      message: 'DISP001 ගැටළුව සාර්ථකව නිරාකරණය කරන ලදී',
-      time: '1 පැයකට පෙර',
-      type: 'success',
-      unread: false
-    }
-  ];
-
   const timeRangeOptions = [
     { value: '7d', label: 'පසුගිය 7 දින' },
     { value: '30d', label: 'පසුගිය 30 දින' },
     { value: '90d', label: 'පසුගිය 90 දින' }
   ];
 
-  const handleNotificationClick = () => {
-    setShowNotifications(!showNotifications);
-    setShowSettings(false);
+  const searchCategoryOptions = [
+    { value: 'all', label: 'සියල්ල' },
+    { value: 'registrations', label: 'ලියාපදිංචි කිරීම්' },
+    { value: 'verifications', label: 'සත්‍යාපන' },
+    { value: 'properties', label: 'ඉඩම්' },
+    { value: 'applicants', label: 'අයදුම්කරුවන්' }
+  ];
+
+  // Search functionality
+  const handleSearch = () => {
+    if (!searchTerm.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const results: any[] = [];
+    const term = searchTerm.toLowerCase();
+
+    // Search in registrations
+    if (searchCategory === 'all' || searchCategory === 'registrations') {
+      const matchingRegistrations = pendingRegistrations.filter(reg =>
+        reg.propertyTitle.toLowerCase().includes(term) ||
+        reg.applicant.toLowerCase().includes(term) ||
+        reg.location.toLowerCase().includes(term) ||
+        reg.id.toLowerCase().includes(term)
+      );
+      results.push(...matchingRegistrations.map(reg => ({ ...reg, type: 'registration' })));
+    }
+
+    // Search in verifications
+    if (searchCategory === 'all' || searchCategory === 'verifications') {
+      const matchingVerifications = verificationQueue.filter(ver =>
+        ver.propertyId.toLowerCase().includes(term) ||
+        ver.submittedBy.toLowerCase().includes(term) ||
+        ver.id.toLowerCase().includes(term)
+      );
+      results.push(...matchingVerifications.map(ver => ({ ...ver, type: 'verification' })));
+    }
+
+    // Search in properties
+    if (searchCategory === 'all' || searchCategory === 'properties') {
+      const matchingProperties = properties.filter(prop =>
+        prop.title.toLowerCase().includes(term) ||
+        prop.location.toLowerCase().includes(term) ||
+        prop.owner.toLowerCase().includes(term) ||
+        prop.id.toLowerCase().includes(term)
+      );
+      results.push(...matchingProperties.map(prop => ({ ...prop, type: 'property' })));
+    }
+
+    setSearchResults(results);
+    setShowSearchModal(true);
   };
 
-  const handleSettingsClick = () => {
-    setShowSettings(!showSettings);
-    setShowNotifications(false);
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    setSearchResults([]);
+    setShowSearchModal(false);
   };
 
   const formatDate = (timestamp: number) => {
@@ -278,6 +310,32 @@ const LandOfficerDashboard = () => {
     }
   };
 
+  const getResultTypeIcon = (type: string) => {
+    switch (type) {
+      case 'registration':
+        return <FileText className="w-4 h-4 text-blue-600" />;
+      case 'verification':
+        return <UserCheck className="w-4 h-4 text-green-600" />;
+      case 'property':
+        return <MapPin className="w-4 h-4 text-purple-600" />;
+      default:
+        return <Search className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  const getResultTypeLabel = (type: string) => {
+    switch (type) {
+      case 'registration':
+        return 'ලියාපදිංචිය';
+      case 'verification':
+        return 'සත්‍යාපනය';
+      case 'property':
+        return 'ඉඩම';
+      default:
+        return 'ප්‍රතිඵලය';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -297,111 +355,13 @@ const LandOfficerDashboard = () => {
                 ආයුබෝවන්, {user?.name}! ඔබේ දෛනික කාර්ය සාරාංශය
               </p>
             </div>
-            <div className="flex items-center space-x-3 mt-4 md:mt-0 relative">
-              <div className="relative">
-                <Button 
-                  variant="outline" 
-                  icon={Bell} 
-                  size="sm"
-                  onClick={handleNotificationClick}
-                  className="relative"
-                >
-                  දැනුම්දීම්
-                  {notifications.filter(n => n.unread).length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                  )}
-                </Button>
-                
-                {/* Notifications Dropdown */}
-                {showNotifications && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
-                  >
-                    <div className="p-4 border-b border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900">දැනුම්දීම්</h3>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
-                            notification.unread ? 'bg-blue-50' : ''
-                          }`}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className="text-sm font-medium text-gray-900 mb-1">
-                                {notification.title}
-                              </h4>
-                              <p className="text-sm text-gray-600 mb-2">
-                                {notification.message}
-                              </p>
-                              <p className="text-xs text-gray-500">{notification.time}</p>
-                            </div>
-                            {notification.unread && (
-                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="p-4 border-t border-gray-200">
-                      <Button variant="outline" size="sm" className="w-full">
-                        සියලු දැනුම්දීම් බලන්න
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-              
-              <div className="relative">
-                <Button 
-                  variant="outline" 
-                  icon={Settings} 
-                  size="sm"
-                  onClick={handleSettingsClick}
-                >
-                  සැකසුම්
-                </Button>
-                
-                {/* Settings Dropdown */}
-                {showSettings && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
-                  >
-                    <div className="p-4 border-b border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900">සැකසුම්</h3>
-                    </div>
-                    <div className="p-2">
-                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
-                        ප්‍රොෆයිල් සැකසුම්
-                      </button>
-                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
-                        දැනුම්දීම් සැකසුම්
-                      </button>
-                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
-                        ආරක්ෂණ සැකසුම්
-                      </button>
-                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
-                        වාර්තා සැකසුම්
-                      </button>
-                      <hr className="my-2" />
-                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
-                        උදව් සහ සහාය
-                      </button>
-                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
-                        ප්‍රතිපෝෂණ
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </div>
+            <div className="flex items-center space-x-3 mt-4 md:mt-0">
+              <Button variant="outline" icon={Bell} size="sm">
+                දැනුම්දීම්
+              </Button>
+              <Button variant="outline" icon={Settings} size="sm">
+                සැකසුම්
+              </Button>
             </div>
           </div>
         </motion.div>
@@ -610,9 +570,34 @@ const LandOfficerDashboard = () => {
               <Card>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">රැදී සිටින ලියාපදිංචි කිරීම්</h3>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" icon={Search} size="sm">සොයන්න</Button>
-                    <Button variant="outline" icon={Filter} size="sm">ෆිල්ටර්</Button>
+                  <div className="flex items-center space-x-3">
+                    {/* Enhanced Search Section */}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="සොයන්න..."
+                        className="pl-8 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-64"
+                      />
+                      <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      {searchTerm && (
+                        <button
+                          onClick={clearSearch}
+                          className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="w-32">
+                      <Select
+                        value={searchCategory}
+                        onChange={setSearchCategory}
+                        options={searchCategoryOptions}
+                      />
+                    </div>
                   </div>
                 </div>
                 
@@ -671,9 +656,27 @@ const LandOfficerDashboard = () => {
               <Card>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">සත්‍යාපන පෝලිම</h3>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" icon={Search} size="sm">සොයන්න</Button>
-                    <Button variant="outline" icon={Filter} size="sm">ෆිල්ටර්</Button>
+                  <div className="flex items-center space-x-3">
+                    {/* Enhanced Search Section */}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="සොයන්න..."
+                        className="pl-8 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-64"
+                      />
+                      <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      {searchTerm && (
+                        <button
+                          onClick={clearSearch}
+                          className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
@@ -725,9 +728,27 @@ const LandOfficerDashboard = () => {
               <Card>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">ගැටළු කළමනාකරණය</h3>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" icon={Search} size="sm">සොයන්න</Button>
-                    <Button variant="outline" icon={Filter} size="sm">ෆිල්ටර්</Button>
+                  <div className="flex items-center space-x-3">
+                    {/* Enhanced Search Section */}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="සොයන්න..."
+                        className="pl-8 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-64"
+                      />
+                      <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      {searchTerm && (
+                        <button
+                          onClick={clearSearch}
+                          className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
@@ -744,15 +765,100 @@ const LandOfficerDashboard = () => {
           )}
         </div>
 
-        {/* Click outside to close dropdowns */}
-        {(showNotifications || showSettings) && (
-          <div 
-            className="fixed inset-0 z-40" 
-            onClick={() => {
-              setShowNotifications(false);
-              setShowSettings(false);
-            }}
-          />
+        {/* Search Results Modal */}
+        {showSearchModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">සෙවුම් ප්‍රතිඵල</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    "{searchTerm}" සඳහා {searchResults.length} ප්‍රතිඵල හමු විය
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowSearchModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto max-h-[60vh]">
+                {searchResults.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">ප්‍රතිඵල නොමැත</h4>
+                    <p className="text-gray-600">
+                      ඔබේ සෙවුම් පදය වෙනස් කර නැවත උත්සාහ කරන්න
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {searchResults.map((result, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start space-x-3">
+                            {getResultTypeIcon(result.type)}
+                            <div>
+                              <div className="flex items-center space-x-2 mb-1">
+                                <h4 className="font-medium text-gray-900">
+                                  {result.propertyTitle || result.title || result.propertyId || result.id}
+                                </h4>
+                                <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                                  {getResultTypeLabel(result.type)}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-2">
+                                {result.applicant || result.submittedBy || result.owner || result.location}
+                              </p>
+                              {result.description && (
+                                <p className="text-sm text-gray-500 line-clamp-2">
+                                  {result.description}
+                                </p>
+                              )}
+                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                {result.location && (
+                                  <span className="flex items-center">
+                                    <MapPin className="w-3 h-3 mr-1" />
+                                    {result.location}
+                                  </span>
+                                )}
+                                {result.area && (
+                                  <span>{result.area} අක්කර</span>
+                                )}
+                                {result.submittedDate && (
+                                  <span className="flex items-center">
+                                    <Calendar className="w-3 h-3 mr-1" />
+                                    {formatDate(result.submittedDate)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button variant="outline" size="sm" icon={Eye}>
+                              බලන්න
+                            </Button>
+                            {result.type === 'registration' && (
+                              <Button variant="primary" size="sm">
+                                සත්‍යාපනය
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
         )}
       </div>
     </div>
