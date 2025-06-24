@@ -32,6 +32,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import Select from '../components/ui/Select';
 
 const LandOfficerDashboard = () => {
   const { user } = useAuth();
@@ -194,6 +195,12 @@ const LandOfficerDashboard = () => {
     }
   ];
 
+  const timeRangeOptions = [
+    { value: '7d', label: 'පසුගිය 7 දින' },
+    { value: '30d', label: 'පසුගිය 30 දින' },
+    { value: '90d', label: 'පසුගිය 90 දින' }
+  ];
+
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('si-LK', {
       year: 'numeric',
@@ -349,15 +356,13 @@ const LandOfficerDashboard = () => {
                   <Card>
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-lg font-semibold text-gray-900">මාසික කාර්ය සාධනය</h3>
-                      <select
-                        value={selectedTimeRange}
-                        onChange={(e) => setSelectedTimeRange(e.target.value)}
-                        className="text-sm border border-gray-300 rounded-lg px-3 py-1"
-                      >
-                        <option value="7d">පසුගිය 7 දින</option>
-                        <option value="30d">පසුගිය 30 දින</option>
-                        <option value="90d">පසුගිය 90 දින</option>
-                      </select>
+                      <div className="w-48">
+                        <Select
+                          value={selectedTimeRange}
+                          onChange={setSelectedTimeRange}
+                          options={timeRangeOptions}
+                        />
+                      </div>
                     </div>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={monthlyStats}>
