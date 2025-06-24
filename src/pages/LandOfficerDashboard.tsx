@@ -39,6 +39,8 @@ const LandOfficerDashboard = () => {
   const { properties, transactions, disputes } = useBlockchain();
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
   const [activeTab, setActiveTab] = useState('overview');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Mock data for land officer specific metrics
   const pendingRegistrations = [
@@ -195,11 +197,48 @@ const LandOfficerDashboard = () => {
     }
   ];
 
+  const notifications = [
+    {
+      id: 1,
+      title: 'නව ලියාපදිංචි ඉල්ලීමක්',
+      message: 'කොළඹ නගර ඉඩම සඳහා නව ලියාපදිංචි ඉල්ලීමක්',
+      time: '5 මිනිත්තුවකට පෙර',
+      type: 'info',
+      unread: true
+    },
+    {
+      id: 2,
+      title: 'හදිසි සත්‍යාපනය',
+      message: 'PROP001 සඳහා හදිසි ලේඛන සත්‍යාපනය අවශ්‍යයි',
+      time: '15 මිනිත්තුවකට පෙර',
+      type: 'urgent',
+      unread: true
+    },
+    {
+      id: 3,
+      title: 'ගැටළුව නිරාකරණය',
+      message: 'DISP001 ගැටළුව සාර්ථකව නිරාකරණය කරන ලදී',
+      time: '1 පැයකට පෙර',
+      type: 'success',
+      unread: false
+    }
+  ];
+
   const timeRangeOptions = [
     { value: '7d', label: 'පසුගිය 7 දින' },
     { value: '30d', label: 'පසුගිය 30 දින' },
     { value: '90d', label: 'පසුගිය 90 දින' }
   ];
+
+  const handleNotificationClick = () => {
+    setShowNotifications(!showNotifications);
+    setShowSettings(false);
+  };
+
+  const handleSettingsClick = () => {
+    setShowSettings(!showSettings);
+    setShowNotifications(false);
+  };
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('si-LK', {
@@ -258,13 +297,111 @@ const LandOfficerDashboard = () => {
                 ආයුබෝවන්, {user?.name}! ඔබේ දෛනික කාර්ය සාරාංශය
               </p>
             </div>
-            <div className="flex items-center space-x-3 mt-4 md:mt-0">
-              <Button variant="outline" icon={Bell} size="sm">
-                දැනුම්දීම්
-              </Button>
-              <Button variant="outline" icon={Settings} size="sm">
-                සැකසුම්
-              </Button>
+            <div className="flex items-center space-x-3 mt-4 md:mt-0 relative">
+              <div className="relative">
+                <Button 
+                  variant="outline" 
+                  icon={Bell} 
+                  size="sm"
+                  onClick={handleNotificationClick}
+                  className="relative"
+                >
+                  දැනුම්දීම්
+                  {notifications.filter(n => n.unread).length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                  )}
+                </Button>
+                
+                {/* Notifications Dropdown */}
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                  >
+                    <div className="p-4 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900">දැනුම්දීම්</h3>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
+                            notification.unread ? 'bg-blue-50' : ''
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="text-sm font-medium text-gray-900 mb-1">
+                                {notification.title}
+                              </h4>
+                              <p className="text-sm text-gray-600 mb-2">
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-gray-500">{notification.time}</p>
+                            </div>
+                            {notification.unread && (
+                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="p-4 border-t border-gray-200">
+                      <Button variant="outline" size="sm" className="w-full">
+                        සියලු දැනුම්දීම් බලන්න
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+              
+              <div className="relative">
+                <Button 
+                  variant="outline" 
+                  icon={Settings} 
+                  size="sm"
+                  onClick={handleSettingsClick}
+                >
+                  සැකසුම්
+                </Button>
+                
+                {/* Settings Dropdown */}
+                {showSettings && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                  >
+                    <div className="p-4 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900">සැකසුම්</h3>
+                    </div>
+                    <div className="p-2">
+                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                        ප්‍රොෆයිල් සැකසුම්
+                      </button>
+                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                        දැනුම්දීම් සැකසුම්
+                      </button>
+                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                        ආරක්ෂණ සැකසුම්
+                      </button>
+                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                        වාර්තා සැකසුම්
+                      </button>
+                      <hr className="my-2" />
+                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                        උදව් සහ සහාය
+                      </button>
+                      <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                        ප්‍රතිපෝෂණ
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
             </div>
           </div>
         </motion.div>
@@ -606,6 +743,17 @@ const LandOfficerDashboard = () => {
             </motion.div>
           )}
         </div>
+
+        {/* Click outside to close dropdowns */}
+        {(showNotifications || showSettings) && (
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => {
+              setShowNotifications(false);
+              setShowSettings(false);
+            }}
+          />
+        )}
       </div>
     </div>
   );
