@@ -48,6 +48,8 @@ const LandOfficerDashboard = () => {
   const [searchCategory, setSearchCategory] = useState('all');
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
 
   // Mock data for land officer specific metrics
   const pendingRegistrations = [
@@ -59,7 +61,18 @@ const LandOfficerDashboard = () => {
       status: 'pending_verification',
       area: 1.5,
       location: 'කොළඹ 05',
-      priority: 'high'
+      priority: 'high',
+      documents: [
+        { name: 'ඔප්පුව.pdf', type: 'deed', size: '2.3 MB' },
+        { name: 'සර්වේ_වාර්තාව.pdf', type: 'survey', size: '1.8 MB' },
+        { name: 'හැඳුනුම්පත.jpg', type: 'id', size: '0.5 MB' }
+      ],
+      notes: 'ඉඩම් සීමා පිළිබඳ සර්වේ වාර්තාව පරීක්ෂා කිරීම අවශ්‍යයි.',
+      contactInfo: {
+        phone: '+94771234567',
+        email: 'saman@example.com',
+        address: '123/A, ගාලු පාර, කොළඹ 05'
+      }
     },
     {
       id: 'REG002',
@@ -69,7 +82,17 @@ const LandOfficerDashboard = () => {
       status: 'document_review',
       area: 3.2,
       location: 'ගම්පහ',
-      priority: 'medium'
+      priority: 'medium',
+      documents: [
+        { name: 'ඔප්පුව.pdf', type: 'deed', size: '3.1 MB' },
+        { name: 'පෙර_ලියාපදිංචි_ලේඛන.pdf', type: 'history', size: '4.2 MB' }
+      ],
+      notes: 'පෙර ලියාපදිංචි ලේඛන සමඟ සසඳන්න.',
+      contactInfo: {
+        phone: '+94772345678',
+        email: 'nimal@example.com',
+        address: '45, මහවෙල පාර, ගම්පහ'
+      }
     },
     {
       id: 'REG003',
@@ -79,7 +102,17 @@ const LandOfficerDashboard = () => {
       status: 'survey_required',
       area: 5.0,
       location: 'කළුතර',
-      priority: 'high'
+      priority: 'high',
+      documents: [
+        { name: 'ඔප්පුව.pdf', type: 'deed', size: '2.7 MB' },
+        { name: 'ඡායාරූප.zip', type: 'photos', size: '8.5 MB' }
+      ],
+      notes: 'නව සර්වේ වාර්තාවක් අවශ්‍යයි. ඉඩම් සීමා පැහැදිලි නැත.',
+      contactInfo: {
+        phone: '+94773456789',
+        email: 'kamala@example.com',
+        address: '78, ගාලු පාර, කළුතර'
+      }
     }
   ];
 
@@ -338,6 +371,15 @@ const LandOfficerDashboard = () => {
       default:
         return 'ප්‍රතිඵලය';
     }
+  };
+
+  const handleViewRegistration = (registration: any) => {
+    setSelectedRegistration(registration);
+    setShowRegistrationModal(true);
+  };
+
+  const handleApproveRegistration = (id: string) => {
+    alert(`ලියාපදිංචිය ${id} අනුමත කරන ලදී`);
   };
 
   return (
@@ -649,8 +691,21 @@ const LandOfficerDashboard = () => {
                             {getPriorityBadge(registration.priority)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                            <Button variant="outline" icon={Eye} size="sm">බලන්න</Button>
-                            <Button variant="primary" size="sm">සත්‍යාපනය</Button>
+                            <Button 
+                              variant="outline" 
+                              icon={Eye} 
+                              size="sm"
+                              onClick={() => handleViewRegistration(registration)}
+                            >
+                              බලන්න
+                            </Button>
+                            <Button 
+                              variant="primary" 
+                              size="sm"
+                              onClick={() => handleApproveRegistration(registration.id)}
+                            >
+                              සත්‍යාපනය
+                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -870,6 +925,175 @@ const LandOfficerDashboard = () => {
                     ))}
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Registration Details Modal */}
+        {showRegistrationModal && selectedRegistration && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">{selectedRegistration.propertyTitle}</h3>
+                  <p className="text-sm text-gray-600 mt-1">ලියාපදිංචි ID: {selectedRegistration.id}</p>
+                </div>
+                <button
+                  onClick={() => setShowRegistrationModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column */}
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">ඉඩම් තොරතුරු</h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ඉඩම් නම:</span>
+                          <span className="font-medium">{selectedRegistration.propertyTitle}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ස්ථානය:</span>
+                          <span className="font-medium">{selectedRegistration.location}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ප්‍රමාණය:</span>
+                          <span className="font-medium">{selectedRegistration.area} අක්කර</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">තත්ත්වය:</span>
+                          <span>{getStatusBadge(selectedRegistration.status)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ප්‍රමුඛතාව:</span>
+                          <span>{getPriorityBadge(selectedRegistration.priority)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ඉදිරිපත් කළ දිනය:</span>
+                          <span>{formatDate(selectedRegistration.submittedDate)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">අයදුම්කරු තොරතුරු</h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">නම:</span>
+                          <span className="font-medium">{selectedRegistration.applicant}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">දුරකථන අංකය:</span>
+                          <span>{selectedRegistration.contactInfo.phone}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ඊමේල් ලිපිනය:</span>
+                          <span>{selectedRegistration.contactInfo.email}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ලිපිනය:</span>
+                          <span>{selectedRegistration.contactInfo.address}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">සටහන්</h4>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-700">{selectedRegistration.notes}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">ලේඛන</h4>
+                      <div className="space-y-3">
+                        {selectedRegistration.documents.map((doc: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center">
+                              <FileText className="w-4 h-4 text-blue-600 mr-2" />
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{doc.name}</p>
+                                <p className="text-xs text-gray-500">{doc.type} • {doc.size}</p>
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button variant="outline" size="sm" icon={Eye}>
+                                බලන්න
+                              </Button>
+                              <Button variant="outline" size="sm" icon={Download}>
+                                බාගන්න
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">ක්‍රියාමාර්ග</h4>
+                      <div className="space-y-3">
+                        <Button 
+                          variant="primary" 
+                          icon={CheckCircle} 
+                          className="w-full"
+                          onClick={() => {
+                            handleApproveRegistration(selectedRegistration.id);
+                            setShowRegistrationModal(false);
+                          }}
+                        >
+                          අනුමත කරන්න
+                        </Button>
+                        <Button variant="outline" icon={Clock} className="w-full">
+                          තවත් තොරතුරු ඉල්ලන්න
+                        </Button>
+                        <Button variant="danger" icon={X} className="w-full">
+                          ප්‍රතික්ෂේප කරන්න
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-medium text-blue-900 mb-2 flex items-center">
+                        <Shield className="w-4 h-4 mr-2" />
+                        සත්‍යාපන උපදෙස්
+                      </h4>
+                      <p className="text-sm text-blue-700">
+                        ලියාපදිංචි කිරීමට අනුමැතිය දීමට පෙර, සියලුම ලේඛන සත්‍යාපනය කර ඇති බවට සහතික වන්න. 
+                        ඉඩම් සීමා සහ හිමිකම් පිළිබඳ ගැටළු ඇත්දැයි පරීක්ෂා කරන්න.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                  <Button variant="outline" onClick={() => setShowRegistrationModal(false)}>
+                    වසන්න
+                  </Button>
+                  <Button 
+                    variant="primary" 
+                    icon={CheckCircle}
+                    onClick={() => {
+                      handleApproveRegistration(selectedRegistration.id);
+                      setShowRegistrationModal(false);
+                    }}
+                  >
+                    අනුමත කරන්න
+                  </Button>
+                </div>
               </div>
             </motion.div>
           </div>
