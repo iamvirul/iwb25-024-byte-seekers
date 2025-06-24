@@ -17,7 +17,8 @@ import {
   BookOpen,
   Scale,
   Send,
-  Plus
+  Plus,
+  X
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';

@@ -13,7 +13,8 @@ import {
   Calendar,
   Award,
   FileText,
-  Gavel
+  Gavel,
+  X
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
