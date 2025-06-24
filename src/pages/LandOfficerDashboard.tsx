@@ -34,6 +34,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Select from '../components/ui/Select';
+import NotificationsModal from '../components/legal/NotificationsModal';
+import SettingsModal from '../components/legal/SettingsModal';
 
 const LandOfficerDashboard = () => {
   const { user } = useAuth();
@@ -44,6 +46,8 @@ const LandOfficerDashboard = () => {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchCategory, setSearchCategory] = useState('all');
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Mock data for land officer specific metrics
   const pendingRegistrations = [
@@ -356,10 +360,20 @@ const LandOfficerDashboard = () => {
               </p>
             </div>
             <div className="flex items-center space-x-3 mt-4 md:mt-0">
-              <Button variant="outline" icon={Bell} size="sm">
+              <Button 
+                variant="outline" 
+                icon={Bell} 
+                size="sm"
+                onClick={() => setShowNotificationsModal(true)}
+              >
                 දැනුම්දීම්
               </Button>
-              <Button variant="outline" icon={Settings} size="sm">
+              <Button 
+                variant="outline" 
+                icon={Settings} 
+                size="sm"
+                onClick={() => setShowSettingsModal(true)}
+              >
                 සැකසුම්
               </Button>
             </div>
@@ -860,6 +874,18 @@ const LandOfficerDashboard = () => {
             </motion.div>
           </div>
         )}
+
+        {/* Notifications Modal */}
+        <NotificationsModal 
+          isOpen={showNotificationsModal} 
+          onClose={() => setShowNotificationsModal(false)} 
+        />
+
+        {/* Settings Modal */}
+        <SettingsModal 
+          isOpen={showSettingsModal} 
+          onClose={() => setShowSettingsModal(false)} 
+        />
       </div>
     </div>
   );
