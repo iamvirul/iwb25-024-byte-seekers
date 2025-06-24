@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
-import {
-  Home, Search, FileText, Users, Gavel, Upload,
-  Menu, X, LogOut, User, Shield, Settings, BarChart3
+import { 
+  Home, Search, FileText, Users, Gavel, Upload, 
+  Menu, X, LogOut, User, Shield, Settings, BarChart3, Scale
 } from 'lucide-react';
 import Button from '../ui/Button';
 
@@ -36,9 +36,27 @@ const Navbar = () => {
     ...navigation.slice(1) // Exclude home, add others
   ];
 
-  const currentNavigation = user?.role === 'land_officer' ? landOfficerNavigation : navigation;
+  // Add legal officer specific navigation
+  const legalOfficerNavigation = [
+    { name: 'නීති නිලධාරී ඩෑෂ්බෝඩ්', href: '/legal-officer', icon: Scale },
+    ...navigation.slice(1) // Exclude home, add others
+  ];
+
+  const getCurrentNavigation = () => {
+    if (user?.role === 'land_officer') return landOfficerNavigation;
+    if (user?.role === 'legal_official') return legalOfficerNavigation;
+    return navigation;
+  };
+
+  const currentNavigation = getCurrentNavigation();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const getDashboardPath = () => {
+    if (user?.role === 'land_officer') return '/land-officer';
+    if (user?.role === 'legal_official') return '/legal-officer';
+    return '/dashboard';
+  };
 
   return (
     <nav className="bg-white shadow-md border-b border-gray-200 sticky top-0 z-50">
@@ -63,10 +81,11 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(item.href)
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isActive(item.href)
                       ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`}
+                  }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{item.name}</span>
@@ -87,7 +106,7 @@ const Navbar = () => {
                   <span>{user?.name}</span>
                 </Link>
                 <Link
-                  to={user?.role === 'land_officer' ? '/land-officer' : '/dashboard'}
+                  to={getDashboardPath()}
                   className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
                 >
                   <Shield className="w-4 h-4" />
@@ -145,17 +164,18 @@ const Navbar = () => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 ${isActive(item.href)
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 ${
+                    isActive(item.href)
                       ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`}
+                  }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.name}</span>
                 </Link>
               );
             })}
-
+            
             {isAuthenticated ? (
               <div className="border-t border-gray-200 pt-3 mt-3 space-y-1">
                 <Link
@@ -167,7 +187,7 @@ const Navbar = () => {
                   <span>මගේ ප්‍රොෆයිලය</span>
                 </Link>
                 <Link
-                  to={user?.role === 'land_officer' ? '/land-officer' : '/dashboard'}
+                  to={getDashboardPath()}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
                 >
