@@ -1,3 +1,4 @@
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { BlockchainProvider } from './contexts/BlockchainContext';
@@ -7,6 +8,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import LandOfficerDashboard from './pages/LandOfficerDashboard';
 import LandRegistry from './pages/LandRegistry';
 import PropertySearch from './pages/PropertySearch';
 import Transactions from './pages/Transactions';
@@ -27,6 +29,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/land-officer" element={<LandOfficerDashboard />} />
               <Route path="/registry" element={<LandRegistry />} />
               <Route path="/search" element={<PropertySearch />} />
               <Route path="/transactions" element={<Transactions />} />
