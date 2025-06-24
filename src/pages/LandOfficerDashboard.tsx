@@ -50,6 +50,10 @@ const LandOfficerDashboard = () => {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [selectedVerification, setSelectedVerification] = useState<any>(null);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [selectedDispute, setSelectedDispute] = useState<any>(null);
 
   // Mock data for land officer specific metrics
   const pendingRegistrations = [
@@ -124,7 +128,15 @@ const LandOfficerDashboard = () => {
       submittedBy: 'සුනිල් සිල්වා',
       documents: ['deed.pdf', 'survey.pdf', 'nic.jpg'],
       priority: 'urgent',
-      daysWaiting: 3
+      daysWaiting: 3,
+      description: 'කොළොන්නාව ඉඩම සඳහා ලේඛන සත්‍යාපනය',
+      status: 'pending',
+      notes: 'ඔප්පුවේ සහ සර්වේ වාර්තාවේ ඉඩම් සීමා සසඳන්න',
+      contactInfo: {
+        phone: '+94771234567',
+        email: 'sunil@example.com',
+        address: '45/2, කොළොන්නාව පාර, කොළොන්නාව'
+      }
     },
     {
       id: 'VER002',
@@ -133,7 +145,61 @@ const LandOfficerDashboard = () => {
       submittedBy: 'මාලිනී ජයවර්ධන',
       documents: ['ownership_proof.pdf'],
       priority: 'high',
-      daysWaiting: 1
+      daysWaiting: 1,
+      description: 'ගම්පහ වත්ත සඳහා හිමිකම් සත්‍යාපනය',
+      status: 'pending',
+      notes: 'පෙර හිමිකරුගේ ලේඛන සමඟ සසඳන්න',
+      contactInfo: {
+        phone: '+94772345678',
+        email: 'malini@example.com',
+        address: '78, මහවෙල පාර, ගම්පහ'
+      }
+    }
+  ];
+
+  // Sample disputes for the dispute management section
+  const landDisputes = [
+    {
+      id: 'DISP001',
+      propertyId: 'PROP001',
+      title: 'ඉඩම් සීමා ගැටළුව',
+      complainant: 'සුනිල් සිල්වා',
+      defendant: 'කමල් පෙරේරා',
+      filedDate: Date.now() - 86400000 * 15,
+      status: 'investigating',
+      priority: 'high',
+      description: 'ඉඩම් සීමා සම්බන්ධයෙන් ගැටළුවක් ඇත. අසල්වැසියා සීමාව ඉක්මවා ඇත.',
+      documents: [
+        { name: 'සර්වේ_වාර්තාව.pdf', type: 'survey', size: '2.5 MB' },
+        { name: 'ඡායාරූප.zip', type: 'photos', size: '4.8 MB' }
+      ],
+      notes: 'නව සර්වේ වාර්තාවක් අවශ්‍යයි. ඉඩම් සීමා පැහැදිලි නැත.',
+      contactInfo: {
+        phone: '+94771234567',
+        email: 'sunil@example.com',
+        address: '45/2, කොළොන්නාව පාර, කොළොන්නාව'
+      }
+    },
+    {
+      id: 'DISP002',
+      propertyId: 'PROP002',
+      title: 'හිමිකම් ගැටළුව',
+      complainant: 'මාලිනී ජයවර්ධන',
+      defendant: 'රාජ් සිංහ',
+      filedDate: Date.now() - 86400000 * 8,
+      status: 'pending',
+      priority: 'medium',
+      description: 'ඉඩමේ හිමිකම සම්බන්ධයෙන් ගැටළුවක් ඇත. ඔප්පුවේ අත්සන් ගැටළුසහගතයි.',
+      documents: [
+        { name: 'ඔප්පුව.pdf', type: 'deed', size: '3.1 MB' },
+        { name: 'හැඳුනුම්පත.jpg', type: 'id', size: '0.7 MB' }
+      ],
+      notes: 'ඔප්පුවේ අත්සන් සත්‍යාපනය කිරීම අවශ්‍යයි.',
+      contactInfo: {
+        phone: '+94772345678',
+        email: 'malini@example.com',
+        address: '78, මහවෙල පාර, ගම්පහ'
+      }
     }
   ];
 
@@ -342,6 +408,12 @@ const LandOfficerDashboard = () => {
         return <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">සර්වේ අවශ්‍යයි</span>;
       case 'approved':
         return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">අනුමතයි</span>;
+      case 'pending':
+        return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">රැදී සිටින</span>;
+      case 'investigating':
+        return <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">විමර්ශනය</span>;
+      case 'resolved':
+        return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">නිරාකරණය</span>;
       default:
         return null;
     }
@@ -380,6 +452,26 @@ const LandOfficerDashboard = () => {
 
   const handleApproveRegistration = (id: string) => {
     alert(`ලියාපදිංචිය ${id} අනුමත කරන ලදී`);
+  };
+
+  const handleViewVerification = (verification: any) => {
+    setSelectedVerification(verification);
+    setShowVerificationModal(true);
+  };
+
+  const handleVerifyDocument = (id: string) => {
+    alert(`ලේඛන ${id} සත්‍යාපනය කරන ලදී`);
+    setShowVerificationModal(false);
+  };
+
+  const handleViewDispute = (dispute: any) => {
+    setSelectedDispute(dispute);
+    setShowDisputeModal(true);
+  };
+
+  const handleResolveDispute = (id: string) => {
+    alert(`ගැටළුව ${id} නිරාකරණය කරන ලදී`);
+    setShowDisputeModal(false);
   };
 
   return (
@@ -777,8 +869,21 @@ const LandOfficerDashboard = () => {
                           {item.daysWaiting} දින රැදී සිටින
                         </span>
                         <div className="space-x-2">
-                          <Button variant="outline" size="sm" icon={Eye}>බලන්න</Button>
-                          <Button variant="primary" size="sm">සත්‍යාපනය</Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            icon={Eye}
+                            onClick={() => handleViewVerification(item)}
+                          >
+                            බලන්න
+                          </Button>
+                          <Button 
+                            variant="primary" 
+                            size="sm"
+                            onClick={() => handleVerifyDocument(item.id)}
+                          >
+                            සත්‍යාපනය
+                          </Button>
                         </div>
                       </div>
                     </Card>
@@ -821,14 +926,68 @@ const LandOfficerDashboard = () => {
                   </div>
                 </div>
                 
-                <div className="text-center py-12">
-                  <Gavel className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">ගැටළු කළමනාකරණය</h4>
-                  <p className="text-gray-600 mb-6">
-                    ඉඩම් සම්බන්ධ ගැටළු සහ ඒවායේ නිරාකරණ ක්‍රියාවලිය
-                  </p>
-                  <Button icon={Gavel}>ගැටළු බලන්න</Button>
-                </div>
+                {landDisputes.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {landDisputes.map((dispute) => (
+                      <Card key={dispute.id} hover className="border-l-4 border-l-red-500">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-1">{dispute.title}</h4>
+                            <p className="text-sm text-gray-600">{dispute.propertyId}</p>
+                          </div>
+                          {getPriorityBadge(dispute.priority)}
+                        </div>
+                        
+                        <div className="mb-4">
+                          <div className="flex justify-between text-sm text-gray-600 mb-2">
+                            <span>පැමිණිලිකරු:</span>
+                            <span>{dispute.complainant}</span>
+                          </div>
+                          <div className="flex justify-between text-sm text-gray-600 mb-2">
+                            <span>විත්තිකරු:</span>
+                            <span>{dispute.defendant}</span>
+                          </div>
+                          <div className="flex justify-between text-sm text-gray-600">
+                            <span>තත්ත්වය:</span>
+                            <span>{getStatusBadge(dispute.status)}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-500">
+                            {formatDate(dispute.filedDate)}
+                          </span>
+                          <div className="space-x-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              icon={Eye}
+                              onClick={() => handleViewDispute(dispute)}
+                            >
+                              බලන්න
+                            </Button>
+                            <Button 
+                              variant="primary" 
+                              size="sm"
+                              onClick={() => handleResolveDispute(dispute.id)}
+                            >
+                              නිරාකරණය
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Gavel className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">ගැටළු කළමනාකරණය</h4>
+                    <p className="text-gray-600 mb-6">
+                      ඉඩම් සම්බන්ධ ගැටළු සහ ඒවායේ නිරාකරණ ක්‍රියාවලිය
+                    </p>
+                    <Button icon={Gavel}>ගැටළු බලන්න</Button>
+                  </div>
+                )}
               </Card>
             </motion.div>
           )}
@@ -1092,6 +1251,352 @@ const LandOfficerDashboard = () => {
                     }}
                   >
                     අනුමත කරන්න
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Verification Details Modal */}
+        {showVerificationModal && selectedVerification && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">{selectedVerification.description || 'ලේඛන සත්‍යාපනය'}</h3>
+                  <p className="text-sm text-gray-600 mt-1">සත්‍යාපන ID: {selectedVerification.id}</p>
+                </div>
+                <button
+                  onClick={() => setShowVerificationModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column */}
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">සත්‍යාපන තොරතුරු</h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">වර්ගය:</span>
+                          <span className="font-medium">{selectedVerification.type === 'document_verification' ? 'ලේඛන සත්‍යාපනය' : 'හිමිකම් සත්‍යාපනය'}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ඉඩම් ID:</span>
+                          <span className="font-medium">{selectedVerification.propertyId}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ඉදිරිපත් කළේ:</span>
+                          <span className="font-medium">{selectedVerification.submittedBy}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ප්‍රමුඛතාව:</span>
+                          <span>{getPriorityBadge(selectedVerification.priority)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">රැදී සිටින දින:</span>
+                          <span className="font-medium">{selectedVerification.daysWaiting} දින</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">තත්ත්වය:</span>
+                          <span>{getStatusBadge(selectedVerification.status)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">සම්බන්ධතා තොරතුරු</h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">නම:</span>
+                          <span className="font-medium">{selectedVerification.submittedBy}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">දුරකථන අංකය:</span>
+                          <span>{selectedVerification.contactInfo?.phone || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ඊමේල් ලිපිනය:</span>
+                          <span>{selectedVerification.contactInfo?.email || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ලිපිනය:</span>
+                          <span>{selectedVerification.contactInfo?.address || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">සටහන්</h4>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-700">{selectedVerification.notes || 'සටහන් නොමැත'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">ලේඛන</h4>
+                      <div className="space-y-3">
+                        {selectedVerification.documents.map((doc: string, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center">
+                              <FileText className="w-4 h-4 text-blue-600 mr-2" />
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{doc}</p>
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button variant="outline" size="sm" icon={Eye}>
+                                බලන්න
+                              </Button>
+                              <Button variant="outline" size="sm" icon={Download}>
+                                බාගන්න
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">සත්‍යාපන ක්‍රියාමාර්ග</h4>
+                      <div className="space-y-3">
+                        <Button 
+                          variant="primary" 
+                          icon={CheckCircle} 
+                          className="w-full"
+                          onClick={() => {
+                            handleVerifyDocument(selectedVerification.id);
+                            setShowVerificationModal(false);
+                          }}
+                        >
+                          සත්‍යාපනය කරන්න
+                        </Button>
+                        <Button variant="outline" icon={Clock} className="w-full">
+                          තවත් තොරතුරු ඉල්ලන්න
+                        </Button>
+                        <Button variant="danger" icon={X} className="w-full">
+                          ප්‍රතික්ෂේප කරන්න
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-medium text-blue-900 mb-2 flex items-center">
+                        <Shield className="w-4 h-4 mr-2" />
+                        සත්‍යාපන උපදෙස්
+                      </h4>
+                      <p className="text-sm text-blue-700">
+                        ලේඛන සත්‍යාපනය කිරීමේදී, ලේඛනවල සත්‍යතාව, අත්සන් සහ මුද්‍රා පරීක්ෂා කරන්න. 
+                        ඉඩම් සීමා සහ හිමිකම් පිළිබඳ ගැටළු ඇත්දැයි පරීක්ෂා කරන්න.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                  <Button variant="outline" onClick={() => setShowVerificationModal(false)}>
+                    වසන්න
+                  </Button>
+                  <Button 
+                    variant="primary" 
+                    icon={CheckCircle}
+                    onClick={() => {
+                      handleVerifyDocument(selectedVerification.id);
+                      setShowVerificationModal(false);
+                    }}
+                  >
+                    සත්‍යාපනය කරන්න
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Dispute Details Modal */}
+        {showDisputeModal && selectedDispute && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">{selectedDispute.title}</h3>
+                  <p className="text-sm text-gray-600 mt-1">ගැටළු ID: {selectedDispute.id}</p>
+                </div>
+                <button
+                  onClick={() => setShowDisputeModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column */}
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">ගැටළු තොරතුරු</h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ඉඩම් ID:</span>
+                          <span className="font-medium">{selectedDispute.propertyId}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">තත්ත්වය:</span>
+                          <span>{getStatusBadge(selectedDispute.status)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ප්‍රමුඛතාව:</span>
+                          <span>{getPriorityBadge(selectedDispute.priority)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ගොනු කළ දිනය:</span>
+                          <span>{formatDate(selectedDispute.filedDate)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">පාර්ශ්වයන්</h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">පැමිණිලිකරු:</span>
+                          <span className="font-medium">{selectedDispute.complainant}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">විත්තිකරු:</span>
+                          <span className="font-medium">{selectedDispute.defendant}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">ගැටළු විස්තරය</h4>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-700">{selectedDispute.description}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">සටහන්</h4>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-700">{selectedDispute.notes}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">ලේඛන</h4>
+                      <div className="space-y-3">
+                        {selectedDispute.documents.map((doc: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center">
+                              <FileText className="w-4 h-4 text-blue-600 mr-2" />
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{doc.name}</p>
+                                <p className="text-xs text-gray-500">{doc.type} • {doc.size}</p>
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button variant="outline" size="sm" icon={Eye}>
+                                බලන්න
+                              </Button>
+                              <Button variant="outline" size="sm" icon={Download}>
+                                බාගන්න
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">සම්බන්ධතා තොරතුරු</h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">පැමිණිලිකරු දුරකථන:</span>
+                          <span>{selectedDispute.contactInfo?.phone || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">පැමිණිලිකරු ඊමේල්:</span>
+                          <span>{selectedDispute.contactInfo?.email || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">පැමිණිලිකරු ලිපිනය:</span>
+                          <span>{selectedDispute.contactInfo?.address || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">ක්‍රියාමාර්ග</h4>
+                      <div className="space-y-3">
+                        <Button 
+                          variant="primary" 
+                          icon={CheckCircle} 
+                          className="w-full"
+                          onClick={() => {
+                            handleResolveDispute(selectedDispute.id);
+                            setShowDisputeModal(false);
+                          }}
+                        >
+                          නිරාකරණය කරන්න
+                        </Button>
+                        <Button variant="outline" icon={Gavel} className="w-full">
+                          නීති නිලධාරියාට යොමු කරන්න
+                        </Button>
+                        <Button variant="outline" icon={Clock} className="w-full">
+                          විමර්ශනය ආරම්භ කරන්න
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-4">
+                      <h4 className="font-medium text-red-900 mb-2 flex items-center">
+                        <AlertTriangle className="w-4 h-4 mr-2" />
+                        ගැටළු උපදෙස්
+                      </h4>
+                      <p className="text-sm text-red-700">
+                        ගැටළු නිරාකරණය කිරීමට පෙර, සියලුම පාර්ශ්වයන්ගේ ලේඛන පරීක්ෂා කර, 
+                        අවශ්‍ය නම් ස්ථානීය පරීක්ෂාවක් සිදු කරන්න. ගැටළුව සංකීර්ණ නම් නීති නිලධාරියාට යොමු කරන්න.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                  <Button variant="outline" onClick={() => setShowDisputeModal(false)}>
+                    වසන්න
+                  </Button>
+                  <Button 
+                    variant="primary" 
+                    icon={CheckCircle}
+                    onClick={() => {
+                      handleResolveDispute(selectedDispute.id);
+                      setShowDisputeModal(false);
+                    }}
+                  >
+                    නිරාකරණය කරන්න
                   </Button>
                 </div>
               </div>
