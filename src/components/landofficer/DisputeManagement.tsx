@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Gavel, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Gavel,
+  AlertTriangle,
+  CheckCircle,
   Clock,
   User,
   FileText,
@@ -13,7 +13,10 @@ import {
   Eye,
   Download,
   Search,
-  Filter
+  Filter,
+  X,
+  Hash,
+  Scale
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -48,6 +51,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const statusOptions = [
     { value: 'all', label: 'සියලු තත්ත්වයන්' },
@@ -59,11 +63,11 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({
 
   const filteredDisputes = disputes.filter(dispute => {
     const matchesSearch = dispute.propertyId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         dispute.complainant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         dispute.defendant.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      dispute.complainant.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dispute.defendant.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesStatus = filterStatus === 'all' || dispute.status === filterStatus;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -103,6 +107,12 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const handleViewDetails = (dispute: Dispute) => {
+    setSelectedDispute(dispute);
+    setShowDetailsModal(true);
+    onViewDetails(dispute);
   };
 
   return (
@@ -158,17 +168,17 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({
                   <MapPin className="w-4 h-4 mr-2" />
                   ඉඩම්: {dispute.propertyId}
                 </div>
-                
+
                 <div className="flex items-center text-sm text-gray-600">
                   <User className="w-4 h-4 mr-2" />
                   පැමිණිලිකරු: {dispute.complainant}
                 </div>
-                
+
                 <div className="flex items-center text-sm text-gray-600">
                   <User className="w-4 h-4 mr-2" />
                   විත්තිකරු: {dispute.defendant}
                 </div>
-                
+
                 <div className="flex items-center text-sm text-gray-600">
                   <Calendar className="w-4 h-4 mr-2" />
                   {formatDate(dispute.filedDate)}
@@ -190,7 +200,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({
                   variant="outline"
                   size="sm"
                   icon={Eye}
-                  onClick={() => onViewDetails(dispute)}
+                  onClick={() => handleViewDetails(dispute)}
                   className="flex-1"
                 >
                   විස්තර
@@ -221,6 +231,189 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({
             </p>
           </div>
         </Card>
+      )}
+
+      {/* Details Modal */}
+      {showDetailsModal && selectedDispute && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+          >
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">ගැටළුව #{selectedDispute.id.slice(-6)}</h3>
+                <p className="text-sm text-gray-600 mt-1">ගැටළු ID: {selectedDispute.id}</p>
+              </div>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">ගැටළු තොරතුරු</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">ගැටළු ID:</span>
+                        <span className="font-medium">{selectedDispute.id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">ඉඩම් ID:</span>
+                        <span>{selectedDispute.propertyId}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">ප්‍රමුඛතාව:</span>
+                        <span>{getPriorityBadge(selectedDispute.priority)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">තත්ත්වය:</span>
+                        <span>{getStatusBadge(selectedDispute.status)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">ගොනු කළ දිනය:</span>
+                        <span>{formatDate(selectedDispute.filedDate)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">පාර්ශ්වයන්</h4>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="text-gray-600">පැමිණිලිකරු:</span>
+                        <span className="ml-2 font-medium">{selectedDispute.complainant}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">විත්තිකරු:</span>
+                        <span className="ml-2 font-medium">{selectedDispute.defendant}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">ගැටළුවේ විස්තරය</h4>
+                    <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg">
+                      {selectedDispute.description}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">සහාය ලේඛන</h4>
+                    <div className="space-y-2">
+                      {selectedDispute.documents.map((doc, index) => (
+                        <div key={index} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                          <div className="flex items-center">
+                            <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                            <span>{doc}</span>
+                          </div>
+                          <Button variant="ghost" size="sm" icon={Download}>
+                            බාගන්න
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">ක්‍රියාමාර්ග</h4>
+                    <div className="space-y-3">
+                      {selectedDispute.status === 'pending' && (
+                        <>
+                          <Button
+                            variant="primary"
+                            icon={CheckCircle}
+                            onClick={() => {
+                              onUpdateStatus(selectedDispute.id, 'investigating');
+                              setShowDetailsModal(false);
+                            }}
+                            className="w-full"
+                          >
+                            විමර්ශනය ආරම්භ කරන්න
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              onUpdateStatus(selectedDispute.id, 'rejected');
+                              setShowDetailsModal(false);
+                            }}
+                            className="w-full"
+                          >
+                            ප්‍රතික්ෂේප කරන්න
+                          </Button>
+                        </>
+                      )}
+
+                      {selectedDispute.status === 'investigating' && (
+                        <Button
+                          variant="primary"
+                          icon={Scale}
+                          onClick={() => {
+                            onUpdateStatus(selectedDispute.id, 'resolved');
+                            setShowDetailsModal(false);
+                          }}
+                          className="w-full"
+                        >
+                          නිරාකරණය කරන්න
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="outline"
+                        icon={MessageSquare}
+                        className="w-full"
+                      >
+                        නීති නිලධාරියාට යොමු කරන්න
+                      </Button>
+                    </div>
+                  </div>
+
+                  {selectedDispute.assignedOfficer && (
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">පවරන ලද නිලධාරී</h4>
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-sm text-blue-700 font-medium">
+                          {selectedDispute.assignedOfficer}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-4">
+                    <h4 className="font-medium text-red-900 mb-2">වැදගත් සටහන</h4>
+                    <p className="text-sm text-red-700">
+                      ගැටළු නිරාකරණය කිරීමට පෙර සියලු සාක්ෂි සහ ලේඛන සම්පූර්ණයෙන් පරීක්ෂා කර ගන්න.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                <Button variant="outline" onClick={() => setShowDetailsModal(false)}>
+                  වසන්න
+                </Button>
+                <Button
+                  icon={Download}
+                  onClick={() => {
+                    // Handle download functionality
+                    alert('ගැටළු වාර්තාව බාගත කරමින්...');
+                  }}
+                >
+                  වාර්තාව බාගන්න
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );

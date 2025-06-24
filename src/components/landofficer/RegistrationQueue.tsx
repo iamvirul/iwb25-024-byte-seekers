@@ -12,7 +12,10 @@ import {
   Download,
   Search,
   Filter,
-  SlidersHorizontal
+  SlidersHorizontal,
+  X,
+  Hash,
+  Shield
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -47,6 +50,8 @@ const RegistrationQueue: React.FC<RegistrationQueueProps> = ({
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const statusOptions = [
     { value: 'all', label: 'සියලු තත්ත්වයන්' },
@@ -112,6 +117,12 @@ const RegistrationQueue: React.FC<RegistrationQueueProps> = ({
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const handleViewDetails = (registration: Registration) => {
+    setSelectedRegistration(registration);
+    setShowDetailsModal(true);
+    onViewDetails(registration);
   };
 
   return (
@@ -226,7 +237,7 @@ const RegistrationQueue: React.FC<RegistrationQueueProps> = ({
                   variant="outline"
                   size="sm"
                   icon={Eye}
-                  onClick={() => onViewDetails(registration)}
+                  onClick={() => handleViewDetails(registration)}
                   className="flex-1"
                 >
                   විස්තර
@@ -256,6 +267,153 @@ const RegistrationQueue: React.FC<RegistrationQueueProps> = ({
             </p>
           </div>
         </Card>
+      )}
+
+      {/* Details Modal */}
+      {showDetailsModal && selectedRegistration && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+          >
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">{selectedRegistration.propertyTitle}</h3>
+                <p className="text-sm text-gray-600 mt-1">ලියාපදිංචි ID: {selectedRegistration.id}</p>
+              </div>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">ඉඩම් තොරතුරු</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">නම:</span>
+                        <span>{selectedRegistration.propertyTitle}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">ස්ථානය:</span>
+                        <span>{selectedRegistration.location}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">ප්‍රමාණය:</span>
+                        <span>{selectedRegistration.area} අක්කර</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">ප්‍රමුඛතාව:</span>
+                        <span>{getPriorityBadge(selectedRegistration.priority)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">අයදුම්කරු තොරතුරු</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">නම:</span>
+                        <span>{selectedRegistration.applicant}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">ඉදිරිපත් කළ දිනය:</span>
+                        <span>{formatDate(selectedRegistration.submittedDate)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">ලේඛන</h4>
+                    <div className="space-y-2">
+                      {selectedRegistration.documents.map((doc, index) => (
+                        <div key={index} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                          <div className="flex items-center">
+                            <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                            <span>{doc}</span>
+                          </div>
+                          <Button variant="ghost" size="sm" icon={Download}>
+                            බාගන්න
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">තත්ත්වය</h4>
+                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                      {getStatusIcon(selectedRegistration.status)}
+                      <span className="text-sm font-medium">
+                        {selectedRegistration.status === 'pending_verification' && 'සත්‍යාපනය වෙමින්'}
+                        {selectedRegistration.status === 'document_review' && 'ලේඛන පරීක්ෂණය'}
+                        {selectedRegistration.status === 'survey_required' && 'සර්වේ අවශ්‍යයි'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">ක්‍රියාමාර්ග</h4>
+                    <div className="space-y-3">
+                      <Button
+                        variant="primary"
+                        icon={CheckCircle}
+                        onClick={() => {
+                          onApprove(selectedRegistration.id);
+                          setShowDetailsModal(false);
+                        }}
+                        className="w-full"
+                      >
+                        ලියාපදිංචිය අනුමත කරන්න
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          onReject(selectedRegistration.id);
+                          setShowDetailsModal(false);
+                        }}
+                        className="w-full"
+                      >
+                        ප්‍රතික්ෂේප කරන්න
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-medium text-blue-900 mb-2">සටහන්</h4>
+                    <p className="text-sm text-blue-700">
+                      මෙම ලියාපදිංචිය සම්පූර්ණ කිරීමට පෙර සියලු ලේඛන සත්‍යාපනය කර ගන්න.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                <Button variant="outline" onClick={() => setShowDetailsModal(false)}>
+                  වසන්න
+                </Button>
+                <Button 
+                  icon={Download}
+                  onClick={() => {
+                    // Handle download functionality
+                    alert('ලේඛන බාගත කරමින්...');
+                  }}
+                >
+                  ලේඛන බාගන්න
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );
