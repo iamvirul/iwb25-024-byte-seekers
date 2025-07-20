@@ -4,9 +4,9 @@ public type ValidationResult record {|
 |};
 
 public type RequestUser record {|
-    first_name string;
-    last_name string;
-    email string;
-    password string;
+    string first_name;
+    string last_name;
+    string email;
+    string password;
 |};
 
