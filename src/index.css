@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Remove focus outline from chart elements */
+.recharts-sector,
+.recharts-bar,
+.recharts-line,
+.recharts-area,
+.recharts-pie-sector,
+.recharts-surface,
+.recharts-wrapper {
+  outline: none !important;
+}
+
+/* Remove focus outline from all recharts elements */
+.recharts-responsive-container *:focus {
+  outline: none !important;
+}
+
+/* Ensure chart elements don't show focus states */
+.recharts-layer:focus,
+.recharts-layer *:focus {
+  outline: none !important;
+}
