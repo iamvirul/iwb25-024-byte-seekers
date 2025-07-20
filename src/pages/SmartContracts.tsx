@@ -18,14 +18,19 @@ import {
   SlidersHorizontal,
   Grid3X3,
   List,
+  Sparkles,
+  TrendingUp,
+  Users,
   ArrowRight,
   BarChart3,
   Shield,
   Zap,
   Database,
   Cpu,
+  Settings,
   DollarSign,
   Scale,
+  Gavel
 } from 'lucide-react';
 import Card from '../components/ui/Card';
 import EmptyState from '../components/common/EmptyState';
@@ -382,8 +387,8 @@ const SmartContracts = () => {
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Card key={stat.label} hover className="text-center">
-                <div className="flex flex-col items-center">
+              <Card key={stat.label} hover className="text-center h-full">
+                <div className="flex flex-col items-center h-full justify-center">
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-3 shadow-lg">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
@@ -778,65 +783,72 @@ const SmartContracts = () => {
                 />
               </Card>
             ) : (
-              <div className={`space-y-4 ${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-4 space-y-0' : ''}`}>
+              <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 gap-4' : 'space-y-4'}`}>
                 {filteredContracts.map((contract, index) => (
                   <motion.div
                     key={contract.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className={viewMode === 'grid' ? 'h-full' : ''}
                   >
                     {viewMode === 'grid' ? (
-                      <Card hover onClick={() => setSelectedContract(contract)} className="cursor-pointer">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3">
-                            <div className="flex-shrink-0">
-                              {getContractIcon(contract.type)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                {contract.name}
-                              </h3>
-                              <div className="space-y-1 text-sm text-gray-600">
-                                <div className="flex items-center">
-                                  <FileText className="w-4 h-4 mr-2" />
-                                  ඉඩම්: {contract.propertyId}
-                                </div>
-                                <div className="flex items-center">
-                                  <User className="w-4 h-4 mr-2" />
-                                  පාර්ශ්වයන්: {contract.parties.length}
-                                </div>
-                                <div className="flex items-center">
-                                  <Calendar className="w-4 h-4 mr-2" />
-                                  {formatDate(contract.createdDate)}
-                                </div>
-                                <div className="text-lg font-semibold text-purple-600">
-                                  {formatCurrency(contract.amount)}
+                      <div className="h-full">
+                        <Card hover onClick={() => setSelectedContract(contract)} className="cursor-pointer h-full flex flex-col">
+                          <div className="flex items-start justify-between flex-1">
+                            <div className="flex items-start space-x-3 flex-1 min-w-0">
+                              <div className="flex-shrink-0">
+                                {getContractIcon(contract.type)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                  {contract.name}
+                                </h3>
+                                <div className="space-y-1 text-sm text-gray-600 mb-4">
+                                  <div className="flex items-center">
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    ඉඩම්: {contract.propertyId}
+                                  </div>
+                                  <div className="flex items-center">
+                                    <User className="w-4 h-4 mr-2" />
+                                    පාර්ශ්වයන්: {contract.parties.length}
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Calendar className="w-4 h-4 mr-2" />
+                                    {formatDate(contract.createdDate)}
+                                  </div>
+                                  <div className="text-lg font-semibold text-purple-600">
+                                    {formatCurrency(contract.amount)}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="flex flex-col items-end space-y-2">
-                            {getStatusBadge(contract.status)}
-                            {contract.status === 'active' && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  executeContract(contract.id);
-                                }}
-                                className="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                              >
-                                <Play className="w-4 h-4 mr-1" />
-                                ක්‍රියාත්මක
+                          <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                            <div>
+                              {getStatusBadge(contract.status)}
+                            </div>
+                            <div className="flex space-x-2">
+                              {contract.status === 'active' && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    executeContract(contract.id);
+                                  }}
+                                  className="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                                >
+                                  <Play className="w-4 h-4 mr-1" />
+                                  ක්‍රියාත්මක
+                                </button>
+                              )}
+                              <button className="inline-flex items-center px-3 py-1 border border-purple-300 text-purple-700 rounded-md hover:bg-purple-50 transition-colors">
+                                <Eye className="w-4 h-4 mr-1" />
+                                විස්තර
                               </button>
-                            )}
-                            <button className="inline-flex items-center px-3 py-1 border border-purple-300 text-purple-700 rounded-md hover:bg-purple-50 transition-colors">
-                              <Eye className="w-4 h-4 mr-1" />
-                              විස්තර
-                            </button>
+                            </div>
                           </div>
-                        </div>
-                      </Card>
+                        </Card>
+                      </div>
                     ) : (
                       <Card hover onClick={() => setSelectedContract(contract)} className="cursor-pointer">
                         <div className="flex items-center justify-between">
