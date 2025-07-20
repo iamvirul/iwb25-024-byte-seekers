@@ -1,4 +1,4 @@
-import ballerinax/mysql;
+import ballerinax/mysql; 
 import ballerinax/mysql.driver as _;
 
 configurable DBConnection LandChainDatabase = ?;
