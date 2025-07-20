@@ -7,15 +7,10 @@ public function issueToken(string username) returns string|error {
         audience: "users",
         expTime: 3600,
         signatureConfig: {
-            config: {
-                keyStore: {
-                    path: "resources/certificates/truststore.p12",
-                    password: "MUKCF1WQgSyTHN3JMB5R7ZZ9GC59R1X2"
-                },
-                keyAlias: "ballerina",
-                keyPassword: "MUKCF1WQgSyTHN3JMB5R7ZZ9GC59R1X2"
-            }
+        config: {
+            keyFile: "resources/certificates/private.key"
         }
+    }
     };
 
     string jwt = check jwt:issue(issuerConfig);
