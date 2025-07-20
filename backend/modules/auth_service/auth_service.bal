@@ -1,10 +1,17 @@
-# Returns the string `Hello` with the input string name.
-#
-# + name - name as a string or nil
-# + return - "Hello, " with the input string name
-public function hello(string? name) returns string {
-    if name !is () {
-        return string `Hello, ${name}`;
+import ballerina/jwt;
+import ballerina/http;
+
+
+listener http:Listener authMicroservice = new (9091);
+@http:ServiceConfig {
+    cors: {
+        allowOrigins: ["*"],
+        allowMethods: ["GET", "POST", "PUT", "DELETE"],
+        allowCredentials: true
     }
-    return "Hello, World!";
+}
+service /auth on authMicroservice {
+    resource function post login() returns http:Response|error {
+        
+    }
 }
