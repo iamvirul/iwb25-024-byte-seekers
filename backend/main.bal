@@ -2,6 +2,7 @@ import ballerina/http;
 import ballerinax/mysql;
 import ballerina/io;
 import ballerina/sql;
+import ballerina/jwt;
 
 import backend.utils as Utils;
 import backend.db_service as db;
@@ -80,5 +81,22 @@ service /auth on authMicroservice {
                 message: "Invalid username or password"
             };
         }
+    }
+
+    resource function get validate/[string token]() returns json|error {
+        string jwt = token;
+
+        jwt:ValidatorConfig validatorConfig = {
+            issuer: "byteseekers",
+            audience: "users",
+            clockSkew: 60,
+            signatureConfig: {
+                certFile: "resources/certificates/public.crt"
+            }
+        };
+
+        jwt:Payload result = check jwt:validate(jwt, validatorConfig);
+
+        io:println("Token is valid: ", result);
     }
 }
