@@ -7,16 +7,16 @@ public enum REGEXS {
 }
 
 public enum USER_STATUS {
-    ACTIVE = "active",
-    INACTIVE = "inactive",
-    PENDING = "pending",
-    BLOCKED = "blocked"
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE",
+    PENDING = "PENDING",
+    BLOCKED = "BLOCKED"
 }
 
 public enum USER_TYPES {
-    ADMIN = "admin",
-    LAND_OWNER = "land_owner",
-    LAND_OFFICER = "land_officer"
+    ADMIN = "ADMIN",
+    LAND_OWNER = "LAND_OWNER",
+    LAND_OFFICER = "LAND_OFFICER"
 }
 
 public enum EMAIL_ERRORS {

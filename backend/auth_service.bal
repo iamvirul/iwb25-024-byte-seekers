@@ -58,15 +58,25 @@ service /auth on authMicroservice {
             }
             string|error jwt = Utils:issueToken(Utils:LAND_OWNER);
             if jwt is string {
-                response.statusCode = 200;
-                response = Utils:setSuccessResponse(
-                        response,
-                        {
-                            message: "Login successful",
-                            token: jwt
-                        }
-                );
-                return response;
+                if (user.user_status == Utils:ACTIVE) {
+                    response.statusCode = 200;
+                    response = Utils:setSuccessResponse(
+                            response,
+                            {
+                                message: "Login successful",
+                                token: jwt
+                            }
+                    );
+                    return response;
+                }else if (user.user_type != Utils:LAND_OWNER){
+                    response.statusCode = 403;
+                    response = Utils:setErrorResponse(response, "Access Denied");
+                    return response;
+                } else {
+                    response.statusCode = 401;
+                    response = Utils:setErrorResponse(response, "User is not active yet");
+                    return response;
+                }
             } else {
                 response.statusCode = 500;
                 response = Utils:setErrorResponse(response, "Failed to generate token");
@@ -88,7 +98,7 @@ service /auth on authMicroservice {
             return response;
         }
         stream<User, sql:Error?> userStream = self.connection->query(
-        `SELECT * FROM users WHERE email = ${requestUser.email} OR nic = ${requestUser.nic}`
+        `SELECT * FROM users WHERE email = ${requestUser.email} OR nic = ${requestUser.nic} OR sludi = ${requestUser.sludi}`
         );
         User? user = ();
         var result = check userStream.next();
@@ -98,7 +108,7 @@ service /auth on authMicroservice {
         }
         if user is User {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, Utils:EMAIL_ALREADY_EXISTS + " or " + Utils:NIC_ALREADY_EXISTS);
+            response = Utils:setErrorResponse(response, "Email, NIC or SLUDI already exists");
             return response;
         }
         string hash_password = check crypto:hashArgon2(requestUser.password);
@@ -129,6 +139,115 @@ service /auth on authMicroservice {
         response = Utils:setSuccessResponse(response, "User registered successfully");
         return response;
 
+    }
+
+    resource function post land_officer/register(@http:Payload RequestUser requestUser) returns http:Response|error {
+        http:Response response = new;
+        Utils:ValidationResult validateRegisterUser = Utils:validateRegisterUser(requestUser);
+        if !validateRegisterUser.isValid {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, validateRegisterUser.errors);
+            return response;
+        }
+        stream<User, sql:Error?> userStream = self.connection->query(
+        `SELECT * FROM users WHERE email = ${requestUser.email} OR nic = ${requestUser.nic} OR sludi = ${requestUser.sludi}`
+        );
+        User? user = ();
+        var result = check userStream.next();
+        _ = check userStream.close();
+        if result is record {|User value;|} {
+            user = result.value;
+        }
+        if user is User {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Email, NIC or SLUDI already exists");
+            return response;
+        }
+        string hash_password = check crypto:hashArgon2(requestUser.password);
+        string userUUID = uuid:createType4AsString();
+        string userId = "LCLOF-" + userUUID;
+        var insertResult = self.connection->execute(
+            `INSERT INTO users (first_name, last_name,user_id, email, nic, password, contact_no, address, sludi, user_type, user_status)
+            VALUES (
+            ${requestUser.first_name}, 
+            ${requestUser.last_name},
+            ${userId},
+            ${requestUser.email}, 
+            ${requestUser.nic},
+            ${hash_password},
+            ${requestUser.contact_no},
+            ${requestUser.address}, 
+            ${requestUser.sludi},
+            ${Utils:LAND_OFFICER}, 
+            ${Utils:PENDING})`
+        );
+        _ = check insertResult;
+        response = Utils:setSuccessResponse(
+                response,
+                {
+                    message: "User registered successfully"
+                });
+        response.statusCode = 201;
+        response = Utils:setSuccessResponse(response, "User registered successfully");
+        return response;
+
+    }
+
+    resource function post land_officer/login(@http:Payload LoginUser loginUser) returns http:Response|error {
+        http:Response response = new;
+        Utils:ValidationResult validateLoginUser = Utils:validateLoginUser(loginUser);
+        if !validateLoginUser.isValid {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, validateLoginUser.errors);
+            return response;
+        }
+        stream<User, sql:Error?> userStream = self.connection->query(
+        `SELECT * FROM users WHERE email = ${loginUser.email}`
+        );
+
+        User? user = ();
+        var result = check userStream.next();
+        _ = check userStream.close();
+
+        if result is record {|User value;|} {
+            user = result.value;
+        }
+
+        if user is User {
+            if crypto:verifyArgon2(loginUser.password, user.password) is false {
+                response.statusCode = 401;
+                response = Utils:setErrorResponse(response, Utils:INVALID_PASSWORD);
+                return response;
+            }
+            string|error jwt = Utils:issueToken(Utils:LAND_OWNER);
+            if jwt is string {
+                if (user.user_type == Utils:ACTIVE) {
+                    response.statusCode = 200;
+                    response = Utils:setSuccessResponse(
+                            response,
+                            {
+                                message: "Login successful",
+                                token: jwt
+                            }
+                    );
+                } else if (user.user_type != Utils:LAND_OFFICER) {
+                    response.statusCode = 403;
+                    response = Utils:setErrorResponse(response, "Access Denied");
+                } else {
+                    response.statusCode = 401;
+                    response = Utils:setErrorResponse(response, "User is not active yet");
+                }
+                return response;
+            } else {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, "Failed to generate token");
+                return response;
+            }
+        } else {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, "Invalid username or password");
+            return response;
+        }
     }
 
     resource function get validate/[string token]() returns json|error {
