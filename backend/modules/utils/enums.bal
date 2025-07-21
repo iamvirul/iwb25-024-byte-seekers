@@ -1,7 +1,22 @@
 public enum REGEXS {
     EMAIL_REGEX = "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
     PASSWORD_REGEX = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$",
-    DATETIME_REGEX = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+    DATETIME_REGEX = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$",
+    NIC_REGEX = "^(?:\\d{9}[VXvx]|\\d{12})$",
+    MOBILE_REGEX = "^(?:\\+94|94|0)7[0-8]\\d{7}$"
+}
+
+public enum USER_STATUS {
+    ACTIVE = "active",
+    INACTIVE = "inactive",
+    PENDING = "pending",
+    BLOCKED = "blocked"
+}
+
+public enum USER_TYPES {
+    ADMIN = "admin",
+    LAND_OWNER = "land_owner",
+    LAND_OFFICER = "land_officer"
 }
 
 public enum EMAIL_ERRORS {
@@ -27,7 +42,28 @@ public enum PASSWORD_ERRORS {
     PASSWORD_REQUIRED = "Password is required",
     INCORRECT_OLD_PASSWORD = "Old password is incorrect",
     USER_NOT_FOUND = "User not found",
-    PASSWORD_UPDATED = "Password updated successfully"
+    PASSWORD_UPDATED = "Password updated successfully",
+    INVALID_PASSWORD = "Invalid password"
+}
+public enum NIC_ERRORS {
+    NIC_LENGTH = "NIC should be 9 or 12 characters in length",
+    NIC_REQUIRED = "NIC is required",
+    NIC_INVALID_FORMAT = "Invalid NIC format",
+    NIC_ALREADY_EXISTS = "NIC already exists"
+}
+public enum CONTACT_NO_ERRORS {
+    CONTACT_NO_LENGTH = "Contact number should be 10 digits",
+    CONTACT_NO_REQUIRED = "Contact number is required",
+    CONTACT_NO_INVALID_FORMAT = "Invalid contact number format"
+}
+public enum ADDRESS_ERRORS {
+    ADDRESS_LENGTH = "Address should not exceed 200 characters",
+    ADDRESS_REQUIRED = "Address is required"
+}
+
+public enum SLUDI_ERRORS {
+    SLUDI_LENGTH = "SLUDI should not exceed 45 characters",
+    SLUDI_REQUIRED = "SLUDI is required"
 }
 
 public enum COMMON_ERROR_MESSAGES {

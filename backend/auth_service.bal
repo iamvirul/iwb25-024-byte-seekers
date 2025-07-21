@@ -1,0 +1,144 @@
+import backend.db_service as db;
+import backend.utils as Utils;
+
+import ballerina/crypto;
+import ballerina/http;
+import ballerina/io;
+import ballerina/jwt;
+import ballerina/sql;
+import ballerinax/mysql;
+import ballerina/uuid;
+
+listener http:Listener authMicroservice = new (9091);
+
+@http:ServiceConfig {
+    cors: {
+        allowOrigins: ["*"],
+        allowMethods: ["GET", "POST"],
+        allowCredentials: true
+    }
+}
+service /auth on authMicroservice {
+    private final mysql:Client connection;
+
+    function init() returns error? {
+        self.connection = db:getConnection();
+    }
+
+    function __deinit() returns error? {
+        check self.connection.close();
+    }
+
+    resource function post land_owner/login(@http:Payload LoginRequest loginRequest) returns http:Response|error {
+        http:Response response = new;
+
+        stream<User, sql:Error?> userStream = self.connection->query(
+        `SELECT * FROM users WHERE email = ${loginRequest.email}`
+        );
+
+        User? user = ();
+        var result = check userStream.next();
+        _ = check userStream.close();
+
+        if result is record {|User value;|} {
+            user = result.value;
+        }
+
+        if user is User {
+            if crypto:verifyArgon2(loginRequest.password, user.password) is false {
+                response.statusCode = 401;
+                response = Utils:setErrorResponse(response, Utils:INVALID_PASSWORD);
+                return response;
+            }
+            string|error jwt = Utils:issueToken(Utils:LAND_OWNER);
+            if jwt is string {
+                response.statusCode = 200;
+                response = Utils:setSuccessResponse(
+                        response,
+                        {
+                            message: "Login successful",
+                            token: jwt
+                        }
+                );
+                return response;
+            } else {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, "Failed to generate token");
+                return response;
+            }
+        } else {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, "Invalid username or password");
+            return response;
+        }
+    }
+
+    resource function post land_owner/register(@http:Payload RequestUser requestUser) returns http:Response|error {
+        http:Response response = new;
+        Utils:ValidationResult validateRegisterUser = Utils:validateRegisterUser(requestUser);
+        if !validateRegisterUser.isValid {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, validateRegisterUser.errors);
+            return response;
+        }
+        stream<User, sql:Error?> userStream = self.connection->query(
+        `SELECT * FROM users WHERE email = ${requestUser.email} OR nic = ${requestUser.nic}`
+        );
+        User? user = ();
+        var result = check userStream.next();
+        _ = check userStream.close();
+        if result is record {|User value;|} {
+            user = result.value;
+        }
+        if user is User {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, Utils:EMAIL_ALREADY_EXISTS + " or " + Utils:NIC_ALREADY_EXISTS);
+            return response;
+        }
+        string hash_password = check crypto:hashArgon2(requestUser.password);
+        string userUUID = uuid:createType4AsString();
+        string userId = "LCLO-" + userUUID;
+        var insertResult = self.connection->execute(
+            `INSERT INTO users (first_name, last_name,user_id, email, nic, password, contact_no, address, sludi, user_type, user_status)
+            VALUES (
+            ${requestUser.first_name}, 
+            ${requestUser.last_name},
+            ${userId},
+            ${requestUser.email}, 
+            ${requestUser.nic},
+            ${hash_password},
+            ${requestUser.contact_no},
+            ${requestUser.address}, 
+            ${requestUser.sludi},
+            ${Utils:LAND_OWNER}, 
+            ${Utils:PENDING})`
+        );
+        _ = check insertResult;
+        response = Utils:setSuccessResponse(
+                response,
+                {
+                    message: "User registered successfully"
+                });
+        response.statusCode = 201;
+        response = Utils:setSuccessResponse(response, "User registered successfully");
+        return response;
+
+    }
+
+    resource function get validate/[string token]() returns json|error {
+        string jwt = token;
+
+        jwt:ValidatorConfig validatorConfig = {
+            issuer: "byteseekers",
+            audience: Utils:LAND_OWNER,
+            clockSkew: 60,
+            signatureConfig: {
+                certFile: "resources/certificates/public.crt"
+            }
+        };
+
+        jwt:Payload result = check jwt:validate(jwt, validatorConfig);
+
+        io:println("Token is valid: ", result);
+    }
+}

@@ -7,6 +7,10 @@ public type RequestUser record {|
     string first_name;
     string last_name;
     string email;
+    string nic;
     string password;
+    string contact_no;
+    string address;
+    string sludi;
 |};
 

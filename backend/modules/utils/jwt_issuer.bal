@@ -1,10 +1,10 @@
 import ballerina/jwt;
 import ballerina/time;
 
-public function issueToken(string username) returns string|error {
+public function issueToken(string audience) returns string|error {
     jwt:IssuerConfig issuerConfig = {
         issuer: "byteseekers",
-        audience: "users",
+        audience: audience,
         expTime: 3600,
         signatureConfig: {
         config: {

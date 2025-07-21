@@ -13,7 +13,7 @@ public function validateRegisterUser(RequestUser user) returns ValidationResult 
     map<string> errorMsg = {};
     boolean errorFlag = false;
 
-    if user.first_name is "" {
+   if user.first_name == "" {
         errorFlag = true;
         errorMsg["first_name"] = FNAME_REQUIRED;
     } else if user.first_name.length() > 45 {
@@ -21,7 +21,7 @@ public function validateRegisterUser(RequestUser user) returns ValidationResult 
         errorMsg["first_name"] = FNAME_LENGTH;
     }
 
-    if user.last_name is "" {
+    if user.last_name == "" {
         errorFlag = true;
         errorMsg["last_name"] = LNAME_REQUIRED;
     } else if user.last_name.length() > 45 {
@@ -29,7 +29,7 @@ public function validateRegisterUser(RequestUser user) returns ValidationResult 
         errorMsg["last_name"] = LNAME_LENGTH;
     }
 
-    if user.email is "" {
+    if user.email == "" {
         errorFlag = true;
         errorMsg["email"] = EMAIL_REQUIRED;
     } else if user.email.length() > 200 {
@@ -40,12 +40,44 @@ public function validateRegisterUser(RequestUser user) returns ValidationResult 
         errorMsg["email"] = EMAIL_INVALID_FORMAT;
     }
 
-    if user.password is "" {
+    if  user.password == "" {
         errorFlag = true;
         errorMsg["password"] = PASSWORD_REQUIRED;
     } else if !regex:matches(user.password, PASSWORD_REGEX) {
         errorFlag = true;
         errorMsg["password"] = PASSWORD_LENGTH;
+    }
+
+    if user.nic == "" {
+        errorFlag = true;
+        errorMsg["nic"] = NIC_REQUIRED;
+    } else if !regex:matches(user.nic, NIC_REGEX) {
+        errorFlag = true;
+        errorMsg["nic"] = NIC_INVALID_FORMAT;
+    }
+
+    if user.contact_no == "" {
+        errorFlag = true;
+        errorMsg["contact_no"] = CONTACT_NO_REQUIRED;
+    } else if !regex:matches(user.contact_no, MOBILE_REGEX) {
+        errorFlag = true;
+        errorMsg["contact_no"] = CONTACT_NO_INVALID_FORMAT;
+    }
+
+    if user.address == "" {
+        errorFlag = true;
+        errorMsg["address"] = ADDRESS_REQUIRED;
+    } else if user.address.length() > 200 {
+        errorFlag = true;
+        errorMsg["address"] = ADDRESS_LENGTH;
+    }
+
+    if user.sludi == "" {
+        errorFlag = true;
+        errorMsg["sludi"] = SLUDI_REQUIRED;
+    } else if user.sludi.length() > 45 {
+        errorFlag = true;
+        errorMsg["sludi"] = SLUDI_LENGTH;
     }
 
     return {
