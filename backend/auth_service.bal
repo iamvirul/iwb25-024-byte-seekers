@@ -107,10 +107,38 @@ service /auth on authMicroservice {
             response = Utils:setErrorResponse(response, "Email, NIC or SLUDI already exists");
             return response;
         }
-        string hash_password = check crypto:hashArgon2(requestUser.password);
-        string userUUID = uuid:createType4AsString();
-        string userId = "LCLO-" + userUUID;
-        var insertResult = self.connection->execute(
+
+        http:Client SLUDIClient = check new ("localhost:9094/sludi_service");
+        http:Response|http:ClientError SLUDIresponse = check SLUDIClient->/verify/[requestUser.sludi];
+
+        if (SLUDIresponse is http:Response) {
+            json payload = check SLUDIresponse.getJsonPayload();
+            if payload.success is false {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, "User not found with SLUDI");
+                return response;
+            }
+            json sludiUser = check payload.user;
+            if sludiUser.nic != requestUser.nic {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, "NIC does not match with SLUDI");
+                return response;
+            }
+            if sludiUser.fname != requestUser.first_name {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, "First name does not match with SLUDI");
+                return response;
+            }
+            if sludiUser.lname != requestUser.last_name {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, "Last name does not match with SLUDI");
+                return response;
+            }
+
+            string hash_password = check crypto:hashArgon2(requestUser.password);
+            string userUUID = uuid:createType4AsString();
+            string userId = "LCLO-" + userUUID;
+            var insertResult = self.connection->execute(
             `INSERT INTO users (first_name, last_name,user_id, email, nic, password, contact_no, address, sludi, user_type, user_status)
             VALUES (
             ${requestUser.first_name}, 
@@ -124,17 +152,21 @@ service /auth on authMicroservice {
             ${requestUser.sludi},
             ${Utils:LAND_OWNER}, 
             ${Utils:PENDING})`
-        );
-        _ = check insertResult;
-        response = Utils:setSuccessResponse(
-                response,
-                {
-                    message: "User registered successfully"
-                });
-        response.statusCode = 201;
-        response = Utils:setSuccessResponse(response, "User registered successfully");
-        return response;
-
+            );
+            _ = check insertResult;
+            response = Utils:setSuccessResponse(
+                    response,
+                    {
+                        message: "User registered successfully"
+                    });
+            response.statusCode = 201;
+            response = Utils:setSuccessResponse(response, "User registered successfully");
+            return response;
+        } else {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Error while verifying the user");
+            return response;
+        }
     }
 
     resource function post land_officer/register(@http:Payload RequestUser requestUser) returns http:Response|error {
@@ -159,10 +191,38 @@ service /auth on authMicroservice {
             response = Utils:setErrorResponse(response, "Email, NIC or SLUDI already exists");
             return response;
         }
-        string hash_password = check crypto:hashArgon2(requestUser.password);
-        string userUUID = uuid:createType4AsString();
-        string userId = "LCLOF-" + userUUID;
-        var insertResult = self.connection->execute(
+
+        http:Client SLUDIClient = check new ("localhost:9094/sludi_service");
+        http:Response|http:ClientError SLUDIresponse = check SLUDIClient->/verify/[requestUser.sludi];
+
+        if (SLUDIresponse is http:Response) {
+            json payload = check SLUDIresponse.getJsonPayload();
+            if payload.success is false {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, "User not found with SLUDI");
+                return response;
+            }
+            json sludiUser = check payload.user;
+            if sludiUser.nic != requestUser.nic {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, "NIC does not match with SLUDI");
+                return response;
+            }
+            if sludiUser.fname != requestUser.first_name {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, "First name does not match with SLUDI");
+                return response;
+            }
+            if sludiUser.lname != requestUser.last_name {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, "Last name does not match with SLUDI");
+                return response;
+            }
+
+            string hash_password = check crypto:hashArgon2(requestUser.password);
+            string userUUID = uuid:createType4AsString();
+            string userId = "LCLOF-" + userUUID;
+            var insertResult = self.connection->execute(
             `INSERT INTO users (first_name, last_name,user_id, email, nic, password, contact_no, address, sludi, user_type, user_status)
             VALUES (
             ${requestUser.first_name}, 
@@ -176,17 +236,21 @@ service /auth on authMicroservice {
             ${requestUser.sludi},
             ${Utils:LAND_OFFICER}, 
             ${Utils:PENDING})`
-        );
-        _ = check insertResult;
-        response = Utils:setSuccessResponse(
-                response,
-                {
-                    message: "User registered successfully"
-                });
-        response.statusCode = 201;
-        response = Utils:setSuccessResponse(response, "User registered successfully");
-        return response;
-
+            );
+            _ = check insertResult;
+            response = Utils:setSuccessResponse(
+                    response,
+                    {
+                        message: "User registered successfully"
+                    });
+            response.statusCode = 201;
+            response = Utils:setSuccessResponse(response, "User registered successfully");
+            return response;
+        } else {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Error while verifying the user");
+            return response;
+        }
     }
 
     resource function post land_officer/login(@http:Payload LoginUser loginUser) returns http:Response|error {
