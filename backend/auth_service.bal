@@ -58,7 +58,11 @@ service /auth on authMicroservice {
             }
             string|error jwt = Utils:issueToken(Utils:LAND_OWNER);
             if jwt is string {
-                if (user.user_status == Utils:ACTIVE) {
+                if (user.user_type != Utils:LAND_OWNER) {
+                    response.statusCode = 403;
+                    response = Utils:setErrorResponse(response, "Access Denied");
+                    return response;
+                } else {
                     response.statusCode = 200;
                     response = Utils:setSuccessResponse(
                             response,
@@ -67,14 +71,6 @@ service /auth on authMicroservice {
                                 token: jwt
                             }
                     );
-                    return response;
-                }else if (user.user_type != Utils:LAND_OWNER){
-                    response.statusCode = 403;
-                    response = Utils:setErrorResponse(response, "Access Denied");
-                    return response;
-                } else {
-                    response.statusCode = 401;
-                    response = Utils:setErrorResponse(response, "User is not active yet");
                     return response;
                 }
             } else {
