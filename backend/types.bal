@@ -1,4 +1,4 @@
-public type LoginRequest record {
+public type LoginUser record {
     string email;
     string password;
 };

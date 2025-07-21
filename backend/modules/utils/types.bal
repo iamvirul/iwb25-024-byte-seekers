@@ -14,3 +14,7 @@ public type RequestUser record {|
     string sludi;
 |};
 
+public type LoginUser record {
+    string email;
+    string password;
+};

@@ -45,17 +45,20 @@ public enum PASSWORD_ERRORS {
     PASSWORD_UPDATED = "Password updated successfully",
     INVALID_PASSWORD = "Invalid password"
 }
+
 public enum NIC_ERRORS {
     NIC_LENGTH = "NIC should be 9 or 12 characters in length",
     NIC_REQUIRED = "NIC is required",
     NIC_INVALID_FORMAT = "Invalid NIC format",
     NIC_ALREADY_EXISTS = "NIC already exists"
 }
+
 public enum CONTACT_NO_ERRORS {
     CONTACT_NO_LENGTH = "Contact number should be 10 digits",
     CONTACT_NO_REQUIRED = "Contact number is required",
     CONTACT_NO_INVALID_FORMAT = "Invalid contact number format"
 }
+
 public enum ADDRESS_ERRORS {
     ADDRESS_LENGTH = "Address should not exceed 200 characters",
     ADDRESS_REQUIRED = "Address is required"

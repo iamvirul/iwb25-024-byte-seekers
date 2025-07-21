@@ -5,15 +5,17 @@ public function setErrorResponse(http:Response response, string|json message) re
     response.setJsonPayload({"success": false, "content": message});
     return response;
 }
+
 public function setSuccessResponse(http:Response response, string|json message) returns http:Response {
     response.setJsonPayload({"success": true, "content": message});
     return response;
 }
+
 public function validateRegisterUser(RequestUser user) returns ValidationResult {
     map<string> errorMsg = {};
     boolean errorFlag = false;
 
-   if user.first_name == "" {
+    if user.first_name == "" {
         errorFlag = true;
         errorMsg["first_name"] = FNAME_REQUIRED;
     } else if user.first_name.length() > 45 {
@@ -40,7 +42,7 @@ public function validateRegisterUser(RequestUser user) returns ValidationResult 
         errorMsg["email"] = EMAIL_INVALID_FORMAT;
     }
 
-    if  user.password == "" {
+    if user.password == "" {
         errorFlag = true;
         errorMsg["password"] = PASSWORD_REQUIRED;
     } else if !regex:matches(user.password, PASSWORD_REGEX) {
@@ -78,6 +80,26 @@ public function validateRegisterUser(RequestUser user) returns ValidationResult 
     } else if user.sludi.length() > 45 {
         errorFlag = true;
         errorMsg["sludi"] = SLUDI_LENGTH;
+    }
+
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
+public function validateLoginUser(LoginUser user) returns ValidationResult {
+    map<string> errorMsg = {};
+    boolean errorFlag = false;
+
+    if user.email == "" {
+        errorFlag = true;
+        errorMsg["email"] = EMAIL_REQUIRED;
+    }
+
+    if user.password == "" {
+        errorFlag = true;
+        errorMsg["password"] = PASSWORD_REQUIRED;
     }
 
     return {

@@ -6,8 +6,8 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/jwt;
 import ballerina/sql;
-import ballerinax/mysql;
 import ballerina/uuid;
+import ballerinax/mysql;
 
 listener http:Listener authMicroservice = new (9091);
 
@@ -18,6 +18,7 @@ listener http:Listener authMicroservice = new (9091);
         allowCredentials: true
     }
 }
+
 service /auth on authMicroservice {
     private final mysql:Client connection;
 
@@ -29,11 +30,16 @@ service /auth on authMicroservice {
         check self.connection.close();
     }
 
-    resource function post land_owner/login(@http:Payload LoginRequest loginRequest) returns http:Response|error {
+    resource function post land_owner/login(@http:Payload LoginUser loginUser) returns http:Response|error {
         http:Response response = new;
-
+        Utils:ValidationResult validateLoginUser = Utils:validateLoginUser(loginUser);
+        if !validateLoginUser.isValid {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, validateLoginUser.errors);
+            return response;
+        }
         stream<User, sql:Error?> userStream = self.connection->query(
-        `SELECT * FROM users WHERE email = ${loginRequest.email}`
+        `SELECT * FROM users WHERE email = ${loginUser.email}`
         );
 
         User? user = ();
@@ -45,7 +51,7 @@ service /auth on authMicroservice {
         }
 
         if user is User {
-            if crypto:verifyArgon2(loginRequest.password, user.password) is false {
+            if crypto:verifyArgon2(loginUser.password, user.password) is false {
                 response.statusCode = 401;
                 response = Utils:setErrorResponse(response, Utils:INVALID_PASSWORD);
                 return response;
