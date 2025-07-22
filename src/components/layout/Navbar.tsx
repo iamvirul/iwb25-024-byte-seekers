@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { 
   Home, Search, FileText, Users, Gavel, Upload, 
-  Menu, X, LogOut, User, Shield
+  Menu, X, LogOut, User, Shield, Settings, BarChart3, Scale
 } from 'lucide-react';
 import Button from '../ui/Button';
 
@@ -29,7 +29,34 @@ const Navbar = () => {
     { name: 'ස්මාර්ට් කොන්ත්‍රාක්ට්', href: '/contracts', icon: Upload }
   ];
 
+  // Add land officer specific navigation
+  const landOfficerNavigation = [
+    { name: 'නිලධාරී ඩෑෂ්බෝඩ්', href: '/land-officer', icon: BarChart3 },
+    { name: 'ඉඩම් ලියාපදිංචිය', href: '/registry', icon: Settings },
+    ...navigation.slice(1) // Exclude home, add others
+  ];
+
+  // Add legal officer specific navigation
+  const legalOfficerNavigation = [
+    { name: 'නීති නිලධාරී ඩෑෂ්බෝඩ්', href: '/legal-officer', icon: Scale },
+    ...navigation.slice(1) // Exclude home, add others
+  ];
+
+  const getCurrentNavigation = () => {
+    if (user?.role === 'land_officer') return landOfficerNavigation;
+    if (user?.role === 'legal_official') return legalOfficerNavigation;
+    return navigation;
+  };
+
+  const currentNavigation = getCurrentNavigation();
+
   const isActive = (path: string) => location.pathname === path;
+
+  const getDashboardPath = () => {
+    if (user?.role === 'land_officer') return '/land-officer';
+    if (user?.role === 'legal_official') return '/legal-officer';
+    return '/dashboard';
+  };
 
   return (
     <nav className="bg-white shadow-md border-b border-gray-200 sticky top-0 z-50">
@@ -48,7 +75,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
-            {navigation.map((item) => {
+            {currentNavigation.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
@@ -72,11 +99,18 @@ const Navbar = () => {
             {isAuthenticated ? (
               <div className="flex items-center space-x-3">
                 <Link
-                  to="/dashboard"
+                  to="/profile"
                   className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
                 >
                   <User className="w-4 h-4" />
                   <span>{user?.name}</span>
+                </Link>
+                <Link
+                  to={getDashboardPath()}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
+                >
+                  <Shield className="w-4 h-4" />
+                  <span>ඩෑෂ්බෝඩ්</span>
                 </Link>
                 <Button
                   variant="ghost"
@@ -123,7 +157,7 @@ const Navbar = () => {
           className="md:hidden bg-white border-t border-gray-200"
         >
           <div className="px-4 pt-2 pb-3 space-y-1">
-            {navigation.map((item) => {
+            {currentNavigation.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
@@ -145,12 +179,20 @@ const Navbar = () => {
             {isAuthenticated ? (
               <div className="border-t border-gray-200 pt-3 mt-3 space-y-1">
                 <Link
-                  to="/dashboard"
+                  to="/profile"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
                 >
                   <User className="w-5 h-5" />
-                  <span>{user?.name}</span>
+                  <span>මගේ ප්‍රොෆයිලය</span>
+                </Link>
+                <Link
+                  to={getDashboardPath()}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
+                >
+                  <Shield className="w-5 h-5" />
+                  <span>ඩෑෂ්බෝඩ්</span>
                 </Link>
                 <button
                   onClick={handleLogout}
