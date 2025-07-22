@@ -29,7 +29,7 @@ service /auth on authMicroservice {
         check self.dbClient.close();
     }
 
-    resource function post land_owner/login(@http:Payload LoginUser loginUser) returns http:Response|error {
+    resource function post users/login(@http:Payload LoginUser loginUser) returns http:Response|error {
         http:Response response = new;
         Utils:ValidationResult validateLoginUser = Utils:validateLoginUser(loginUser);
         if !validateLoginUser.isValid {
@@ -53,13 +53,9 @@ service /auth on authMicroservice {
                 response = Utils:setErrorResponse(response, Utils:INVALID_PASSWORD);
                 return response;
             }
-            string|error jwt = Utils:issueToken(Utils:LAND_OWNER);
+            Utils:USER_TYPES userType = check Utils:getUserType(loginUser.user_type);
+            string|error jwt = Utils:issueToken(userType);
             if jwt is string {
-                if (user.user_type != Utils:LAND_OWNER) {
-                    response.statusCode = 403;
-                    response = Utils:setErrorResponse(response, "Access Denied");
-                    return response;
-                } else {
                     response.statusCode = 200;
                     response = Utils:setSuccessResponse(
                             response,
@@ -69,7 +65,6 @@ service /auth on authMicroservice {
                             }
                     );
                     return response;
-                }
             } else {
                 response.statusCode = 500;
                 response = Utils:setErrorResponse(response, "Failed to generate token");
@@ -82,7 +77,7 @@ service /auth on authMicroservice {
         }
     }
 
-    resource function post land_owner/register(@http:Payload RequestUser requestUser) returns http:Response|error {
+    resource function post users/register(@http:Payload RequestUser requestUser) returns http:Response|error {
         http:Response response = new;
         Utils:ValidationResult validateRegisterUser = Utils:validateRegisterUser(requestUser);
         if !validateRegisterUser.isValid {

@@ -11,6 +11,16 @@ public function setSuccessResponse(http:Response response, string|json message) 
     return response;
 }
 
+public function getUserType(string userType) returns USER_TYPES | error {
+    match userType {
+        "land_owner" => {return LAND_OWNER;}
+        "land_officer" => {return LAND_OFFICER;}
+        "admin" => {return ADMIN;}
+        _ => {return error("Invalid user type");}
+        
+    }
+}
+
 public function validateRegisterUser(RequestUser user) returns ValidationResult {
     map<string> errorMsg = {};
     boolean errorFlag = false;
