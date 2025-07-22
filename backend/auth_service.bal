@@ -1,4 +1,3 @@
-import backend.db_service as db;
 import backend.utils as Utils;
 import backend.db as DB;
 
@@ -6,10 +5,8 @@ import ballerina/io;
 import ballerina/crypto;
 import ballerina/http;
 import ballerina/jwt;
-import ballerina/sql;
 import ballerina/uuid;
 import ballerina/persist;
-import ballerinax/mysql;
 
 listener http:Listener authMicroservice = new (9091);
 
@@ -22,16 +19,13 @@ listener http:Listener authMicroservice = new (9091);
 }
 
 service /auth on authMicroservice {
-    private final mysql:Client connection;
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.connection = db:getConnection();
         self.dbClient = check new ();
     }
 
     function __deinit() returns error? {
-        check self.connection.close();
         check self.dbClient.close();
     }
 
@@ -179,147 +173,6 @@ service /auth on authMicroservice {
         } else {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, "Error while verifying the user");
-            return response;
-        }
-    }
-
-    resource function post land_officer/register(@http:Payload RequestUser requestUser) returns http:Response|error {
-        http:Response response = new;
-        Utils:ValidationResult validateRegisterUser = Utils:validateRegisterUser(requestUser);
-        if !validateRegisterUser.isValid {
-            response.statusCode = 400;
-            response = Utils:setErrorResponse(response, validateRegisterUser.errors);
-            return response;
-        }
-        stream<User, sql:Error?> userStream = self.connection->query(
-        `SELECT * FROM users WHERE email = ${requestUser.email} OR nic = ${requestUser.nic} OR sludi = ${requestUser.sludi}`
-        );
-        User? user = ();
-        var result = check userStream.next();
-        _ = check userStream.close();
-        if result is record {|User value;|} {
-            user = result.value;
-        }
-        if user is User {
-            response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Email, NIC or SLUDI already exists");
-            return response;
-        }
-
-        http:Client SLUDIClient = check new ("localhost:9094/sludi_service");
-        http:Response|http:ClientError SLUDIresponse = check SLUDIClient->/verify/[requestUser.sludi];
-
-        if (SLUDIresponse is http:Response) {
-            json payload = check SLUDIresponse.getJsonPayload();
-            if payload.success is false {
-                response.statusCode = 400;
-                response = Utils:setErrorResponse(response, "User not found with SLUDI");
-                return response;
-            }
-            json sludiUser = check payload.user;
-            if sludiUser.nic != requestUser.nic {
-                response.statusCode = 400;
-                response = Utils:setErrorResponse(response, "NIC does not match with SLUDI");
-                return response;
-            }
-            if sludiUser.fname != requestUser.first_name {
-                response.statusCode = 400;
-                response = Utils:setErrorResponse(response, "First name does not match with SLUDI");
-                return response;
-            }
-            if sludiUser.lname != requestUser.last_name {
-                response.statusCode = 400;
-                response = Utils:setErrorResponse(response, "Last name does not match with SLUDI");
-                return response;
-            }
-
-            string hash_password = check crypto:hashArgon2(requestUser.password);
-            string userUUID = uuid:createType4AsString();
-            string userId = "LCLOF-" + userUUID;
-            var insertResult = self.connection->execute(
-            `INSERT INTO users (first_name, last_name,user_id, email, nic, password, contact_no, address, sludi, user_type, user_status)
-            VALUES (
-            ${requestUser.first_name}, 
-            ${requestUser.last_name},
-            ${userId},
-            ${requestUser.email}, 
-            ${requestUser.nic},
-            ${hash_password},
-            ${requestUser.contact_no},
-            ${requestUser.address}, 
-            ${requestUser.sludi},
-            ${Utils:LAND_OFFICER}, 
-            ${Utils:PENDING})`
-            );
-            _ = check insertResult;
-            response = Utils:setSuccessResponse(
-                    response,
-                    {
-                        message: "User registered successfully"
-                    });
-            response.statusCode = 201;
-            response = Utils:setSuccessResponse(response, "User registered successfully");
-            return response;
-        } else {
-            response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Error while verifying the user");
-            return response;
-        }
-    }
-
-    resource function post land_officer/login(@http:Payload LoginUser loginUser) returns http:Response|error {
-        http:Response response = new;
-        Utils:ValidationResult validateLoginUser = Utils:validateLoginUser(loginUser);
-        if !validateLoginUser.isValid {
-            response.statusCode = 400;
-            response = Utils:setErrorResponse(response, validateLoginUser.errors);
-            return response;
-        }
-        stream<User, sql:Error?> userStream = self.connection->query(
-        `SELECT * FROM users WHERE email = ${loginUser.email}`
-        );
-
-        User? user = ();
-        var result = check userStream.next();
-        _ = check userStream.close();
-
-        if result is record {|User value;|} {
-            user = result.value;
-        }
-
-        if user is User {
-            if crypto:verifyArgon2(loginUser.password, user.password) is false {
-                response.statusCode = 401;
-                response = Utils:setErrorResponse(response, Utils:INVALID_PASSWORD);
-                return response;
-            }
-            string|error jwt = Utils:issueToken(Utils:LAND_OWNER);
-            if jwt is string {
-                if (user.user_type == Utils:ACTIVE) {
-                    response.statusCode = 200;
-                    response = Utils:setSuccessResponse(
-                            response,
-                            {
-                                message: "Login successful",
-                                token: jwt
-                            }
-                    );
-                } else if (user.user_type != Utils:LAND_OFFICER) {
-                    response.statusCode = 403;
-                    response = Utils:setErrorResponse(response, "Access Denied");
-                } else {
-                    response.statusCode = 401;
-                    response = Utils:setErrorResponse(response, "User is not active yet");
-                }
-                return response;
-            } else {
-                response.statusCode = 500;
-                response = Utils:setErrorResponse(response, "Failed to generate token");
-                return response;
-            }
-        } else {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, "Invalid username or password");
             return response;
         }
     }
