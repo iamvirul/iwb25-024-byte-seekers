@@ -1,12 +1,14 @@
 import backend.db_service as db;
 import backend.utils as Utils;
+import backend.db as DB;
 
+import ballerina/io;
 import ballerina/crypto;
 import ballerina/http;
-import ballerina/io;
 import ballerina/jwt;
 import ballerina/sql;
 import ballerina/uuid;
+import ballerina/persist;
 import ballerinax/mysql;
 
 listener http:Listener authMicroservice = new (9091);
@@ -21,13 +23,16 @@ listener http:Listener authMicroservice = new (9091);
 
 service /auth on authMicroservice {
     private final mysql:Client connection;
+    private final DB:Client dbClient;
 
     function init() returns error? {
         self.connection = db:getConnection();
+        self.dbClient = check new ();
     }
 
     function __deinit() returns error? {
         check self.connection.close();
+        check self.dbClient.close();
     }
 
     resource function post land_owner/login(@http:Payload LoginUser loginUser) returns http:Response|error {
@@ -38,9 +43,7 @@ service /auth on authMicroservice {
             response = Utils:setErrorResponse(response, validateLoginUser.errors);
             return response;
         }
-        stream<User, sql:Error?> userStream = self.connection->query(
-        `SELECT * FROM users WHERE email = ${loginUser.email}`
-        );
+        stream<User, persist:Error?> userStream = self.dbClient->queryNativeSQL(`SELECT * FROM users WHERE email = ${loginUser.email}`,User);
 
         User? user = ();
         var result = check userStream.next();
@@ -93,9 +96,7 @@ service /auth on authMicroservice {
             response = Utils:setErrorResponse(response, validateRegisterUser.errors);
             return response;
         }
-        stream<User, sql:Error?> userStream = self.connection->query(
-        `SELECT * FROM users WHERE email = ${requestUser.email} OR nic = ${requestUser.nic} OR sludi = ${requestUser.sludi}`
-        );
+        stream<User, persist:Error?> userStream = self.dbClient->queryNativeSQL(`SELECT * FROM users WHERE email = ${requestUser.email} OR nic = ${requestUser.nic} OR sludi = ${requestUser.sludi}`,User);
         User? user = ();
         var result = check userStream.next();
         _ = check userStream.close();
@@ -138,22 +139,35 @@ service /auth on authMicroservice {
             string hash_password = check crypto:hashArgon2(requestUser.password);
             string userUUID = uuid:createType4AsString();
             string userId = "LCLO-" + userUUID;
-            var insertResult = self.connection->execute(
-            `INSERT INTO users (first_name, last_name,user_id, email, nic, password, contact_no, address, sludi, user_type, user_status)
-            VALUES (
-            ${requestUser.first_name}, 
-            ${requestUser.last_name},
-            ${userId},
-            ${requestUser.email}, 
-            ${requestUser.nic},
-            ${hash_password},
-            ${requestUser.contact_no},
-            ${requestUser.address}, 
-            ${requestUser.sludi},
-            ${Utils:LAND_OWNER}, 
-            ${Utils:PENDING})`
-            );
-            _ = check insertResult;
+            byte[] encryptNIC = check Utils:encryptData(requestUser.nic);
+            byte[] encryptSludi = check Utils:encryptData(requestUser.sludi);
+            byte[] encryptContactNo = check Utils:encryptData(requestUser.contact_no);
+            byte[] encryptAddress = check Utils:encryptData(requestUser.address);
+
+            DB:UserInsert requestUserInsert = {
+                userId: userId,
+                firstName: requestUser.first_name,
+                lastName: requestUser.last_name,
+                email: requestUser.email,
+                password: hash_password,
+                nic: encryptNIC,
+                sludi: encryptSludi,
+                contactNo: encryptContactNo,
+                address: encryptAddress,
+                userStatus: Utils:PENDING,
+                userType: Utils:LAND_OWNER
+            };
+            int[]|persist:Error insertedRecord = self.dbClient->/users.post([requestUserInsert]);
+            if insertedRecord is persist:Error {
+               if insertedRecord is persist:AlreadyExistsError {
+                    response.statusCode = 400;
+                    response = Utils:setErrorResponse(response, "User already exists");
+                    return response;
+                }
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, "Failed to register user");
+                return response;
+            }
             response = Utils:setSuccessResponse(
                     response,
                     {
