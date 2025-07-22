@@ -1,5 +1,6 @@
 import ballerina/http;
 import ballerina/regex;
+import backend.common as Common;
 
 public function setErrorResponse(http:Response response, string|json message) returns http:Response {
     response.setJsonPayload({"success": false, "content": message});
@@ -21,7 +22,7 @@ public function getUserType(string userType) returns USER_TYPES | error {
     }
 }
 
-public function validateRegisterUser(RequestUser user) returns ValidationResult {
+public function validateRegisterUser(Common:RequestUser user) returns Common:ValidationResult {
     map<string> errorMsg = {};
     boolean errorFlag = false;
 
@@ -98,7 +99,7 @@ public function validateRegisterUser(RequestUser user) returns ValidationResult 
     };
 }
 
-public function validateLoginUser(LoginUser user) returns ValidationResult {
+public function validateLoginUser(Common:LoginUser user) returns Common:ValidationResult {
     map<string> errorMsg = {};
     boolean errorFlag = false;
 
