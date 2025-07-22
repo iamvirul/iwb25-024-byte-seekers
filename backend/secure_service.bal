@@ -10,7 +10,7 @@ http:JwtValidatorConfig validator = {
 
 http:ListenerJwtAuthHandler handler = new (validator);
 
-listener http:Listener securedListener = new (9092);
+listener http:Listener securedListener = new (9090);
 
 service /secure on securedListener {
     resource function get info(@http:Header string Authorization) returns string|http:Unauthorized {

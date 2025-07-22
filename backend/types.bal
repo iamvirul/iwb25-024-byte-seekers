@@ -1,6 +1,7 @@
 public type LoginUser record {
     string email;
     string password;
+    string user_type;
 };
 
 public type User record {|
@@ -9,14 +10,16 @@ public type User record {|
     string last_name;
     string user_id;
     string email;
-    string nic;
+    byte[] nic;
+    byte[] sludi;
+    byte[] contactNo;
+    byte[]? address;
     string password;
     string contact_no;
-    string address;
     string user_status;
-    string sludi;
     string user_type;
 |};
+
 public type RequestUser record {|
     string first_name;
     string last_name;
