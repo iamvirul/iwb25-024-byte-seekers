@@ -1,12 +1,13 @@
-import backend.utils as Utils;
 import backend.db as DB;
+import backend.utils as Utils;
+import backend.common as Common;
 
-import ballerina/io;
 import ballerina/crypto;
 import ballerina/http;
+import ballerina/io;
 import ballerina/jwt;
-import ballerina/uuid;
 import ballerina/persist;
+import ballerina/uuid;
 
 listener http:Listener authMicroservice = new (9091);
 
@@ -29,25 +30,25 @@ service /auth on authMicroservice {
         check self.dbClient.close();
     }
 
-    resource function post users/login(@http:Payload LoginUser loginUser) returns http:Response|error {
+    resource function post users/login(@http:Payload Common:LoginUser loginUser) returns http:Response|error {
         http:Response response = new;
-        Utils:ValidationResult validateLoginUser = Utils:validateLoginUser(loginUser);
+        Common:ValidationResult validateLoginUser = Utils:validateLoginUser(loginUser);
         if !validateLoginUser.isValid {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, validateLoginUser.errors);
             return response;
         }
-        stream<User, persist:Error?> userStream = self.dbClient->queryNativeSQL(`SELECT * FROM users WHERE email = ${loginUser.email}`,User);
+        stream<Common:User, persist:Error?> userStream = self.dbClient->queryNativeSQL(`SELECT * FROM users WHERE email = ${loginUser.email}`, Common:User);
 
-        User? user = ();
+        Common:User? user = ();
         var result = check userStream.next();
         _ = check userStream.close();
 
-        if result is record {|User value;|} {
+        if result is record {|Common:User value;|} {
             user = result.value;
         }
 
-        if user is User {
+        if user is Common:User {
             if crypto:verifyArgon2(loginUser.password, user.password) is false {
                 response.statusCode = 401;
                 response = Utils:setErrorResponse(response, Utils:INVALID_PASSWORD);
@@ -56,15 +57,15 @@ service /auth on authMicroservice {
             Utils:USER_TYPES userType = check Utils:getUserType(loginUser.user_type);
             string|error jwt = Utils:issueToken(userType);
             if jwt is string {
-                    response.statusCode = 200;
-                    response = Utils:setSuccessResponse(
+                response.statusCode = 200;
+                response = Utils:setSuccessResponse(
                             response,
-                            {
-                                message: "Login successful",
-                                token: jwt
-                            }
+                        {
+                            message: "Login successful",
+                            token: jwt
+                        }
                     );
-                    return response;
+                return response;
             } else {
                 response.statusCode = 500;
                 response = Utils:setErrorResponse(response, "Failed to generate token");
@@ -77,22 +78,22 @@ service /auth on authMicroservice {
         }
     }
 
-    resource function post users/register(@http:Payload RequestUser requestUser) returns http:Response|error {
+    resource function post users/register(@http:Payload Common:RequestUser requestUser) returns http:Response|error {
         http:Response response = new;
-        Utils:ValidationResult validateRegisterUser = Utils:validateRegisterUser(requestUser);
+        Common:ValidationResult validateRegisterUser = Utils:validateRegisterUser(requestUser);
         if !validateRegisterUser.isValid {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, validateRegisterUser.errors);
             return response;
         }
-        stream<User, persist:Error?> userStream = self.dbClient->queryNativeSQL(`SELECT * FROM users WHERE email = ${requestUser.email} OR nic = ${requestUser.nic} OR sludi = ${requestUser.sludi}`,User);
-        User? user = ();
+        stream<Common:User, persist:Error?> userStream = self.dbClient->queryNativeSQL(`SELECT * FROM users WHERE email = ${requestUser.email} OR nic = ${requestUser.nic} OR sludi = ${requestUser.sludi}`, Common:User);
+        Common:User? user = ();
         var result = check userStream.next();
         _ = check userStream.close();
-        if result is record {|User value;|} {
+        if result is record {|Common:User value;|} {
             user = result.value;
         }
-        if user is User {
+        if user is Common:User {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, "Email, NIC or SLUDI already exists");
             return response;
@@ -144,11 +145,11 @@ service /auth on authMicroservice {
                 contactNo: encryptContactNo,
                 address: encryptAddress,
                 userStatus: Utils:PENDING,
-                userType: Utils:LAND_OWNER
+                userType: check Utils:getUserType(requestUser.user_type)
             };
             int[]|persist:Error insertedRecord = self.dbClient->/users.post([requestUserInsert]);
             if insertedRecord is persist:Error {
-               if insertedRecord is persist:AlreadyExistsError {
+                if insertedRecord is persist:AlreadyExistsError {
                     response.statusCode = 400;
                     response = Utils:setErrorResponse(response, "User already exists");
                     return response;
