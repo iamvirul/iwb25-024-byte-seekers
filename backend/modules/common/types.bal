@@ -29,6 +29,7 @@ public type RequestUser record {|
     string contact_no;
     string address;
     string sludi;
+    string user_type;
 |};
 
 public type ValidationResult record {|
