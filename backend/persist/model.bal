@@ -162,7 +162,7 @@ public type LandTransferChain record {|
     int landsId;
     @sql:Name {value: "from_land_owners_id"}
     @sql:Index {name: "fk_land_transfer_chain_land_owners1_idx"}
-    int fromLandOwnersId;
+    int? fromLandOwnersId;
     @sql:Name {value: "to_land_owners_id"}
     @sql:Index {name: "fk_land_transfer_chain_land_owners2_idx"}
     int toLandOwnersId;
