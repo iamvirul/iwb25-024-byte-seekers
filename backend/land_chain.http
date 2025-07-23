@@ -1,0 +1,22 @@
+POST http://localhost:9091/auth/users/register
+Content-Type: application/json
+
+{
+  "first_name": "Hiranya",
+  "last_name": "Gunawardhane",
+  "email": "hiranyagunawardhane@gmail.com",
+  "nic": "200583703767",
+  "password": "Hiru2005@",
+  "contact_no": "0768190976",
+  "address": "Colombo",
+  "sludi": "SL-UDI-000000051",
+  "user_type": 1
+}
+
+HTTP/1.1 201  - Created
+content-type: application/json
+connection: close
+server: ballerina
+date: Thu, 24 Jul 2025 00:47:38 +0530
+content-encoding: gzip
+content-length: 79

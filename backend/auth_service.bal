@@ -1,6 +1,6 @@
+import backend.common as Common;
 import backend.db as DB;
 import backend.utils as Utils;
-import backend.common as Common;
 
 import ballerina/crypto;
 import ballerina/http;
@@ -99,7 +99,7 @@ service /auth on authMicroservice {
             return response;
         }
 
-        http:Client SLUDIClient = check new ("localhost:9094/sludi_service");
+        http:Client SLUDIClient = check new ("localhost:9096/sludi_service");
         http:Response|http:ClientError SLUDIresponse = check SLUDIClient->/verify/[requestUser.sludi];
 
         if (SLUDIresponse is http:Response) {
@@ -143,29 +143,33 @@ service /auth on authMicroservice {
                 nic: encryptNIC,
                 sludi: encryptSludi,
                 contactNo: encryptContactNo,
-                address: encryptAddress,
-                userStatus: Utils:PENDING,
-                userType: check Utils:getUserType(requestUser.user_type)
+                address: encryptAddress
             };
-            int[]|persist:Error insertedRecord = self.dbClient->/users.post([requestUserInsert]);
-            if insertedRecord is persist:Error {
-                if insertedRecord is persist:AlreadyExistsError {
-                    response.statusCode = 400;
-                    response = Utils:setErrorResponse(response, "User already exists");
-                    return response;
+
+            transaction {
+                int[]|persist:Error insertedRecord = self.dbClient->/users.post([requestUserInsert]);
+                if insertedRecord is persist:Error {
+                    if insertedRecord is persist:AlreadyExistsError {
+                        response.statusCode = 400;
+                        response = Utils:setErrorResponse(response, "User already exists");
+                    }
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, "Failed to register user");
                 }
-                response.statusCode = 500;
-                response = Utils:setErrorResponse(response, "Failed to register user");
+                if insertedRecord is int[] {
+                    _ = check self.dbClient->/userhasusertypes.post([
+                        {
+                            usersId: <int>insertedRecord[0],
+                            userTypesId: requestUser.user_type
+                        }
+                    ]);
+                    response.statusCode = 201;
+                    response = Utils:setSuccessResponse(response, "User registered successfully");
+                }
+
+                check commit;
                 return response;
             }
-            response = Utils:setSuccessResponse(
-                    response,
-                    {
-                        message: "User registered successfully"
-                    });
-            response.statusCode = 201;
-            response = Utils:setSuccessResponse(response, "User registered successfully");
-            return response;
         } else {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, "Error while verifying the user");
