@@ -1,7 +1,7 @@
 public type LoginUser record {
     string email;
     string password;
-    string user_type;
+    int user_type;
 };
 
 public type User record {|
@@ -35,4 +35,9 @@ public type RequestUser record {|
 public type ValidationResult record {|
     boolean isValid;
     map<string> errors;
+|};
+
+public type UserHasTypes record {|
+    int users_id;
+    int user_types_id;
 |};

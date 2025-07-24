@@ -47,11 +47,23 @@ service /auth on authMicroservice {
         if result is record {|Common:User value;|} {
             user = result.value;
         }
-
         if user is Common:User {
+            
             if crypto:verifyArgon2(loginUser.password, user.password) is false {
                 response.statusCode = 401;
                 response = Utils:setErrorResponse(response, Utils:INVALID_PASSWORD);
+                return response;
+            }
+            stream<Common:UserHasTypes, persist:Error?> userHasType = self.dbClient->queryNativeSQL(`SELECT * FROM users_has_user_types WHERE users_id = ${user.id} AND user_types_id = ${loginUser.user_type}`,Common:UserHasTypes);
+            Common:UserHasTypes? userTypeResult = ();
+            var userTypeCheck = check userHasType.next();
+            _ = check userHasType.close();
+            if userTypeCheck is record {|Common:UserHasTypes value;|} {
+                userTypeResult = userTypeCheck.value;
+            }
+            if userTypeResult is () {
+                response.statusCode = 403;
+                response = Utils:setErrorResponse(response, "User does not have the required user type");
                 return response;
             }
             Utils:USER_TYPES userType = check Utils:getUserType(loginUser.user_type);

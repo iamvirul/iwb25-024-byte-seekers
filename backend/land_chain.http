@@ -20,3 +20,42 @@ server: ballerina
 date: Thu, 24 Jul 2025 00:47:38 +0530
 content-encoding: gzip
 content-length: 79
+###
+POST http://localhost:9095/land/register
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzUwNDA5LCAibmJmIjoxNzUzMzQ2ODA5LCAiaWF0IjoxNzUzMzQ2ODA5fQ.inhQd1cWFpTF5NP3SyWbNMHraOG3Zf2x0_n2iRx0xZ_7OlyXwffWOTEW-LXAKa3I1Zv7hFJrMkkxvkPco6Y4eM8BmhN8qYmF4fWFtxfgJdeTTrpyrwucUi3vkDNxhtqZZBJAzayf7CzDWFwtG-Heg-vDNaIGAt2VbilCKvNJl7DQl9O0IU0XZvpilPzNvx3lXoChOSICp7eNVth4t0prmcWW3TO6avacToCsMH9VP2LepzmEgmwpv-8bv24ySt8-j4K9SmAusUELbekXwRN314W9VAbvVLDjok1173MRDAKL97ZXm_SVoagw10NxS-kULjZa1XA7CiLV1uQxN_uDZg
+Content-Type: application/json
+
+{
+  "landId": "{?}",
+  "landName": "{?}",
+  "landPlace": "{?}",
+  "landLat": 0,
+  "landLang": 0,
+  "landSize": 0,
+  "landValue": 0,
+  "landType": "{?}",
+  "registerDate": {
+    "year": 2023,
+    "month": 10,
+    "day": 1
+  },
+  "landStatus": "REJECTED",
+  "priority": 0
+}
+
+HTTP/1.1 400  - Bad Request
+content-type: application/json
+connection: close
+server: ballerina
+date: Thu, 24 Jul 2025 14:31:57 +0530
+content-encoding: gzip
+content-length: 86
+###
+POST http://localhost:9091/auth/users/login
+Content-Type: application/json
+
+{
+  "email": "hiranyagunawardhane@gmail.com",
+  "password": "Hiru2005@",
+  "user_type": "land_officer"
+}

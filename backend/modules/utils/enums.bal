@@ -16,7 +16,8 @@ public enum USER_STATUS {
 public enum USER_TYPES {
     ADMIN = "ADMIN",
     LAND_OWNER = "LAND_OWNER",
-    LAND_OFFICER = "LAND_OFFICER"
+    LAND_OFFICER = "LAND_OFFICER",
+    LEGAL_OFFICER = "LEGAL_OFFICER"
 }
 
 public enum EMAIL_ERRORS {
@@ -74,4 +75,24 @@ public enum COMMON_ERROR_MESSAGES {
     INVALID_CONTENT_TYPE = "Invalid Content Type",
     INVALID_MULTIPART_REQUEST = "Invalid multipart request",
     REQUIRED_FIELDS_MISSING = "Required fields are missing"
+}
+
+public enum LAND_ERRORS {
+    LAND_NAME_REQUIRED = "Land name is required",
+    LAND_NAME_LENGTH = "Land name should not exceed 100 characters",
+    LAND_ALREADY_EXISTS = "Land already exists",
+    LAND_INSERT_SUCCESS = "Land inserted successfully",
+    LAND_UPDATE_SUCCESS = "Land updated successfully",
+    LAND_DELETE_SUCCESS = "Land deleted successfully",
+    LAND_NOT_FOUND = "Land not found",
+    PLACE_REQUIRED = "Place is required",
+    PLACE_LENGTH = "Place should not exceed 100 characters",
+    LATITUDE_INVALID = "Invalid latitude value",
+    LONGITUDE_INVALID = "Invalid longitude value",
+    LAND_SIZE_INVALID = "Invalid land size value",
+    LAND_VALUE_INVALID = "Invalid land value",
+    LAND_TYPE_REQUIRED = "Land type is required",
+    PRIORITY_INVALID = "Priority must be zero or positive",
+    FAILED_TO_REGISTER_LAND = "Failed to register land"
+
 }
