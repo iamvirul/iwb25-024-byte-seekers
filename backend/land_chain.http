@@ -2,22 +2,22 @@ POST http://localhost:9091/auth/users/register
 Content-Type: application/json
 
 {
-  "first_name": "Asela",
-  "last_name": "Rathnayake",
-  "email": "asela@gmail.com",
-  "nic": "963456789V",
+  "first_name": "Roshan",
+  "last_name": "Jayasinghe",
+  "email": "roshan@gmail.com",
+  "nic": "973456789V",
   "password": "Hiru2005@",
   "contact_no": "0768190976",
   "address": "Colombo",
-  "sludi": "SL-UDI-000000007",
-  "user_type": 2
+  "sludi": "SL-UDI-000000008",
+  "user_type": 4
 }
 
 HTTP/1.1 201  - Created
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 22:20:43 +0530
+date: Thu, 24 Jul 2025 23:02:29 +0530
 content-encoding: gzip
 content-length: 79
 ###
@@ -55,18 +55,18 @@ POST http://localhost:9091/auth/users/login
 Content-Type: application/json
 
 {
-  "email": "asela@gmail.com",
+  "email": "roshan@gmail.com",
   "password": "Hiru2005@",
-  "user_type": 2
+  "user_type": 4
 }
 
 HTTP/1.1 200  - OK
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 22:21:00 +0530
+date: Thu, 24 Jul 2025 23:02:49 +0530
 content-encoding: gzip
-content-length: 474
+content-length: 479
 ###
 GET http://localhost:9095/land/getAllLands
 Content-Type: application/json
@@ -112,13 +112,25 @@ Content-Type: application/json
   "witnessName": "234da",
   "disputesDetails": "Sample Dispute",
   "landsId": 1,
-  "legalOfficerId": 11
+  "legalOfficerId": 10
 }
 
-HTTP/1.1 201  - Created
+HTTP/1.1 404  - Not Found
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 22:33:11 +0530
+date: Thu, 24 Jul 2025 23:06:21 +0530
 content-encoding: gzip
-content-length: 115
+content-length: 80
+###
+GET http://localhost:9092/legal_officer/getDisputes/11
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMRUdBTF9PRkZJQ0VSIiwgImV4cCI6MTc1MzM4MTk2OSwgIm5iZiI6MTc1MzM3ODM2OSwgImlhdCI6MTc1MzM3ODM2OX0.bfHY0X4Y1ZsqVRudC3OybjAZgdk1hwDAW6OFjEKsr87QdvpjUmBvyfB6RqdZqDBdzZDbDmeG692MX3vCF34H0HtXP0YXC_eY0-_fR1I-vygcIKVdVtqN8aMHgVtpy85ke-jxObI_QnrtIvRnSGJTdVwBR16C31dPSaaNFo2pGZKT2upVLsGz_GuKfty04P4Mbwhmo2SuDBHtiWC3tvcdbeDrdVcOLVDtz7mxAZxSrHv4suywuY-_M_4VhORY5NPBKIY_dcXe2lbnIoEkE09XR2Y4dBbqEIGdp6OqrkWKLww7Yx39TiJggLnfkUZ9HM1kh3wXWyAzxL5Ghv4tl1yFzw
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Thu, 24 Jul 2025 23:06:42 +0530
+content-encoding: gzip
+content-length: 235
