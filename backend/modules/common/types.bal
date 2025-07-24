@@ -1,5 +1,7 @@
 import backend.db as DB;
+
 import ballerina/time;
+
 public type LoginUser record {
     string email;
     string password;
@@ -57,4 +59,12 @@ public type Land record {|
     time:Date registerDate;
     DB:LandLandStatus landStatus;
     int priority;
+|};
+
+public type LegalOfficer record {|
+    int id;
+    string firstName;
+    string lastName;
+    string baslId;
+    decimal? initialCost;
 |};

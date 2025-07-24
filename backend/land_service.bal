@@ -120,8 +120,34 @@ service /land on landMicroservice {
         common:Land land = landResult;
         response.statusCode = 200;
         response = Utils:setSuccessResponse(response, {
-            "land": land.toJson()
-        });
+                                                          "land": land.toJson()
+                                                      });
+        return response;
+    }
+
+    resource function get getLegelOfficers(@http:Header string Authorization) returns error|http:Response {
+        http:Response response = new;
+        jwt:Payload|http:Unauthorized authn = landOfficerHandler.authenticate(Authorization);
+        if authn is http:Unauthorized {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
+            return response;
+        }
+        common:LegalOfficer[] legalOfficers = [];
+        stream<common:LegalOfficer, persist:Error?> legalOfficerResult = self.dbClient->/legalofficers(common:LegalOfficer);
+
+        check from var legalOfficer in legalOfficerResult
+            do {
+                legalOfficers.push(legalOfficer);
+            };
+        check legalOfficerResult.close();
+        if legalOfficers.length() == 0 {
+            response.statusCode = 404;
+            response = Utils:setErrorResponse(response, Utils:NO_LANDS_FOUND);
+        } else {
+            response.statusCode = 200;
+            response = Utils:setSuccessResponse(response, {"legal_officers": legalOfficers.toJson()});
+        }
         return response;
     }
 }
