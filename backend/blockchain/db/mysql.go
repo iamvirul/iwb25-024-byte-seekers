@@ -36,9 +36,9 @@ func InitDB() {
 	log.Println("Connected to MySQL successfully")
 }
 
-func getLastBlock(landID int) (lastIndex int, lastHash string, err error) {
+func getLastBlockTx(tx *sql.Tx, landID int) (lastIndex int, lastHash string, err error) {
 	query := `SELECT block_index, block_hash FROM land_transfer_chain WHERE lands_id = ? ORDER BY block_index DESC LIMIT 1`
-	row := DB.QueryRow(query, landID)
+	row := tx.QueryRow(query, landID)
 
 	err = row.Scan(&lastIndex, &lastHash)
 	if err == sql.ErrNoRows {
@@ -47,7 +47,7 @@ func getLastBlock(landID int) (lastIndex int, lastHash string, err error) {
 	return lastIndex, lastHash, err
 }
 
-func InsertBlock(b models.Block) error {
+func InsertBlock(b models.Block) (err error) {
 	transfer := b.LandTransfer
 
 	t, err := time.Parse(time.RFC3339, transfer.TransferDate)
@@ -56,7 +56,23 @@ func InsertBlock(b models.Block) error {
 	}
 	mysqlDate := t.Format("2006-01-02 15:04:05")
 
-	lastIndex, lastHash, err := getLastBlock(transfer.LandID)
+	tx, err := DB.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %v", err)
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p) 
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	lastIndex, lastHash, err := getLastBlockTx(tx, transfer.LandID)
 	if err != nil {
 		return fmt.Errorf("failed to get last block: %v", err)
 	}
@@ -76,7 +92,7 @@ func InsertBlock(b models.Block) error {
 		fromOwner = nil
 	}
 
-	_, err = DB.Exec(query,
+	_, err = tx.Exec(query,
 		mysqlDate,
 		transfer.VerifiedBy,
 		b.Index,
@@ -90,5 +106,6 @@ func InsertBlock(b models.Block) error {
 	if err != nil {
 		return fmt.Errorf("insert block failed: %v", err)
 	}
+
 	return nil
 }
