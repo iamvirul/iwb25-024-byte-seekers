@@ -1,0 +1,17 @@
+http://localhost:8080/api/v1/transfer
+Content-Type: application/json
+X-API-Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJCeXRlU2Vla2VycyIsIm5hbWUiOiJMYW5kQ2hhaW4tQmxvY2tjaGFpbiIsImFkbWluIjp0cnVlLCJpYXQiOjE1MTYyMzkwMjJ9.tzcCRcSX2bD-CB3ZYOOtnEkJj6LVEqY2NQ3nEuR7zmk
+
+{
+  "LandID": 2,
+  "FromOwnerID": 4 ,
+  "ToOwnerID": 5,
+  "TransferDate": "2025-07-23T10:00:00Z",
+  "VerifiedBy": "land_officer_203"
+}
+
+HTTP/1.1 200  - OK
+date: Thu, 24 Jul 2025 06:12:59 GMT
+content-length: 264
+content-type: text/plain; charset=utf-8
+connection: close
