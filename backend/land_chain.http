@@ -2,36 +2,36 @@ POST http://localhost:9091/auth/users/register
 Content-Type: application/json
 
 {
-  "first_name": "Hiranya",
-  "last_name": "Gunawardhane",
-  "email": "hiranyagunawardhane@gmail.com",
-  "nic": "200583703767",
+  "first_name": "Ruwan",
+  "last_name": "Bandara",
+  "email": "ruwanbandara@gmail.com",
+  "nic": "953456789V",
   "password": "Hiru2005@",
   "contact_no": "0768190976",
   "address": "Colombo",
-  "sludi": "SL-UDI-000000051",
-  "user_type": 1
+  "sludi": "SL-UDI-000000006",
+  "user_type": 3
 }
 
 HTTP/1.1 201  - Created
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 00:47:38 +0530
+date: Thu, 24 Jul 2025 16:18:11 +0530
 content-encoding: gzip
 content-length: 79
 ###
 POST http://localhost:9095/land/register
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzUwNDA5LCAibmJmIjoxNzUzMzQ2ODA5LCAiaWF0IjoxNzUzMzQ2ODA5fQ.inhQd1cWFpTF5NP3SyWbNMHraOG3Zf2x0_n2iRx0xZ_7OlyXwffWOTEW-LXAKa3I1Zv7hFJrMkkxvkPco6Y4eM8BmhN8qYmF4fWFtxfgJdeTTrpyrwucUi3vkDNxhtqZZBJAzayf7CzDWFwtG-Heg-vDNaIGAt2VbilCKvNJl7DQl9O0IU0XZvpilPzNvx3lXoChOSICp7eNVth4t0prmcWW3TO6avacToCsMH9VP2LepzmEgmwpv-8bv24ySt8-j4K9SmAusUELbekXwRN314W9VAbvVLDjok1173MRDAKL97ZXm_SVoagw10NxS-kULjZa1XA7CiLV1uQxN_uDZg
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzU3NzEwLCAibmJmIjoxNzUzMzU0MTEwLCAiaWF0IjoxNzUzMzU0MTEwfQ.cwpAOVn31X74lc_440Qk1EMxgfkCIrP_lQx7-4JBTo31ca_VcGdxfyTSHGtXvGY95hkqCDveO2VnpHNtJpVGlSCpo7ZgFVyDnwum-EePyO4dzEN0jnMfO-h1PZUGKnm9zZFirL-CfyHb4UMqD1Pvgru8aXk4VvGPKhZmP-_Klhne7fCbK9NJfYomfLTqk6-kuOo4NuXkx5llJspyfJgONK_oj_aqOxk0QCtgnIrBS__ZlqMXiQ-_nxQMzAcOsbp0u3LYP3V9HRAQ7a5_FpLIz3stobCHfdQUPavRR6RNz58b_iangMtWEyT_ecED7rCp3HcpJ_5ndHVnuINtcAczRA
 Content-Type: application/json
 
 {
-  "landId": "{?}",
-  "landName": "{?}",
-  "landPlace": "{?}",
+  "landId": "234da",
+  "landName": "Sample Land",
+  "landPlace": "Colombo",
   "landLat": 0,
   "landLang": 0,
-  "landSize": 0,
+  "landSize": 10,
   "landValue": 0,
   "landType": "{?}",
   "registerDate": {
@@ -43,19 +43,39 @@ Content-Type: application/json
   "priority": 0
 }
 
-HTTP/1.1 400  - Bad Request
+HTTP/1.1 201  - Created
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 14:31:57 +0530
+date: Thu, 24 Jul 2025 16:19:05 +0530
 content-encoding: gzip
-content-length: 86
+content-length: 67
 ###
 POST http://localhost:9091/auth/users/login
 Content-Type: application/json
 
 {
-  "email": "hiranyagunawardhane@gmail.com",
+  "email": "ruwanbandara@gmail.com",
   "password": "Hiru2005@",
-  "user_type": "land_officer"
+  "user_type": 3
 }
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Thu, 24 Jul 2025 17:11:22 +0530
+content-encoding: gzip
+content-length: 479
+###
+GET http://localhost:9095/land/getAllLands
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzYwODgxLCAibmJmIjoxNzUzMzU3MjgxLCAiaWF0IjoxNzUzMzU3MjgxfQ.flFVTk2MJazz9lD2cpBKUARu4rkkcSdSmUciwvUgAjo5Kseceicnjqsk0nBXGgj93YZgNmLLIA-9M5xzYjRvoRQ8_7tDmdvAoi7mvZwnEeDOP9FN6EEIOPbfLR5HK4frL4Bp-zHlnlA8u-TM095P4axckWKXU9_i9Ce7Lp6e8EdAFc6upz1jpx1WamO7dqt2FDguWT28wBGyy6KaDl_JFnS626yf45warLv0cO8VSOMJckzHZ45Xfy9sjpgufPrB852KnbnoZQbwnnOAvqx_OBsm63rB-LQH9-xvmqDERBBYem_Qt_LVLVHcbEkVztV0mCAqUhKfMArkjMzuWpgKRw
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Thu, 24 Jul 2025 17:23:52 +0530
+content-encoding: gzip
+content-length: 1211
