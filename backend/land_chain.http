@@ -134,3 +134,19 @@ server: ballerina
 date: Thu, 24 Jul 2025 23:06:42 +0530
 content-encoding: gzip
 content-length: 235
+###
+POST http://localhost:9092/legal_officer/addEstimateTime
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMRUdBTF9PRkZJQ0VSIiwgImV4cCI6MTc1MzM4MTk2OSwgIm5iZiI6MTc1MzM3ODM2OSwgImlhdCI6MTc1MzM3ODM2OX0.bfHY0X4Y1ZsqVRudC3OybjAZgdk1hwDAW6OFjEKsr87QdvpjUmBvyfB6RqdZqDBdzZDbDmeG692MX3vCF34H0HtXP0YXC_eY0-_fR1I-vygcIKVdVtqN8aMHgVtpy85ke-jxObI_QnrtIvRnSGJTdVwBR16C31dPSaaNFo2pGZKT2upVLsGz_GuKfty04P4Mbwhmo2SuDBHtiWC3tvcdbeDrdVcOLVDtz7mxAZxSrHv4suywuY-_M_4VhORY5NPBKIY_dcXe2lbnIoEkE09XR2Y4dBbqEIGdp6OqrkWKLww7Yx39TiJggLnfkUZ9HM1kh3wXWyAzxL5Ghv4tl1yFzw
+{
+    "caseId": "CASE-17310792338",
+    "estimateTime":"2 weeks"
+}
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Thu, 24 Jul 2025 23:58:47 +0530
+content-encoding: gzip
+content-length: 99

@@ -86,3 +86,8 @@ public type Dispute record {|
     int landsId;
     int legalOfficerId;
 |};
+
+public type UpdateDisputeEstimateTime record {|
+    string caseId;
+    string estimateTime;
+|};

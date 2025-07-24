@@ -196,3 +196,23 @@ public function validateDisputeInsert(Common:RequestDispute requestDispute) retu
         errors: errorMsg
     };
 }
+
+public function validateDisputeEstimateTime(Common:UpdateDisputeEstimateTime updateRequest) returns Common:ValidationResult {
+    map<string> errorMsg = {};
+    boolean errorFlag = false;
+    
+    if updateRequest.caseId == "" {
+        errorFlag = true;
+        errorMsg["caseId"] = "Case ID is required";
+    }
+    
+    if updateRequest.estimateTime == "" {
+        errorFlag = true;
+        errorMsg["estimateTime"] = "Estimate time is required";
+    }
+    
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}

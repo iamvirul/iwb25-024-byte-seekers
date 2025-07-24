@@ -62,7 +62,7 @@ service /legal_officer on legalOfficerMicroservice {
         }
         common:Dispute[] disputes = [];
         sql:ParameterizedQuery query = `legal_officer_id = ${id}`;
-        stream<common:Dispute, persist:Error?> disputeResult = self.dbClient->/disputes(common:Dispute,query);
+        stream<common:Dispute, persist:Error?> disputeResult = self.dbClient->/disputes(common:Dispute, query);
 
         check from var dispute in disputeResult
             do {
@@ -76,6 +76,44 @@ service /legal_officer on legalOfficerMicroservice {
             response.statusCode = 200;
             response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson()});
         }
+        return response;
+    }
+
+    resource function post addEstimateTime(@http:Header string Authorization, common:UpdateDisputeEstimateTime updateRequest) returns error|http:Response {
+        http:Response response = new;
+        jwt:Payload|http:Unauthorized authn = legalOfficerHandler.authenticate(Authorization);
+        if authn is http:Unauthorized {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
+            return response;
+        }
+        common:ValidationResult validateLandInsert = Utils:validateDisputeEstimateTime(updateRequest);
+        if !validateLandInsert.isValid {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, validateLandInsert.errors);
+            return response;
+        }
+        sql:ParameterizedQuery query = `case_id = ${updateRequest.caseId}`;
+        stream<common:Dispute, persist:Error?> disputeStream = self.dbClient->/disputes(common:Dispute, query);
+
+        check from var dispute in disputeStream
+            do {
+                DB:DisputeUpdate updateDispute = {
+                    estimateTime: updateRequest.estimateTime
+                };
+                common:Dispute|persist:Error updateResult = self.dbClient->/disputes/[dispute.id].put(updateDispute);
+                if updateResult is persist:Error {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_DISPUTE);
+                    return response;
+                }
+                response.statusCode = 200;
+                response = Utils:setSuccessResponse(response, {"message": Utils:DISPUTE_ESTIMATE_TIME_UPDATED});
+                return response;
+            };
+        check disputeStream.close();
+        response.statusCode = 404;
+        response = Utils:setErrorResponse(response, Utils:INVALID_CASE_ID);
         return response;
     }
 
