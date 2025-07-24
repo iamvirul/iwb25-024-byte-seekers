@@ -169,3 +169,30 @@ public function validateLandInsert(DB:LandInsert landInsert) returns Common:Vali
     };
 }
 
+public function validateDisputeInsert(Common:RequestDispute requestDispute) returns Common:ValidationResult {
+    map<string> errorMsg = {};
+    boolean errorFlag = false;
+    if requestDispute.disputesDetails == "" {
+        errorFlag = true;
+        errorMsg["disputesDetails"] = DISPUTES_DETAILS_REQUIRED;
+    } 
+    if requestDispute.witnessName == "" {
+        errorFlag = true;
+        errorMsg["witnessName"] = WITNESS_NAME_REQUIRED;
+    } else if requestDispute.witnessName.length() > 60 {
+        errorFlag = true;
+        errorMsg["witnessName"] = WITNESS_NAME_LENGTH;
+    }
+    if requestDispute.legalOfficerId <=0 {
+        errorFlag = true;
+        errorMsg["legalOfficerId"] = LEGAL_OFFICER_ID_REQUIRED;
+    }
+    if requestDispute.landsId <= 0 {
+        errorFlag = true;
+        errorMsg["landsId"] = LAND_ID_REQUIRED;
+    }
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
