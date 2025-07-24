@@ -86,9 +86,37 @@ service /land on landMicroservice {
         } else {
             response.statusCode = 200;
             response = Utils:setSuccessResponse(response, {
-                "lands": lands.toJson()
-            });
+                                                              "lands": lands.toJson()
+                                                          });
         }
+        return response;
+    }
+
+    resource function get getLandById/[int id](@http:Header string Authorization) returns error|http:Response {
+        http:Response response = new;
+        jwt:Payload|http:Unauthorized authn = landOfficerHandler.authenticate(Authorization);
+        if authn is http:Unauthorized {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
+            return response;
+        }
+        common:Land|persist:Error landResult = self.dbClient->/lands/[id](common:Land);
+
+        if landResult is persist:Error {
+            if landResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, Utils:LAND_NOT_FOUND);
+            } else {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LANDS);
+            }
+            return response;
+        }
+        common:Land land = landResult;
+        response.statusCode = 200;
+        response = Utils:setSuccessResponse(response, {
+            "land": land.toJson()
+        });
         return response;
     }
 }
