@@ -7,10 +7,10 @@ public function issueToken(string audience) returns string|error {
         audience: audience,
         expTime: 3600,
         signatureConfig: {
-        config: {
-            keyFile: "resources/certificates/private.key"
+            config: {
+                keyFile: "resources/certificates/private.key"
+            }
         }
-    }
     };
 
     string jwt = check jwt:issue(issuerConfig);

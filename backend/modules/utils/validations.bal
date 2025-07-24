@@ -1,6 +1,7 @@
 import ballerina/http;
 import ballerina/regex;
 import backend.common as Common;
+import backend.db as DB;
 
 public function setErrorResponse(http:Response response, string|json message) returns http:Response {
     response.setJsonPayload({"success": false, "content": message});
@@ -12,11 +13,12 @@ public function setSuccessResponse(http:Response response, string|json message) 
     return response;
 }
 
-public function getUserType(string userType) returns USER_TYPES | error {
+public function getUserType(int userType) returns USER_TYPES | error {
     match userType {
-        "land_owner" => {return LAND_OWNER;}
-        "land_officer" => {return LAND_OFFICER;}
-        "admin" => {return ADMIN;}
+        1 => {return ADMIN;}
+        2 => {return LAND_OWNER;}
+        3 => {return LAND_OFFICER;}
+        4 => {return LEGAL_OFFICER;}
         _ => {return error("Invalid user type");}
         
     }
@@ -113,6 +115,102 @@ public function validateLoginUser(Common:LoginUser user) returns Common:Validati
         errorMsg["password"] = PASSWORD_REQUIRED;
     }
 
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
+public function validateLandInsert(DB:LandInsert landInsert) returns Common:ValidationResult {
+    map<string> errorMsg = {};
+    boolean errorFlag = false;
+    if landInsert.landName == "" {
+        errorFlag = true;
+        errorMsg["name"] = LAND_NAME_REQUIRED;
+    } else if landInsert.landName.length() > 100 {
+        errorFlag = true;
+        errorMsg["name"] = LAND_NAME_LENGTH;
+    }
+    if landInsert.landPlace == "" {
+        errorFlag = true;
+        errorMsg["place"] = PLACE_REQUIRED;
+    } else if landInsert.landPlace.length() > 100 {
+        errorFlag = true;
+        errorMsg["place"] = PLACE_LENGTH;
+    }
+    if landInsert.landLat < -90.0d || landInsert.landLat > 90.0d {
+        errorFlag = true;
+        errorMsg["lat"] = LATITUDE_INVALID;
+    }
+    if landInsert.landLang < -180.0d || landInsert.landLang > 180.0d {
+        errorFlag = true;
+        errorMsg["lang"] = LONGITUDE_INVALID;
+    }
+    if landInsert.landSize <= 0.0 {
+        errorFlag = true;
+        errorMsg["size"] = LAND_SIZE_INVALID;
+    }
+    if landInsert.landValue < 0.0d {
+        errorFlag = true;
+        errorMsg["value"] = LAND_VALUE_INVALID;
+    }
+    if landInsert.landType == "" {
+        errorFlag = true;
+        errorMsg["type"] = LAND_TYPE_REQUIRED;
+    }
+    if landInsert.priority < 0 {
+        errorFlag = true;
+        errorMsg["priority"] = PRIORITY_INVALID;
+    }
+
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
+public function validateDisputeInsert(Common:RequestDispute requestDispute) returns Common:ValidationResult {
+    map<string> errorMsg = {};
+    boolean errorFlag = false;
+    if requestDispute.disputesDetails == "" {
+        errorFlag = true;
+        errorMsg["disputesDetails"] = DISPUTES_DETAILS_REQUIRED;
+    } 
+    if requestDispute.witnessName == "" {
+        errorFlag = true;
+        errorMsg["witnessName"] = WITNESS_NAME_REQUIRED;
+    } else if requestDispute.witnessName.length() > 60 {
+        errorFlag = true;
+        errorMsg["witnessName"] = WITNESS_NAME_LENGTH;
+    }
+    if requestDispute.legalOfficerId <=0 {
+        errorFlag = true;
+        errorMsg["legalOfficerId"] = LEGAL_OFFICER_ID_REQUIRED;
+    }
+    if requestDispute.landsId <= 0 {
+        errorFlag = true;
+        errorMsg["landsId"] = LAND_ID_REQUIRED;
+    }
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
+public function validateDisputeEstimateTime(Common:UpdateDisputeEstimateTime updateRequest) returns Common:ValidationResult {
+    map<string> errorMsg = {};
+    boolean errorFlag = false;
+    
+    if updateRequest.caseId == "" {
+        errorFlag = true;
+        errorMsg["caseId"] = "Case ID is required";
+    }
+    
+    if updateRequest.estimateTime == "" {
+        errorFlag = true;
+        errorMsg["estimateTime"] = "Estimate time is required";
+    }
+    
     return {
         isValid: !errorFlag,
         errors: errorMsg
