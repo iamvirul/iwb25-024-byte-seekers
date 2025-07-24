@@ -85,9 +85,7 @@ service /land on landMicroservice {
             response = Utils:setErrorResponse(response, Utils:NO_LANDS_FOUND);
         } else {
             response.statusCode = 200;
-            response = Utils:setSuccessResponse(response, {
-                                                              "lands": lands.toJson()
-                                                          });
+            response = Utils:setSuccessResponse(response, {"lands": lands.toJson()});
         }
         return response;
     }
