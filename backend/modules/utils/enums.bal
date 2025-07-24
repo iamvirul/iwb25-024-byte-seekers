@@ -93,6 +93,7 @@ public enum LAND_ERRORS {
     LAND_VALUE_INVALID = "Invalid land value",
     LAND_TYPE_REQUIRED = "Land type is required",
     PRIORITY_INVALID = "Priority must be zero or positive",
-    FAILED_TO_REGISTER_LAND = "Failed to register land"
-
+    FAILED_TO_REGISTER_LAND = "Failed to register land",
+    FAILED_TO_FETCH_LANDS = "Failed to fetch lands",
+    NO_LANDS_FOUND = "No lands found"
 }
