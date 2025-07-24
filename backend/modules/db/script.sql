@@ -90,6 +90,7 @@ CREATE TABLE `disputes` (
 	`disputes_details` VARCHAR(191) NOT NULL,
 	`estimate_time` VARCHAR(45) NOT NULL,
 	`status` ENUM('PENDING', 'RESOLVED', 'REJECTED') NOT NULL,
+	`created_at` TIMESTAMP NOT NULL,
 	`lands_id` INT NOT NULL,
 	FOREIGN KEY(`lands_id`) REFERENCES `lands`(`id`),
 	`legal_officer_id` INT NOT NULL,

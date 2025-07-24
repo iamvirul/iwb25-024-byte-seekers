@@ -537,6 +537,7 @@ public type Dispute record {|
     string disputesDetails;
     string estimateTime;
     DisputeStatus status;
+    time:Utc createdAt;
     int landsId;
     int legalOfficerId;
 
@@ -549,6 +550,7 @@ public type DisputeOptionalized record {|
     string disputesDetails?;
     string estimateTime?;
     DisputeStatus status?;
+    time:Utc createdAt?;
     int landsId?;
     int legalOfficerId?;
 |};
@@ -569,6 +571,7 @@ public type DisputeInsert record {|
     string disputesDetails;
     string estimateTime;
     DisputeStatus status;
+    time:Utc createdAt;
     int landsId;
     int legalOfficerId;
 |};
@@ -579,6 +582,7 @@ public type DisputeUpdate record {|
     string disputesDetails?;
     string estimateTime?;
     DisputeStatus status?;
+    time:Utc createdAt?;
     int landsId?;
     int legalOfficerId?;
 |};

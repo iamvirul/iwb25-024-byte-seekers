@@ -64,9 +64,9 @@ HTTP/1.1 200  - OK
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 23:02:49 +0530
+date: Fri, 25 Jul 2025 00:32:46 +0530
 content-encoding: gzip
-content-length: 479
+content-length: 476
 ###
 GET http://localhost:9095/land/getAllLands
 Content-Type: application/json
@@ -105,39 +105,39 @@ content-encoding: gzip
 content-length: 448
 ###
 POST http://localhost:9098/land_owner/createDispute
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09XTkVSIiwgImV4cCI6MTc1MzM3OTQ1OSwgIm5iZiI6MTc1MzM3NTg1OSwgImlhdCI6MTc1MzM3NTg1OX0.Yh6O9m8SsZXt3dSa6zyL_1-VDzIJ9MQUwVJTumX3KpqXxv-pJDYZAWCcyqVwdrSS2t877_AlUo8iJXIAxa_mwf_pOQJoGcSgkB1BFqr-2YVd13ieCIVuDkSgQNFR16Egu_KxUjtdPTAdWJpiuDYl8JNb8JyljgOKf8Uv5ifLnymQHqLpwJr49dSmTK-SQSM0BYvtl9NMB6H2O4n8hM52LKNVIG9LNLG_1sdwWi82zcmJWeZ2jK2fYKJdmwP1YeN0FntZtaWIxXTiMMmB2pRYdLrZupI_s4qbJEmiESoiwL_7-SKSZ9uWQpkg9as0wqcRZNOXuOd8lZ80Pbp31gP4zQ
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09XTkVSIiwgImV4cCI6MTc1MzM4NzIwMSwgIm5iZiI6MTc1MzM4MzYwMSwgImlhdCI6MTc1MzM4MzYwMX0.TLulKo6FVafeFjQUA56ewW61deyOuu8tklT7lPuwylHckhyHQmqsRRB9Q8Q_fl9qKqktF_IyIoZUVr_pXrIAD2y7NurZUWvecykdq7O5pNzTNqOAbdORgY7Re85VdcyRPc6iaquHmvmmTfWbjtTSJZL53sOwioo2DJNQuo99qfw4LZTLQXab2_LBSmp4tr4cVMekiCUsVZS0ELacrMEG7TjwanPuk5n9wAi0hRhdYAWH93gmekm39XE0VG_8Fo7wg6GIQ1NPcaFbqLTKdOK3TCYM9eG-Tb6hMJo4_lxQi2CkiudP37_S_-iQfgLV-UTJXxI4P2We970AIDeR1ofgsQ
 Content-Type: application/json
 
 {
   "witnessName": "234da",
   "disputesDetails": "Sample Dispute",
   "landsId": 1,
-  "legalOfficerId": 10
+  "legalOfficerId": 11
 }
 
-HTTP/1.1 404  - Not Found
+HTTP/1.1 201  - Created
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 23:06:21 +0530
+date: Fri, 25 Jul 2025 00:30:30 +0530
 content-encoding: gzip
-content-length: 80
+content-length: 113
 ###
 GET http://localhost:9092/legal_officer/getDisputes/11
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMRUdBTF9PRkZJQ0VSIiwgImV4cCI6MTc1MzM4MTk2OSwgIm5iZiI6MTc1MzM3ODM2OSwgImlhdCI6MTc1MzM3ODM2OX0.bfHY0X4Y1ZsqVRudC3OybjAZgdk1hwDAW6OFjEKsr87QdvpjUmBvyfB6RqdZqDBdzZDbDmeG692MX3vCF34H0HtXP0YXC_eY0-_fR1I-vygcIKVdVtqN8aMHgVtpy85ke-jxObI_QnrtIvRnSGJTdVwBR16C31dPSaaNFo2pGZKT2upVLsGz_GuKfty04P4Mbwhmo2SuDBHtiWC3tvcdbeDrdVcOLVDtz7mxAZxSrHv4suywuY-_M_4VhORY5NPBKIY_dcXe2lbnIoEkE09XR2Y4dBbqEIGdp6OqrkWKLww7Yx39TiJggLnfkUZ9HM1kh3wXWyAzxL5Ghv4tl1yFzw
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMRUdBTF9PRkZJQ0VSIiwgImV4cCI6MTc1MzM4NzM2NiwgIm5iZiI6MTc1MzM4Mzc2NiwgImlhdCI6MTc1MzM4Mzc2Nn0.JdRfwFNE8Lt0gToLYS60xN7XLK_ioVN0St0XQb6wjZgVcyGWeQxpZNXRum6hRRGEqq4vZKaDCZ1tHrSXanVzfs8_ctvWUmVu_Tmke51e4DbayE7V2if25PyT1ACuhR1X0jMK0JTlrP65hO9zy-zQeYw4rgKQRGrsVTFdFh1pFzmwxaSMFyq31LOqfc2ho_762xT2gcWFAm13aWkaZTCMoqQEqoKNqFGGw3tpYINU2VP932N2tnr6ii5ItNiR-jOscNf821t-UKYEkmAAVc6L8P6tox8A6513pvb-pi48aI2wsX7ebFdC1hM3Uizo7dDhIhoueVcSWhuctD0VJw8OBw
 
 HTTP/1.1 200  - OK
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 23:06:42 +0530
+date: Fri, 25 Jul 2025 00:33:17 +0530
 content-encoding: gzip
-content-length: 235
+content-length: 282
 ###
 POST http://localhost:9092/legal_officer/addEstimateTime
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMRUdBTF9PRkZJQ0VSIiwgImV4cCI6MTc1MzM4MTk2OSwgIm5iZiI6MTc1MzM3ODM2OSwgImlhdCI6MTc1MzM3ODM2OX0.bfHY0X4Y1ZsqVRudC3OybjAZgdk1hwDAW6OFjEKsr87QdvpjUmBvyfB6RqdZqDBdzZDbDmeG692MX3vCF34H0HtXP0YXC_eY0-_fR1I-vygcIKVdVtqN8aMHgVtpy85ke-jxObI_QnrtIvRnSGJTdVwBR16C31dPSaaNFo2pGZKT2upVLsGz_GuKfty04P4Mbwhmo2SuDBHtiWC3tvcdbeDrdVcOLVDtz7mxAZxSrHv4suywuY-_M_4VhORY5NPBKIY_dcXe2lbnIoEkE09XR2Y4dBbqEIGdp6OqrkWKLww7Yx39TiJggLnfkUZ9HM1kh3wXWyAzxL5Ghv4tl1yFzw
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMRUdBTF9PRkZJQ0VSIiwgImV4cCI6MTc1MzM4NzM2NiwgIm5iZiI6MTc1MzM4Mzc2NiwgImlhdCI6MTc1MzM4Mzc2Nn0.JdRfwFNE8Lt0gToLYS60xN7XLK_ioVN0St0XQb6wjZgVcyGWeQxpZNXRum6hRRGEqq4vZKaDCZ1tHrSXanVzfs8_ctvWUmVu_Tmke51e4DbayE7V2if25PyT1ACuhR1X0jMK0JTlrP65hO9zy-zQeYw4rgKQRGrsVTFdFh1pFzmwxaSMFyq31LOqfc2ho_762xT2gcWFAm13aWkaZTCMoqQEqoKNqFGGw3tpYINU2VP932N2tnr6ii5ItNiR-jOscNf821t-UKYEkmAAVc6L8P6tox8A6513pvb-pi48aI2wsX7ebFdC1hM3Uizo7dDhIhoueVcSWhuctD0VJw8OBw
 {
     "caseId": "CASE-17310792338",
     "estimateTime":"2 weeks"
@@ -147,6 +147,6 @@ HTTP/1.1 200  - OK
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 23:58:47 +0530
+date: Fri, 25 Jul 2025 00:32:59 +0530
 content-encoding: gzip
 content-length: 99

@@ -85,6 +85,7 @@ public type Dispute record {|
     DB:DisputeStatus status;
     int landsId;
     int legalOfficerId;
+    time:Utc createdAt;
 |};
 
 public type UpdateDisputeEstimateTime record {|

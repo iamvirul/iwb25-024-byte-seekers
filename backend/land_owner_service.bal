@@ -5,6 +5,7 @@ import backend.utils as Utils;
 import ballerina/http;
 import ballerina/jwt;
 import ballerina/persist;
+import ballerina/time;
 
 http:JwtValidatorConfig landOwnerValidator = {
     issuer: "byteseekers",
@@ -107,7 +108,8 @@ service /land_owner on landOwnerMicroservice {
             legalOfficerId: requestDispute.legalOfficerId,
             status: DB:PENDING,
             caseId: caseId,
-            estimateTime: ""
+            estimateTime: "",
+            createdAt: time:utcNow()
         };
         int[]|persist:Error disputeResult = self.dbClient->/disputes.post([disputeInsert]);
         if disputeResult is persist:Error {

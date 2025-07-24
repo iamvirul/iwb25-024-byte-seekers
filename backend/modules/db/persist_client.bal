@@ -90,6 +90,7 @@ public isolated client class Client {
                 "dispute.disputesDetails": {relation: {entityName: "dispute", refField: "disputesDetails", refColumn: "disputes_details"}},
                 "dispute.estimateTime": {relation: {entityName: "dispute", refField: "estimateTime", refColumn: "estimate_time"}},
                 "dispute.status": {relation: {entityName: "dispute", refField: "status"}},
+                "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt", refColumn: "created_at"}},
                 "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId", refColumn: "lands_id"}},
                 "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
             },
@@ -152,6 +153,7 @@ public isolated client class Client {
                 "dispute.disputesDetails": {relation: {entityName: "dispute", refField: "disputesDetails", refColumn: "disputes_details"}},
                 "dispute.estimateTime": {relation: {entityName: "dispute", refField: "estimateTime", refColumn: "estimate_time"}},
                 "dispute.status": {relation: {entityName: "dispute", refField: "status"}},
+                "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt", refColumn: "created_at"}},
                 "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId", refColumn: "lands_id"}},
                 "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
             },
@@ -173,6 +175,7 @@ public isolated client class Client {
                 "disputes[].disputesDetails": {relation: {entityName: "disputes", refField: "disputesDetails", refColumn: "disputes_details"}},
                 "disputes[].estimateTime": {relation: {entityName: "disputes", refField: "estimateTime", refColumn: "estimate_time"}},
                 "disputes[].status": {relation: {entityName: "disputes", refField: "status"}},
+                "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt", refColumn: "created_at"}},
                 "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId", refColumn: "lands_id"}},
                 "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
             },
@@ -307,6 +310,7 @@ public isolated client class Client {
                 "disputes[].disputesDetails": {relation: {entityName: "disputes", refField: "disputesDetails", refColumn: "disputes_details"}},
                 "disputes[].estimateTime": {relation: {entityName: "disputes", refField: "estimateTime", refColumn: "estimate_time"}},
                 "disputes[].status": {relation: {entityName: "disputes", refField: "status"}},
+                "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt", refColumn: "created_at"}},
                 "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId", refColumn: "lands_id"}},
                 "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId", refColumn: "legal_officer_id"}},
                 "landtransferchains[].id": {relation: {entityName: "landtransferchains", refField: "id"}},
@@ -370,6 +374,7 @@ public isolated client class Client {
                 disputesDetails: {columnName: "disputes_details"},
                 estimateTime: {columnName: "estimate_time"},
                 status: {columnName: "status"},
+                createdAt: {columnName: "created_at"},
                 landsId: {columnName: "lands_id"},
                 legalOfficerId: {columnName: "legal_officer_id"},
                 "land.id": {relation: {entityName: "land", refField: "id"}},

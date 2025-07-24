@@ -301,6 +301,8 @@ public type Dispute record {|
     @sql:Varchar {length: 45}
     string estimateTime;
     DisputeStatus status;
+    @sql:Name {value: "created_at"}
+    time:Utc createdAt;
     @sql:Relation {keys: ["landsId"]}
     Land land;
     @sql:Relation {keys: ["legalOfficerId"]}
