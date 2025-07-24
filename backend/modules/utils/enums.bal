@@ -96,5 +96,14 @@ public enum LAND_ERRORS {
     FAILED_TO_REGISTER_LAND = "Failed to register land",
     FAILED_TO_FETCH_LANDS = "Failed to fetch lands",
     NO_LANDS_FOUND = "No lands found",
-    INVALID_LAND_ID = "Invalid land ID"
+    INVALID_LAND_ID = "Invalid land ID",
+    LAND_ID_REQUIRED = "Land ID is required",
+    LEGAL_OFFICER_ID_REQUIRED = "Legal officer ID is required",
+    WITNESS_NAME_LENGTH = "Witness name should not exceed 60 characters",
+    WITNESS_NAME_REQUIRED = "Witness name is required",
+    DISPUTES_DETAILS_REQUIRED = "Disputes details are required",
+    FAILED_TO_FETCH_LAND = "Failed to fetch land",
+    LEGAL_OFFICER_NOT_FOUND = "Legal officer not found",
+    FAILED_TO_FETCH_LEGAL_OFFICER = "Failed to fetch legal officer"
+
 }

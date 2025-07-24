@@ -6,13 +6,13 @@ import ballerina/http;
 import ballerina/jwt;
 import ballerina/persist;
 
-http:JwtValidatorConfig landOwnerValidator = {
+http:JwtValidatorConfig landOfficerValidator = {
     issuer: "byteseekers",
     audience: Utils:LAND_OFFICER,
     signatureConfig: {certFile: "resources/certificates/public.crt"}
 };
 
-http:ListenerJwtAuthHandler landOfficerHandler = new (landOwnerValidator);
+http:ListenerJwtAuthHandler landOfficerHandler = new (landOfficerValidator);
 
 listener http:Listener landMicroservice = new (9095);
 
