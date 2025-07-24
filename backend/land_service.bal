@@ -1,9 +1,10 @@
-import ballerina/http;
-import backend.db as DB;
 import backend.common;
-import ballerina/persist;
+import backend.db as DB;
 import backend.utils as Utils;
+
+import ballerina/http;
 import ballerina/jwt;
+import ballerina/persist;
 
 http:JwtValidatorConfig landOwnerValidator = {
     issuer: "byteseekers",
@@ -24,7 +25,7 @@ listener http:Listener landMicroservice = new (9095);
 }
 
 service /land on landMicroservice {
-     private final DB:Client dbClient;
+    private final DB:Client dbClient;
 
     function init() returns error? {
         self.dbClient = check new ();
@@ -34,7 +35,7 @@ service /land on landMicroservice {
         check self.dbClient.close();
     }
 
-    resource function post register(@http:Payload DB:LandInsert landInsert , @http:Header string Authorization) returns http:Response|error | http:Unauthorized {
+    resource function post register(@http:Payload DB:LandInsert landInsert, @http:Header string Authorization) returns http:Response|error|http:Unauthorized {
         jwt:Payload|http:Unauthorized authn = landOfficerHandler.authenticate(Authorization);
         if authn is http:Unauthorized {
             return authn;
@@ -52,13 +53,41 @@ service /land on landMicroservice {
             if unionResult is persist:AlreadyExistsError {
                 response.statusCode = 409;
                 response = Utils:setErrorResponse(response, Utils:LAND_ALREADY_EXISTS);
-            } 
+            }
             response.statusCode = 500;
             response = Utils:setErrorResponse(response, Utils:FAILED_TO_REGISTER_LAND);
         }
         if unionResult is int[] {
             response.statusCode = 201;
             response = Utils:setSuccessResponse(response, {"landId": unionResult[0]});
+        }
+        return response;
+    }
+
+    resource function get getAllLands(@http:Header string Authorization) returns error|http:Response {
+        http:Response response = new;
+        jwt:Payload|http:Unauthorized authn = landOfficerHandler.authenticate(Authorization);
+        if authn is http:Unauthorized {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
+            return response;
+        }
+        common:Land[] lands = [];
+        stream<common:Land, persist:Error?> landsResult = self.dbClient->/lands(common:Land);
+
+        check from var land in landsResult
+            do {
+                lands.push(land);
+            };
+        check landsResult.close();
+        if lands.length() == 0 {
+            response.statusCode = 404;
+            response = Utils:setErrorResponse(response, Utils:NO_LANDS_FOUND);
+        } else {
+            response.statusCode = 200;
+            response = Utils:setSuccessResponse(response, {
+                "lands": lands.toJson()
+            });
         }
         return response;
     }
