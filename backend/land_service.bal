@@ -100,6 +100,11 @@ service /land on landMicroservice {
             response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
             return response;
         }
+        if id <= 0 {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, Utils:INVALID_LAND_ID);
+            return response;
+        }
         common:Land|persist:Error landResult = self.dbClient->/lands/[id](common:Land);
 
         if landResult is persist:Error {
