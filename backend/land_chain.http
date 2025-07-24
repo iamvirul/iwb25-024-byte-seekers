@@ -2,24 +2,24 @@ POST http://localhost:9091/auth/users/register
 Content-Type: application/json
 
 {
-  "first_name": "Ruwan",
-  "last_name": "Bandara",
-  "email": "ruwanbandara@gmail.com",
-  "nic": "953456789V",
+  "first_name": "Asela",
+  "last_name": "Rathnayake",
+  "email": "asela@gmail.com",
+  "nic": "963456789V",
   "password": "Hiru2005@",
   "contact_no": "0768190976",
   "address": "Colombo",
-  "sludi": "SL-UDI-000000006",
-  "user_type": 3
+  "sludi": "SL-UDI-000000007",
+  "user_type": 2
 }
 
-HTTP/1.1 400  - Bad Request
+HTTP/1.1 201  - Created
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 17:53:11 +0530
+date: Thu, 24 Jul 2025 22:20:43 +0530
 content-encoding: gzip
-content-length: 91
+content-length: 79
 ###
 POST http://localhost:9095/land/register
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzU3NzEwLCAibmJmIjoxNzUzMzU0MTEwLCAiaWF0IjoxNzUzMzU0MTEwfQ.cwpAOVn31X74lc_440Qk1EMxgfkCIrP_lQx7-4JBTo31ca_VcGdxfyTSHGtXvGY95hkqCDveO2VnpHNtJpVGlSCpo7ZgFVyDnwum-EePyO4dzEN0jnMfO-h1PZUGKnm9zZFirL-CfyHb4UMqD1Pvgru8aXk4VvGPKhZmP-_Klhne7fCbK9NJfYomfLTqk6-kuOo4NuXkx5llJspyfJgONK_oj_aqOxk0QCtgnIrBS__ZlqMXiQ-_nxQMzAcOsbp0u3LYP3V9HRAQ7a5_FpLIz3stobCHfdQUPavRR6RNz58b_iangMtWEyT_ecED7rCp3HcpJ_5ndHVnuINtcAczRA
@@ -55,18 +55,18 @@ POST http://localhost:9091/auth/users/login
 Content-Type: application/json
 
 {
-  "email": "ruwanbandara@gmail.com",
+  "email": "asela@gmail.com",
   "password": "Hiru2005@",
-  "user_type": 3
+  "user_type": 2
 }
 
 HTTP/1.1 200  - OK
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 17:53:12 +0530
+date: Thu, 24 Jul 2025 22:21:00 +0530
 content-encoding: gzip
-content-length: 478
+content-length: 474
 ###
 GET http://localhost:9095/land/getAllLands
 Content-Type: application/json
@@ -103,3 +103,22 @@ server: ballerina
 date: Thu, 24 Jul 2025 17:53:14 +0530
 content-encoding: gzip
 content-length: 448
+###
+POST http://localhost:9098/land_owner/createDispute
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09XTkVSIiwgImV4cCI6MTc1MzM3OTQ1OSwgIm5iZiI6MTc1MzM3NTg1OSwgImlhdCI6MTc1MzM3NTg1OX0.Yh6O9m8SsZXt3dSa6zyL_1-VDzIJ9MQUwVJTumX3KpqXxv-pJDYZAWCcyqVwdrSS2t877_AlUo8iJXIAxa_mwf_pOQJoGcSgkB1BFqr-2YVd13ieCIVuDkSgQNFR16Egu_KxUjtdPTAdWJpiuDYl8JNb8JyljgOKf8Uv5ifLnymQHqLpwJr49dSmTK-SQSM0BYvtl9NMB6H2O4n8hM52LKNVIG9LNLG_1sdwWi82zcmJWeZ2jK2fYKJdmwP1YeN0FntZtaWIxXTiMMmB2pRYdLrZupI_s4qbJEmiESoiwL_7-SKSZ9uWQpkg9as0wqcRZNOXuOd8lZ80Pbp31gP4zQ
+Content-Type: application/json
+
+{
+  "witnessName": "234da",
+  "disputesDetails": "Sample Dispute",
+  "landsId": 1,
+  "legalOfficerId": 11
+}
+
+HTTP/1.1 201  - Created
+content-type: application/json
+connection: close
+server: ballerina
+date: Thu, 24 Jul 2025 22:33:11 +0530
+content-encoding: gzip
+content-length: 115
