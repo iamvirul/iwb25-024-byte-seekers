@@ -75,3 +75,14 @@ public type RequestDispute record {|
     int landsId;
     int legalOfficerId;
 |};
+
+public type Dispute record {|
+    int id;
+    string caseId;
+    string witnessName;
+    string disputesDetails;
+    string estimateTime;
+    DB:DisputeStatus status;
+    int landsId;
+    int legalOfficerId;
+|};

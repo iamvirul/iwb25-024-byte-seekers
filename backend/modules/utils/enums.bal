@@ -104,6 +104,6 @@ public enum LAND_ERRORS {
     DISPUTES_DETAILS_REQUIRED = "Disputes details are required",
     FAILED_TO_FETCH_LAND = "Failed to fetch land",
     LEGAL_OFFICER_NOT_FOUND = "Legal officer not found",
-    FAILED_TO_FETCH_LEGAL_OFFICER = "Failed to fetch legal officer"
-
+    FAILED_TO_FETCH_LEGAL_OFFICER = "Failed to fetch legal officer",
+    INVALID_LEGAL_OFFICER_ID = "Invalid legal officer ID"
 }
