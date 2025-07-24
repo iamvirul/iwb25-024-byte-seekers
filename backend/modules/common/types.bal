@@ -1,3 +1,5 @@
+import backend.db as DB;
+import ballerina/time;
 public type LoginUser record {
     string email;
     string password;
@@ -40,4 +42,19 @@ public type ValidationResult record {|
 public type UserHasTypes record {|
     int users_id;
     int user_types_id;
+|};
+
+public type Land record {|
+    int id;
+    string landId;
+    string landName;
+    string landPlace;
+    decimal landLat;
+    decimal landLang;
+    float landSize;
+    decimal landValue;
+    string landType;
+    time:Date registerDate;
+    DB:LandLandStatus landStatus;
+    int priority;
 |};
