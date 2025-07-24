@@ -232,9 +232,6 @@ public type LandOwner record {|
 public type Land record {|
     @sql:Generated
     readonly int id;
-    @sql:Name {value: "_hashId"}
-    @sql:Varchar {length: 60}
-    string hashId;
     @sql:Name {value: "land_id"}
     @sql:Varchar {length: 60}
     string landId;

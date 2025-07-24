@@ -19,7 +19,6 @@ DROP TABLE IF EXISTS `lands`;
 
 CREATE TABLE `lands` (
 	`id` INT AUTO_INCREMENT,
-	`_hashId` VARCHAR(60) NOT NULL,
 	`land_id` VARCHAR(60) NOT NULL,
 	`land_name` VARCHAR(60) NOT NULL,
 	`land_place` VARCHAR(60) NOT NULL,

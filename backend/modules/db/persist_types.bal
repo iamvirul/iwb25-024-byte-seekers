@@ -439,7 +439,6 @@ public type LandOwnerUpdate record {|
 
 public type Land record {|
     readonly int id;
-    string hashId;
     string landId;
     string landName;
     string landPlace;
@@ -456,7 +455,6 @@ public type Land record {|
 
 public type LandOptionalized record {|
     int id?;
-    string hashId?;
     string landId?;
     string landName?;
     string landPlace?;
@@ -480,7 +478,6 @@ public type LandWithRelations record {|
 public type LandTargetType typedesc<LandWithRelations>;
 
 public type LandInsert record {|
-    string hashId;
     string landId;
     string landName;
     string landPlace;
@@ -495,7 +492,6 @@ public type LandInsert record {|
 |};
 
 public type LandUpdate record {|
-    string hashId?;
     string landId?;
     string landName?;
     string landPlace?;
