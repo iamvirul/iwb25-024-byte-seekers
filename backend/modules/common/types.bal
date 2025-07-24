@@ -68,3 +68,10 @@ public type LegalOfficer record {|
     string baslId;
     decimal? initialCost;
 |};
+
+public type RequestDispute record {|
+    string witnessName;
+    string disputesDetails;
+    int landsId;
+    int legalOfficerId;
+|};
