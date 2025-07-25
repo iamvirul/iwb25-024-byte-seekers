@@ -94,7 +94,7 @@ CREATE TABLE "disputes" (
 	"case_id" VARCHAR(50) NOT NULL,
 	"witness_name" VARCHAR(60) NOT NULL,
 	"disputes_details" VARCHAR(191) NOT NULL,
-	"estimate_time" VARCHAR(45) NOT NULL,
+	"estimate_time" VARCHAR(45),
 	"status" VARCHAR(8) CHECK ("status" IN ('PENDING', 'RESOLVED', 'REJECTED')) NOT NULL,
 	"created_at" TIMESTAMP NOT NULL,
 	"lands_id" INT NOT NULL,

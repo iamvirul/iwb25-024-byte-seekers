@@ -560,7 +560,7 @@ public type Dispute record {|
     string caseId;
     string witnessName;
     string disputesDetails;
-    string estimateTime;
+    string? estimateTime;
     DisputeStatus status;
     time:Utc createdAt;
 
@@ -574,7 +574,7 @@ public type DisputeOptionalized record {|
     string caseId?;
     string witnessName?;
     string disputesDetails?;
-    string estimateTime?;
+    string? estimateTime?;
     DisputeStatus status?;
     time:Utc createdAt?;
     int landsId?;
@@ -596,7 +596,7 @@ public type DisputeInsert record {|
     string caseId;
     string witnessName;
     string disputesDetails;
-    string estimateTime;
+    string? estimateTime;
     DisputeStatus status;
     time:Utc createdAt;
     int landsId;
@@ -607,7 +607,7 @@ public type DisputeUpdate record {|
     string caseId?;
     string witnessName?;
     string disputesDetails?;
-    string estimateTime?;
+    string? estimateTime?;
     DisputeStatus status?;
     time:Utc createdAt?;
     int landsId?;

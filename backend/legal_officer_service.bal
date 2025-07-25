@@ -92,7 +92,7 @@ service /legal_officer on legalOfficerMicroservice {
                 DB:DisputeUpdate updateDispute = {
                     estimateTime: updateRequest.estimateTime
                 };
-                common:Dispute|persist:Error updateResult = self.dbClient->/disputes/[dispute.id].put(updateDispute);
+                DB:Dispute|persist:Error updateResult = self.dbClient->/disputes/[dispute.id].put(updateDispute);
                 if updateResult is persist:Error {
                     response.statusCode = 500;
                     response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_DISPUTE);

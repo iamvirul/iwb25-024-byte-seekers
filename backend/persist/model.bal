@@ -307,7 +307,7 @@ public type Dispute record {|
     int legalOfficerId;
     @sql:Name {value: "estimate_time"}
     @sql:Varchar {length: 45}
-    string estimateTime;
+    string? estimateTime;
     DisputeStatus status;
     @sql:Name {value: "created_at"}
     time:Utc createdAt;
