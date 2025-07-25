@@ -19,7 +19,6 @@ public isolated function setupTestDB() returns persist:Error? {
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_officer";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "user_types";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "users";`);
-    _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "nlp_analysis_result";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "land_owner";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "lands";`);
     _ = check h2Client->executeNativeSQL(`
@@ -47,16 +46,6 @@ CREATE TABLE "land_owner" (
 	"nic" VARCHAR(20) NOT NULL,
 	"address" VARCHAR(255),
 	"contact_no" VARCHAR(20),
-	PRIMARY KEY("id")
-);`);
-    _ = check h2Client->executeNativeSQL(`
-CREATE TABLE "nlp_analysis_result" (
-	"id" INT AUTO_INCREMENT,
-	"_hashId" VARCHAR(60) NOT NULL,
-	"results" VARCHAR(191),
-	"result_summary" VARCHAR(191),
-	"tags" VARCHAR(60),
-	"trust" VARCHAR(20),
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
@@ -94,7 +83,7 @@ CREATE TABLE "disputes" (
 	"case_id" VARCHAR(50) NOT NULL,
 	"witness_name" VARCHAR(60) NOT NULL,
 	"disputes_details" VARCHAR(191) NOT NULL,
-	"estimate_time" VARCHAR(45),
+	"estimate_time" VARCHAR(45) NOT NULL,
 	"status" VARCHAR(8) CHECK ("status" IN ('PENDING', 'RESOLVED', 'REJECTED')) NOT NULL,
 	"created_at" TIMESTAMP NOT NULL,
 	"lands_id" INT NOT NULL,
@@ -167,8 +156,6 @@ CREATE TABLE "lands_documents" (
 	"doc_status" VARCHAR(8) CHECK ("doc_status" IN ('PENDING', 'APPROVED', 'REJECTED')) NOT NULL,
 	"lands_id" INT NOT NULL,
 	FOREIGN KEY("lands_id") REFERENCES "lands"("id"),
-	"nlp_analysis_result_id" INT NOT NULL,
-	FOREIGN KEY("nlp_analysis_result_id") REFERENCES "nlp_analysis_result"("id"),
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
@@ -180,7 +167,6 @@ CREATE TABLE "users_has_user_types" (
 	PRIMARY KEY("users_id","user_types_id")
 );`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_lands_documents_lands1_idx" ON "lands_documents" ("lands_id");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_lands_documents_nlp_analysis_result1_idx" ON "lands_documents" ("nlp_analysis_result_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_legal_precedents_disputes1_idx" ON "legal_precedents" ("disputes_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_legal_clauses_legal_precedents1_idx" ON "legal_clauses" ("legal_precedents_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_document_disputes1_idx" ON "disputes_document" ("disputes_id");`);
@@ -206,7 +192,6 @@ public isolated function cleanupTestDB() returns persist:Error? {
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_officer";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "user_types";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "users";`);
-    _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "nlp_analysis_result";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "land_owner";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "lands";`);
 }

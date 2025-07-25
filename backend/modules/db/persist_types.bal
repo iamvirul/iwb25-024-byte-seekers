@@ -38,7 +38,6 @@ public type LandDocument record {|
     time:Utc uploadedDate;
     LandDocumentDocStatus docStatus;
     int landsId;
-    int nlpAnalysisResultId;
 |};
 
 public type LandDocumentOptionalized record {|
@@ -49,13 +48,11 @@ public type LandDocumentOptionalized record {|
     time:Utc uploadedDate?;
     LandDocumentDocStatus docStatus?;
     int landsId?;
-    int nlpAnalysisResultId?;
 |};
 
 public type LandDocumentWithRelations record {|
     *LandDocumentOptionalized;
     LandOptionalized land?;
-    NlpAnalysisResultOptionalized nlpanalysisresult?;
 |};
 
 public type LandDocumentTargetType typedesc<LandDocumentWithRelations>;
@@ -67,7 +64,6 @@ public type LandDocumentInsert record {|
     time:Utc uploadedDate;
     LandDocumentDocStatus docStatus;
     int landsId;
-    int nlpAnalysisResultId;
 |};
 
 public type LandDocumentUpdate record {|
@@ -77,7 +73,6 @@ public type LandDocumentUpdate record {|
     time:Utc uploadedDate?;
     LandDocumentDocStatus docStatus?;
     int landsId?;
-    int nlpAnalysisResultId?;
 |};
 
 public type LegalPrecedent record {|
@@ -340,48 +335,6 @@ public type LandTransferChainUpdate record {|
     int landsId?;
 |};
 
-public type NlpAnalysisResult record {|
-    readonly int id;
-    string hashId;
-    string? results;
-    string? resultSummary;
-    string? tags;
-    string? trust;
-
-|};
-
-public type NlpAnalysisResultOptionalized record {|
-    int id?;
-    string hashId?;
-    string? results?;
-    string? resultSummary?;
-    string? tags?;
-    string? trust?;
-|};
-
-public type NlpAnalysisResultWithRelations record {|
-    *NlpAnalysisResultOptionalized;
-    LandDocumentOptionalized[] landdocuments?;
-|};
-
-public type NlpAnalysisResultTargetType typedesc<NlpAnalysisResultWithRelations>;
-
-public type NlpAnalysisResultInsert record {|
-    string hashId;
-    string? results;
-    string? resultSummary;
-    string? tags;
-    string? trust;
-|};
-
-public type NlpAnalysisResultUpdate record {|
-    string hashId?;
-    string? results?;
-    string? resultSummary?;
-    string? tags?;
-    string? trust?;
-|};
-
 public type LandOwner record {|
     readonly int id;
     string ownerId;
@@ -560,7 +513,7 @@ public type Dispute record {|
     string caseId;
     string witnessName;
     string disputesDetails;
-    string? estimateTime;
+    string estimateTime;
     DisputeStatus status;
     time:Utc createdAt;
 
@@ -574,7 +527,7 @@ public type DisputeOptionalized record {|
     string caseId?;
     string witnessName?;
     string disputesDetails?;
-    string? estimateTime?;
+    string estimateTime?;
     DisputeStatus status?;
     time:Utc createdAt?;
     int landsId?;
@@ -596,7 +549,7 @@ public type DisputeInsert record {|
     string caseId;
     string witnessName;
     string disputesDetails;
-    string? estimateTime;
+    string estimateTime;
     DisputeStatus status;
     time:Utc createdAt;
     int landsId;
@@ -607,7 +560,7 @@ public type DisputeUpdate record {|
     string caseId?;
     string witnessName?;
     string disputesDetails?;
-    string? estimateTime?;
+    string estimateTime?;
     DisputeStatus status?;
     time:Utc createdAt?;
     int landsId?;

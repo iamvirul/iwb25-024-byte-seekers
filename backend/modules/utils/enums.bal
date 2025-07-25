@@ -126,5 +126,6 @@ public enum DOCUMENT_ERRORS {
     FAILED_TO_UPLOAD_DOCUMENT = "Failed to upload document",
     DOCUMENTS_REQUIRED = "Documents are required",
     DOCUMENT_SIZE_EXCEEDED = "Document size exceeded",
-    INVALID_DOCUMENT_TYPE = "Invalid document type"
+    INVALID_DOCUMENT_TYPE = "Invalid document type",
+    DOCUMENT_ALREADY_EXISTS = "Document already exists"
 }

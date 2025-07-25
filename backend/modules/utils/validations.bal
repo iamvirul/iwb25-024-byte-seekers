@@ -272,3 +272,23 @@ public isolated function validateDisputeFormData(Common:DisputeForm form) return
     return {isValid: valid, errors: err};
 }
 
+public isolated function validateLandDocument(Common:FileRecord[] documents) returns Common:ValidationResult {
+    map<string> err = {};
+    boolean valid = true;
+        foreach var fr in documents {
+            if fr.data.length() > MAX_DOCUMENT_BYTES {
+                valid = false;
+                err["documents"] = DOCUMENT_SIZE_EXCEEDED;
+                break;
+            }
+            if !(fr.contentType.startsWith("image/")
+                || fr.contentType == "application/pdf"
+                || fr.contentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+                valid = false;
+                err["documents"] = INVALID_DOCUMENT_TYPE;
+                break;
+            }
+        }
+    return {isValid: valid, errors: err};
+}
+

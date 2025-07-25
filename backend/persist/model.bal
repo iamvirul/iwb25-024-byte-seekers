@@ -47,13 +47,8 @@ public type LandDocument record {|
     @sql:Name {value: "lands_id"}
     @sql:Index {name: "fk_lands_documents_lands1_idx"}
     int landsId;
-    @sql:Name {value: "nlp_analysis_result_id"}
-    @sql:Index {name: "fk_lands_documents_nlp_analysis_result1_idx"}
-    int? nlpAnalysisResultId;
     @sql:Relation {keys: ["landsId"]}
     Land land;
-    @sql:Relation {keys: ["nlpAnalysisResultId"]}
-    NlpAnalysisResult nlpanalysisresult;
 |};
 
 @sql:Name {value: "legal_precedents"}
@@ -181,23 +176,6 @@ public type LandTransferChain record {|
     Land land;
 |};
 
-@sql:Name {value: "nlp_analysis_result"}
-public type NlpAnalysisResult record {|
-    @sql:Generated
-    readonly int id;
-    @sql:Name {value: "_hashId"}
-    @sql:Varchar {length: 60}
-    string hashId;
-    string? results;
-    @sql:Name {value: "result_summary"}
-    string? resultSummary;
-    @sql:Varchar {length: 60}
-    string? tags;
-    @sql:Varchar {length: 20}
-    string? trust;
-    LandDocument[] landdocuments;
-|};
-
 @sql:Name {value: "land_owner"}
 public type LandOwner record {|
     @sql:Generated
@@ -307,7 +285,7 @@ public type Dispute record {|
     int legalOfficerId;
     @sql:Name {value: "estimate_time"}
     @sql:Varchar {length: 45}
-    string? estimateTime;
+    string estimateTime;
     DisputeStatus status;
     @sql:Name {value: "created_at"}
     time:Utc createdAt;

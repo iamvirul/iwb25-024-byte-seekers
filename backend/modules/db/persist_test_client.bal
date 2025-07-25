@@ -17,7 +17,6 @@ const LEGAL_CLAUSE = "legalclauses";
 const DISPUTE_DOCUMENT = "disputedocuments";
 const LEGAL_OFFICER = "legalofficers";
 const LAND_TRANSFER_CHAIN = "landtransferchains";
-const NLP_ANALYSIS_RESULT = "nlpanalysisresults";
 const LAND_OWNER = "landowners";
 const LAND = "lands";
 const DISPUTE_COMMENT = "disputecomments";
@@ -44,7 +43,6 @@ public isolated client class H2Client {
                 uploadedDate: {columnName: "uploaded_date"},
                 docStatus: {columnName: "doc_status"},
                 landsId: {columnName: "lands_id"},
-                nlpAnalysisResultId: {columnName: "nlp_analysis_result_id"},
                 "land.id": {relation: {entityName: "land", refField: "id"}},
                 "land.landId": {relation: {entityName: "land", refField: "landId", refColumn: "land_id"}},
                 "land.landName": {relation: {entityName: "land", refField: "landName", refColumn: "land_name"}},
@@ -56,19 +54,10 @@ public isolated client class H2Client {
                 "land.landType": {relation: {entityName: "land", refField: "landType", refColumn: "land_type"}},
                 "land.registerDate": {relation: {entityName: "land", refField: "registerDate", refColumn: "register_date"}},
                 "land.landStatus": {relation: {entityName: "land", refField: "landStatus", refColumn: "land_status"}},
-                "land.priority": {relation: {entityName: "land", refField: "priority"}},
-                "nlpanalysisresult.id": {relation: {entityName: "nlpanalysisresult", refField: "id"}},
-                "nlpanalysisresult.hashId": {relation: {entityName: "nlpanalysisresult", refField: "hashId", refColumn: "_hashId"}},
-                "nlpanalysisresult.results": {relation: {entityName: "nlpanalysisresult", refField: "results"}},
-                "nlpanalysisresult.resultSummary": {relation: {entityName: "nlpanalysisresult", refField: "resultSummary", refColumn: "result_summary"}},
-                "nlpanalysisresult.tags": {relation: {entityName: "nlpanalysisresult", refField: "tags"}},
-                "nlpanalysisresult.trust": {relation: {entityName: "nlpanalysisresult", refField: "trust"}}
+                "land.priority": {relation: {entityName: "land", refField: "priority"}}
             },
             keyFields: ["id"],
-            joinMetadata: {
-                land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY},
-                nlpanalysisresult: {entity: NlpAnalysisResult, fieldName: "nlpanalysisresult", refTable: "nlp_analysis_result", refColumns: ["id"], joinColumns: ["nlp_analysis_result_id"], 'type: psql:ONE_TO_MANY}
-            }
+            joinMetadata: {land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY}}
         },
         [LEGAL_PRECEDENT]: {
             entityName: "LegalPrecedent",
@@ -228,28 +217,6 @@ public isolated client class H2Client {
                 land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY}
             }
         },
-        [NLP_ANALYSIS_RESULT]: {
-            entityName: "NlpAnalysisResult",
-            tableName: "nlp_analysis_result",
-            fieldMetadata: {
-                id: {columnName: "id", dbGenerated: true},
-                hashId: {columnName: "_hashId"},
-                results: {columnName: "results"},
-                resultSummary: {columnName: "result_summary"},
-                tags: {columnName: "tags"},
-                trust: {columnName: "trust"},
-                "landdocuments[].id": {relation: {entityName: "landdocuments", refField: "id"}},
-                "landdocuments[].docPath": {relation: {entityName: "landdocuments", refField: "docPath", refColumn: "doc_path"}},
-                "landdocuments[].docSize": {relation: {entityName: "landdocuments", refField: "docSize", refColumn: "doc_size"}},
-                "landdocuments[].docType": {relation: {entityName: "landdocuments", refField: "docType", refColumn: "doc_type"}},
-                "landdocuments[].uploadedDate": {relation: {entityName: "landdocuments", refField: "uploadedDate", refColumn: "uploaded_date"}},
-                "landdocuments[].docStatus": {relation: {entityName: "landdocuments", refField: "docStatus", refColumn: "doc_status"}},
-                "landdocuments[].landsId": {relation: {entityName: "landdocuments", refField: "landsId", refColumn: "lands_id"}},
-                "landdocuments[].nlpAnalysisResultId": {relation: {entityName: "landdocuments", refField: "nlpAnalysisResultId", refColumn: "nlp_analysis_result_id"}}
-            },
-            keyFields: ["id"],
-            joinMetadata: {landdocuments: {entity: LandDocument, fieldName: "landdocuments", refTable: "lands_documents", refColumns: ["nlp_analysis_result_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
-        },
         [LAND_OWNER]: {
             entityName: "LandOwner",
             tableName: "land_owner",
@@ -326,8 +293,7 @@ public isolated client class H2Client {
                 "landdocuments[].docType": {relation: {entityName: "landdocuments", refField: "docType", refColumn: "doc_type"}},
                 "landdocuments[].uploadedDate": {relation: {entityName: "landdocuments", refField: "uploadedDate", refColumn: "uploaded_date"}},
                 "landdocuments[].docStatus": {relation: {entityName: "landdocuments", refField: "docStatus", refColumn: "doc_status"}},
-                "landdocuments[].landsId": {relation: {entityName: "landdocuments", refField: "landsId", refColumn: "lands_id"}},
-                "landdocuments[].nlpAnalysisResultId": {relation: {entityName: "landdocuments", refField: "nlpAnalysisResultId", refColumn: "nlp_analysis_result_id"}}
+                "landdocuments[].landsId": {relation: {entityName: "landdocuments", refField: "landsId", refColumn: "lands_id"}}
             },
             keyFields: ["id"],
             joinMetadata: {
@@ -465,7 +431,6 @@ public isolated client class H2Client {
             [DISPUTE_DOCUMENT]: check new (dbClient, self.metadata.get(DISPUTE_DOCUMENT), psql:H2_SPECIFICS),
             [LEGAL_OFFICER]: check new (dbClient, self.metadata.get(LEGAL_OFFICER), psql:H2_SPECIFICS),
             [LAND_TRANSFER_CHAIN]: check new (dbClient, self.metadata.get(LAND_TRANSFER_CHAIN), psql:H2_SPECIFICS),
-            [NLP_ANALYSIS_RESULT]: check new (dbClient, self.metadata.get(NLP_ANALYSIS_RESULT), psql:H2_SPECIFICS),
             [LAND_OWNER]: check new (dbClient, self.metadata.get(LAND_OWNER), psql:H2_SPECIFICS),
             [LAND]: check new (dbClient, self.metadata.get(LAND), psql:H2_SPECIFICS),
             [DISPUTE_COMMENT]: check new (dbClient, self.metadata.get(DISPUTE_COMMENT), psql:H2_SPECIFICS),
@@ -750,46 +715,6 @@ public isolated client class H2Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(LAND_TRANSFER_CHAIN);
-        }
-        _ = check sqlClient.runDeleteQuery(id);
-        return result;
-    }
-
-    isolated resource function get nlpanalysisresults(NlpAnalysisResultTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.H2Processor",
-        name: "query"
-    } external;
-
-    isolated resource function get nlpanalysisresults/[int id](NlpAnalysisResultTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.H2Processor",
-        name: "queryOne"
-    } external;
-
-    isolated resource function post nlpanalysisresults(NlpAnalysisResultInsert[] data) returns int[]|persist:Error {
-        psql:SQLClient sqlClient;
-        lock {
-            sqlClient = self.persistClients.get(NLP_ANALYSIS_RESULT);
-        }
-        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
-        return from sql:ExecutionResult inserted in result
-            where inserted.lastInsertId != ()
-            select <int>inserted.lastInsertId;
-    }
-
-    isolated resource function put nlpanalysisresults/[int id](NlpAnalysisResultUpdate value) returns NlpAnalysisResult|persist:Error {
-        psql:SQLClient sqlClient;
-        lock {
-            sqlClient = self.persistClients.get(NLP_ANALYSIS_RESULT);
-        }
-        _ = check sqlClient.runUpdateQuery(id, value);
-        return self->/nlpanalysisresults/[id].get();
-    }
-
-    isolated resource function delete nlpanalysisresults/[int id]() returns NlpAnalysisResult|persist:Error {
-        NlpAnalysisResult result = check self->/nlpanalysisresults/[id].get();
-        psql:SQLClient sqlClient;
-        lock {
-            sqlClient = self.persistClients.get(NLP_ANALYSIS_RESULT);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;

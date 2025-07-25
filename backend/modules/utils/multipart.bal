@@ -50,3 +50,25 @@ public isolated function parseDisputeMultipartFormData(mime:Entity[]|http:Client
         legalOfficerId: officer
     };
 }
+
+public isolated function parseLandDocumentMultipartFormData(mime:Entity[]|http:ClientError bodyParts) returns Common:FileRecord[]|error {
+    Common:FileRecord[] docs = [];
+
+    if bodyParts is mime:Entity[] {
+        foreach var part in bodyParts {
+            string fieldName = part.getContentDisposition().name;
+            if fieldName == "documents" {
+                string fname = part.getContentDisposition().fileName;
+                string ctype = part.getContentType();
+                byte[] data = checkpanic part.getByteArray();
+                docs.push({filename: fname, contentType: ctype, data: data});
+            } else {
+                return error("Unexpected field: " + fieldName);
+            }
+        }
+    } else {
+        return error("Failed to parse multipart request: not mime:Entity[]");
+    }
+
+    return docs;
+}

@@ -14,7 +14,6 @@ DROP TABLE IF EXISTS `disputes`;
 DROP TABLE IF EXISTS `legal_officer`;
 DROP TABLE IF EXISTS `user_types`;
 DROP TABLE IF EXISTS `users`;
-DROP TABLE IF EXISTS `nlp_analysis_result`;
 DROP TABLE IF EXISTS `land_owner`;
 DROP TABLE IF EXISTS `lands`;
 
@@ -42,16 +41,6 @@ CREATE TABLE `land_owner` (
 	`nic` VARCHAR(20) NOT NULL,
 	`address` VARCHAR(255),
 	`contact_no` VARCHAR(20),
-	PRIMARY KEY(`id`)
-);
-
-CREATE TABLE `nlp_analysis_result` (
-	`id` INT AUTO_INCREMENT,
-	`_hashId` VARCHAR(60) NOT NULL,
-	`results` VARCHAR(191),
-	`result_summary` VARCHAR(191),
-	`tags` VARCHAR(60),
-	`trust` VARCHAR(20),
 	PRIMARY KEY(`id`)
 );
 
@@ -89,7 +78,7 @@ CREATE TABLE `disputes` (
 	`case_id` VARCHAR(50) NOT NULL,
 	`witness_name` VARCHAR(60) NOT NULL,
 	`disputes_details` VARCHAR(191) NOT NULL,
-	`estimate_time` VARCHAR(45),
+	`estimate_time` VARCHAR(45) NOT NULL,
 	`status` ENUM('PENDING', 'RESOLVED', 'REJECTED') NOT NULL,
 	`created_at` TIMESTAMP NOT NULL,
 	`lands_id` INT NOT NULL,
@@ -162,8 +151,6 @@ CREATE TABLE `lands_documents` (
 	`doc_status` ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL,
 	`lands_id` INT NOT NULL,
 	FOREIGN KEY(`lands_id`) REFERENCES `lands`(`id`),
-	`nlp_analysis_result_id` INT NOT NULL,
-	FOREIGN KEY(`nlp_analysis_result_id`) REFERENCES `nlp_analysis_result`(`id`),
 	PRIMARY KEY(`id`)
 );
 
@@ -177,7 +164,6 @@ CREATE TABLE `users_has_user_types` (
 
 
 CREATE INDEX `fk_lands_documents_lands1_idx` ON `lands_documents` (`lands_id`);
-CREATE INDEX `fk_lands_documents_nlp_analysis_result1_idx` ON `lands_documents` (`nlp_analysis_result_id`);
 CREATE INDEX `fk_legal_precedents_disputes1_idx` ON `legal_precedents` (`disputes_id`);
 CREATE INDEX `fk_legal_clauses_legal_precedents1_idx` ON `legal_clauses` (`legal_precedents_id`);
 CREATE INDEX `fk_disputes_document_disputes1_idx` ON `disputes_document` (`disputes_id`);

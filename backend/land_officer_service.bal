@@ -5,6 +5,7 @@ import backend.utils as Utils;
 
 import ballerina/http;
 import ballerina/persist;
+import ballerina/time;
 
 listener http:Listener landMicroservice = new (9070);
 
@@ -109,7 +110,7 @@ service /land_officer on landMicroservice {
                 "x-api-key": blockchain_api_key
             };
             http:Client blockchainClient = check new (blockchain_url);
-            http:Response|http:ClientError blockchain_response = blockchainClient->post("/transfer",blockchainPayload,blockchainHeaders);
+            http:Response|http:ClientError blockchain_response = blockchainClient->post("/transfer", blockchainPayload, blockchainHeaders);
             if blockchain_response is http:Response {
                 json blockchainResponsePayload = check blockchain_response.getJsonPayload();
                 if blockchainResponsePayload.success is false {
@@ -123,6 +124,75 @@ service /land_officer on landMicroservice {
             response.statusCode = 201;
             response = Utils:setSuccessResponse(response, "Land registered successfully");
             check commit;
+        }
+        return response;
+    }
+
+    resource function post land/documents/add/[int landId](http:Request req) returns http:Response|error {
+        http:Response response = new;
+        if req.getContentType().startsWith("multipart/form-data") {
+            Common:FileRecord[]|error parseLandDocuments = Utils:parseLandDocumentMultipartFormData(req.getBodyParts());
+            if parseLandDocuments is error {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, parseLandDocuments.message());
+                return response;
+            }
+            Common:ValidationResult validateDocument = Utils:validateLandDocument(parseLandDocuments);
+            if !validateDocument.isValid {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, validateDocument.errors);
+                return response;
+            }
+            Common:Land|persist:Error landResult = self.dbClient->/lands/[landId](Common:Land);
+            if landResult is persist:Error {
+                if landResult is persist:NotFoundError {
+                    response.statusCode = 404;
+                    response = Utils:setErrorResponse(response, Utils:LAND_NOT_FOUND);
+                } else {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LAND);
+                }
+                return response;
+            }
+            int docIndex = 1;
+            transaction {
+                foreach var doc in parseLandDocuments {
+                    string ext = Utils:getExtension(doc.contentType, doc.filename);
+                    string base = landId.toString() + "_doc" + docIndex.toString();
+                    string path = " landdocuments/" + landId.toString()+"/";
+                    string|error uploaded = Utils:uploadFile(doc.data, path, base, ext);
+                    if uploaded is error {
+                        response.statusCode = 500;
+                        response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPLOAD_DOCUMENT);
+                        
+                    } else {
+                        DB:LandDocumentInsert landDocInsert = {
+                            docPath: uploaded,
+                            docSize: doc.data.length().toString(),
+                            docType: doc.contentType,
+                            uploadedDate: time:utcNow(),
+                            landsId: landId,
+                            docStatus: DB:APPROVED
+                        };
+                        int[]|persist:Error docResult = self.dbClient->/landdocuments.post([landDocInsert]);
+                        if docResult is persist:Error {
+                            if docResult is persist:AlreadyExistsError {
+                                response.statusCode = 409;
+                                response = Utils:setErrorResponse(response, Utils:DOCUMENT_ALREADY_EXISTS);
+                            }
+                            response.statusCode = 500;
+                            response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_DISPUTE_DOCUMENT);
+                        } 
+                    }
+                    docIndex += 1;
+                }
+                check commit;
+            }
+            response.statusCode = 201;
+            response = Utils:setSuccessResponse(response, "Document added successfully");
+        } else {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, Utils:INVALID_CONTENT_TYPE);
         }
         return response;
     }
