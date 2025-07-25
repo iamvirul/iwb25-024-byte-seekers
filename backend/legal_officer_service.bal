@@ -60,29 +60,23 @@ service /legal_officer on legalOfficerMicroservice {
             return response;
         }
         common:DisputeWithDocs[] disputes = [];
+        DB:DisputeDocument[] tempDocs = [];
         sql:ParameterizedQuery query = `legal_officer_id = ${id}`;
         stream<DB:Dispute, persist:Error?> disputeResult = self.dbClient->/disputes(DB:Dispute, query);
         check from var dispute in disputeResult
             do {
+                tempDocs = [];
                 sql:ParameterizedQuery docQuery = `disputes_id = ${dispute.id}`;
                 stream<DB:DisputeDocument, persist:Error?> disputeDoc = self.dbClient->/disputedocuments(DB:DisputeDocument, docQuery);
-                DB:DisputeDocument? doc = ();
-                var result = check disputeDoc.next();
-                if result is record {|DB:DisputeDocument value;|} {
-                    doc = result.value;
-                }
-                if doc is DB:DisputeDocument {
-                    disputes.push({
-                        dispute: dispute,
-                        documents: [doc]
-                    });
-                } else {
-                    disputes.push({
-                        dispute: dispute,
-                        documents: []
-                    });
-                }
-
+                check from var disDoc in disputeDoc
+                    do {
+                        tempDocs.push(disDoc);
+                    };
+                check disputeDoc.close();
+                disputes.push({
+                    dispute: dispute,
+                    documents: tempDocs
+                });
             };
         check disputeResult.close();
         if disputes.length() == 0 {
