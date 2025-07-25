@@ -27,7 +27,7 @@ listener http:Listener landMicroservice = new (9095);
         }]
 }
 
-service /land on landMicroservice {
+service /land_officer on landMicroservice {
     private final DB:Client dbClient;
 
     function init() returns error? {
@@ -38,7 +38,7 @@ service /land on landMicroservice {
         check self.dbClient.close();
     }
 
-    resource function post register(@http:Payload DB:LandInsert landInsert) returns http:Response|error|http:Unauthorized {
+    resource function post land/register(@http:Payload DB:LandInsert landInsert) returns http:Response|error|http:Unauthorized {
         landInsert.landId = Utils:generateShortId();
         http:Response response = new;
         common:ValidationResult validateLandInsert = Utils:validateLandInsert(landInsert);
@@ -63,7 +63,7 @@ service /land on landMicroservice {
         return response;
     }
 
-    resource function get getAllLands() returns error|http:Response {
+    resource function get land/all() returns error|http:Response {
         http:Response response = new;
         common:Land[] lands = [];
         stream<common:Land, persist:Error?> landsResult = self.dbClient->/lands(common:Land);
@@ -83,7 +83,7 @@ service /land on landMicroservice {
         return response;
     }
 
-    resource function get getLandById/[int id]() returns error|http:Response {
+    resource function get land/[int id]() returns error|http:Response {
         http:Response response = new;
         if id <= 0 {
             response.statusCode = 400;
