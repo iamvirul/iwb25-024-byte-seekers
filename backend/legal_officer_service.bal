@@ -15,7 +15,7 @@ http:JwtValidatorConfig legalOfficerValidator = {
 
 http:ListenerJwtAuthHandler legalOfficerHandler = new (legalOfficerValidator);
 
-listener http:Listener legalOfficerMicroservice = new (9092);
+listener http:Listener legalOfficerMicroservice = new (9080);
 
 @http:ServiceConfig {
     cors: {
