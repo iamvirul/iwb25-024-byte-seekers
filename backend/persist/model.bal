@@ -265,6 +265,20 @@ public type Land record {|
     LandDocument[] landdocuments;
 |};
 
+@sql:Name {value: "dispute_comments"}
+public type DisputeComment record {|
+    @sql:Generated
+    readonly int id;
+    @sql:Name {value: "disputes_id"}
+    @sql:Index {name: "fk_dispute_comments_disputes1_idx"}
+    int disputesId;
+    string comment;
+    @sql:Name {value: "created_at"}
+    time:Utc createdAt;
+    @sql:Relation {keys: ["disputesId"]}
+    Dispute dispute;
+|};
+
 @sql:Name {value: "users_has_user_types"}
 public type UserHasUserType record {|
     @sql:Name {value: "users_id"}
@@ -303,6 +317,7 @@ public type Dispute record {|
     DisputeStatus status;
     @sql:Name {value: "created_at"}
     time:Utc createdAt;
+    DisputeComment[] disputecomments;
     @sql:Relation {keys: ["landsId"]}
     Land land;
     @sql:Relation {keys: ["legalOfficerId"]}

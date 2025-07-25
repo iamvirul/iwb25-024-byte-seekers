@@ -505,6 +505,39 @@ public type LandUpdate record {|
     int priority?;
 |};
 
+public type DisputeComment record {|
+    readonly int id;
+    string comment;
+    time:Utc createdAt;
+    int disputesId;
+|};
+
+public type DisputeCommentOptionalized record {|
+    int id?;
+    string comment?;
+    time:Utc createdAt?;
+    int disputesId?;
+|};
+
+public type DisputeCommentWithRelations record {|
+    *DisputeCommentOptionalized;
+    DisputeOptionalized dispute?;
+|};
+
+public type DisputeCommentTargetType typedesc<DisputeCommentWithRelations>;
+
+public type DisputeCommentInsert record {|
+    string comment;
+    time:Utc createdAt;
+    int disputesId;
+|};
+
+public type DisputeCommentUpdate record {|
+    string comment?;
+    time:Utc createdAt?;
+    int disputesId?;
+|};
+
 public type UserHasUserType record {|
     int userTypesId;
     int usersId;
@@ -538,6 +571,7 @@ public type Dispute record {|
     string estimateTime;
     DisputeStatus status;
     time:Utc createdAt;
+
     int landsId;
     int legalOfficerId;
 
@@ -557,6 +591,7 @@ public type DisputeOptionalized record {|
 
 public type DisputeWithRelations record {|
     *DisputeOptionalized;
+    DisputeCommentOptionalized[] disputecomments?;
     LandOptionalized land?;
     LegalOfficerOptionalized legalofficer?;
     DisputeDocumentOptionalized[] disputedocuments?;
