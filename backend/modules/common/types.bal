@@ -108,3 +108,17 @@ public type LandCreate record {|
     DB:LandOwnerInsert from_owner;
     DB:LandOwnerInsert to_owner;
 |};
+
+public type FileRecord record {
+    string filename;
+    string contentType;
+    byte[] data;
+};
+
+public type DisputeForm record {
+    FileRecord[] documents;
+    string witnessName;
+    string disputesDetails;
+    int landsId;
+    int legalOfficerId;
+};
