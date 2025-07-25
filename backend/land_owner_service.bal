@@ -1,5 +1,6 @@
 import backend.common;
 import backend.db as DB;
+import backend.mappers as Mappers;
 import backend.utils as Utils;
 
 import ballerina/http;
@@ -14,7 +15,8 @@ listener http:Listener landOwnerMicroservice = new (9098);
         allowMethods: ["GET", "POST"],
         allowCredentials: true
     },
-    auth: [{
+    auth: [
+        {
             jwtValidatorConfig: {
                 issuer: "byteseekers",
                 audience: Utils:LAND_OWNER,
@@ -24,7 +26,8 @@ listener http:Listener landOwnerMicroservice = new (9098);
                 scopeKey: "scp"
             },
             scopes: [Utils:LAND_OWNER]
-        }]
+        }
+    ]
 }
 
 service /land_owner on landOwnerMicroservice {
@@ -38,7 +41,7 @@ service /land_owner on landOwnerMicroservice {
         check self.dbClient.close();
     }
 
-    resource function get getLegelOfficers() returns error|http:Response {
+    resource function get legal_officers() returns error|http:Response {
         http:Response response = new;
         common:LegalOfficer[] legalOfficers = [];
         stream<common:LegalOfficer, persist:Error?> legalOfficerResult = self.dbClient->/legalofficers(common:LegalOfficer);
@@ -58,60 +61,93 @@ service /land_owner on landOwnerMicroservice {
         return response;
     }
 
-    resource function post createDispute(@http:Payload common:RequestDispute requestDispute) returns http:Response|error {
+    resource function post dispute/add(http:Request req) returns http:Response|error {
         http:Response response = new;
-        common:ValidationResult validateLandInsert = Utils:validateDisputeInsert(requestDispute);
-        if !validateLandInsert.isValid {
-            response.statusCode = 400;
-            response = Utils:setErrorResponse(response, validateLandInsert.errors);
-            return response;
-        }
+        if req.getContentType().startsWith("multipart/form-data") {
+            //parse multipart form data
+            common:DisputeForm|error parsed = Utils:parseDisputeMultipartFormData(req.getBodyParts());
+            if parsed is error {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, Utils:INVALID_MULTIPART_REQUEST);
+                return response;
+            }
+            //validate parsed data
+            common:ValidationResult validateDispute = Utils:validateDisputeFormData(parsed);
+            if !validateDispute.isValid {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, validateDispute.errors);
+                return response;
+            }
+            string caseId = Utils:getUniqueIDByCurrentTime();
+            //check if land and legal officer exist
+            common:Land|persist:Error landResult = self.dbClient->/lands/[parsed.landsId](common:Land);
+            if landResult is persist:Error {
+                if landResult is persist:NotFoundError {
+                    response.statusCode = 404;
+                    response = Utils:setErrorResponse(response, Utils:LAND_NOT_FOUND);
+                } else {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LAND);
+                }
+                return response;
+            }
+            //check if legal officer exists
+            common:LegalOfficer|persist:Error legalOfficerResult = self.dbClient->/legalofficers/[parsed.legalOfficerId](common:LegalOfficer);
+            if legalOfficerResult is persist:Error {
+                if legalOfficerResult is persist:NotFoundError {
+                    response.statusCode = 404;
+                    response = Utils:setErrorResponse(response, Utils:LEGAL_OFFICER_NOT_FOUND);
+                } else {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LEGAL_OFFICER);
+                }
+                return response;
+            }
+            //insert dispute
+            DB:DisputeInsert disputeInsert = Mappers:disputeInsertMapper(parsed, caseId);
+            int[]|persist:Error disputeResult = self.dbClient->/disputes.post([disputeInsert]);
+            if disputeResult is persist:Error {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, Utils:FAILED_TO_REGISTER_LAND);
+                return response;
+            }
+            int insertedDisputeId = disputeResult[0];
+            //upload documents
+            int docIndex = 1;
+            foreach var doc in parsed.documents {
+                string ext = Utils:getExtension(doc.contentType, doc.filename);
+                string base = caseId + "_doc" + docIndex.toString();
+                string|error uploaded = Utils:uploadFile(doc.data, "disputes/", base, ext);
+                if uploaded is error {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPLOAD_DOCUMENT);
+                    return response;
+                } else {
+                    DB:DisputeDocumentInsert disputeDocInsert = {
+                        disputesId: insertedDisputeId,
+                        docPath: uploaded,
+                        uploadedDate: time:utcNow()
+                    };
+                    int[]|persist:Error docResult = self.dbClient->/disputedocuments.post([disputeDocInsert]);
+                    if docResult is persist:Error {
+                        response.statusCode = 500;
+                        response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_DISPUTE_DOCUMENT);
+                        return response;
+                    }
+                }
+                docIndex += 1;
+            }
 
-        string caseId = Utils:getUniqueIDByCurrentTime();
-        
-        common:Land|persist:Error landResult = self.dbClient->/lands/[requestDispute.landsId](common:Land);
-        if landResult is persist:Error {
-            if landResult is persist:NotFoundError {
-                response.statusCode = 404;
-                response = Utils:setErrorResponse(response, Utils:LAND_NOT_FOUND);
-            } else {
-                response.statusCode = 500;
-                response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LAND);
-            }
+            response.statusCode = 201;
+            response = Utils:setSuccessResponse(response, {"message": Utils:LAND_INSERT_SUCCESS, "case_id": disputeInsert.caseId});
             return response;
         }
-        common:LegalOfficer|persist:Error legalOfficerResult = self.dbClient->/legalofficers/[requestDispute.legalOfficerId](common:LegalOfficer);
-        if legalOfficerResult is persist:Error {
-            if legalOfficerResult is persist:NotFoundError {
-                response.statusCode = 404;
-                response = Utils:setErrorResponse(response, Utils:LEGAL_OFFICER_NOT_FOUND);
-            } else {
-                response.statusCode = 500;
-                response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LEGAL_OFFICER);
-            }
+        else {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, Utils:INVALID_CONTENT_TYPE);
             return response;
         }
-        DB:DisputeInsert disputeInsert = {
-            witnessName: requestDispute.witnessName,
-            disputesDetails: requestDispute.disputesDetails,
-            landsId: requestDispute.landsId,
-            legalOfficerId: requestDispute.legalOfficerId,
-            status: DB:PENDING,
-            caseId: caseId,
-            estimateTime: "",
-            createdAt: time:utcNow()
-        };
-        int[]|persist:Error disputeResult = self.dbClient->/disputes.post([disputeInsert]);
-        if disputeResult is persist:Error {
-            response.statusCode = 500;
-            response = Utils:setErrorResponse(response, Utils:FAILED_TO_REGISTER_LAND);
-            return response;
-        }
-        response.statusCode = 201;
-        response = Utils:setSuccessResponse(response, {
-            "message": Utils:LAND_INSERT_SUCCESS,
-            "case_id": disputeInsert.caseId
-        });
-        return response;
     }
+
 }
+
