@@ -3,17 +3,9 @@ import backend.db as DB;
 import backend.utils as Utils;
 
 import ballerina/http;
-import ballerina/jwt;
 import ballerina/persist;
 import ballerina/sql;
 
-http:JwtValidatorConfig legalOfficerValidator = {
-    issuer: "byteseekers",
-    audience: Utils:LEGAL_OFFICER,
-    signatureConfig: {certFile: "resources/certificates/public.crt"}
-};
-
-http:ListenerJwtAuthHandler legalOfficerHandler = new (legalOfficerValidator);
 
 listener http:Listener legalOfficerMicroservice = new (9080);
 
@@ -22,7 +14,18 @@ listener http:Listener legalOfficerMicroservice = new (9080);
         allowOrigins: ["*"],
         allowMethods: ["GET", "POST"],
         allowCredentials: true
-    }
+    },
+    auth: [{
+            jwtValidatorConfig: {
+                issuer: "byteseekers",
+                audience: Utils:LEGAL_OFFICER,
+                signatureConfig: {
+                    certFile: "resources/certificates/public.crt"
+                },
+                scopeKey: "scp"
+            },
+            scopes: [Utils:LEGAL_OFFICER]
+        }]
 }
 
 service /legal_officer on legalOfficerMicroservice {
@@ -36,14 +39,8 @@ service /legal_officer on legalOfficerMicroservice {
         check self.dbClient.close();
     }
 
-    resource function get getDisputes/[int id](@http:Header string Authorization) returns error|http:Response {
+    resource function get getDisputes/[int id]() returns error|http:Response {
         http:Response response = new;
-        jwt:Payload|http:Unauthorized authn = legalOfficerHandler.authenticate(Authorization);
-        if authn is http:Unauthorized {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
-            return response;
-        }
         if id <= 0 {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, Utils:INVALID_LEGAL_OFFICER_ID);
@@ -79,14 +76,8 @@ service /legal_officer on legalOfficerMicroservice {
         return response;
     }
 
-    resource function post addEstimateTime(@http:Header string Authorization, common:UpdateDisputeEstimateTime updateRequest) returns error|http:Response {
+    resource function post addEstimateTime(common:UpdateDisputeEstimateTime updateRequest) returns error|http:Response {
         http:Response response = new;
-        jwt:Payload|http:Unauthorized authn = legalOfficerHandler.authenticate(Authorization);
-        if authn is http:Unauthorized {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
-            return response;
-        }
         common:ValidationResult validateLandInsert = Utils:validateDisputeEstimateTime(updateRequest);
         if !validateLandInsert.isValid {
             response.statusCode = 400;
