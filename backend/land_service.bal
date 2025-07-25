@@ -117,9 +117,11 @@ service /land on landMicroservice {
         }
         common:Land land = landResult;
         response.statusCode = 200;
-        response = Utils:setSuccessResponse(response, {
-                                                          "land": land.toJson()
-                                                      });
+        response = Utils:setSuccessResponse(
+                response,
+                {
+                    "land": land.toJson()
+                });
         return response;
     }
 
