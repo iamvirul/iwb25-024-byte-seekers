@@ -122,3 +122,8 @@ public type DisputeForm record {
     int landsId;
     int legalOfficerId;
 };
+
+public type DisputeWithDocs record {|
+    DB:Dispute dispute;
+    DB:DisputeDocument? [] documents;
+|};

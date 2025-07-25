@@ -3,9 +3,9 @@ import backend.db as DB;
 import backend.utils as Utils;
 
 import ballerina/http;
+// import ballerina/io;
 import ballerina/persist;
 import ballerina/sql;
-
 
 listener http:Listener legalOfficerMicroservice = new (9080);
 
@@ -15,7 +15,8 @@ listener http:Listener legalOfficerMicroservice = new (9080);
         allowMethods: ["GET", "POST"],
         allowCredentials: true
     },
-    auth: [{
+    auth: [
+        {
             jwtValidatorConfig: {
                 issuer: "byteseekers",
                 audience: Utils:LEGAL_OFFICER,
@@ -25,7 +26,8 @@ listener http:Listener legalOfficerMicroservice = new (9080);
                 scopeKey: "scp"
             },
             scopes: [Utils:LEGAL_OFFICER]
-        }]
+        }
+    ]
 }
 
 service /legal_officer on legalOfficerMicroservice {
@@ -39,7 +41,7 @@ service /legal_officer on legalOfficerMicroservice {
         check self.dbClient.close();
     }
 
-    resource function get getDisputes/[int id]() returns error|http:Response {
+    resource function get disputes/[int id]() returns error|http:Response {
         http:Response response = new;
         if id <= 0 {
             response.statusCode = 400;
@@ -57,13 +59,30 @@ service /legal_officer on legalOfficerMicroservice {
             }
             return response;
         }
-        common:Dispute[] disputes = [];
+        common:DisputeWithDocs[] disputes = [];
         sql:ParameterizedQuery query = `legal_officer_id = ${id}`;
-        stream<common:Dispute, persist:Error?> disputeResult = self.dbClient->/disputes(common:Dispute, query);
-
+        stream<DB:Dispute, persist:Error?> disputeResult = self.dbClient->/disputes(DB:Dispute, query);
         check from var dispute in disputeResult
             do {
-                disputes.push(dispute);
+                sql:ParameterizedQuery docQuery = `disputes_id = ${dispute.id}`;
+                stream<DB:DisputeDocument, persist:Error?> disputeDoc = self.dbClient->/disputedocuments(DB:DisputeDocument, docQuery);
+                DB:DisputeDocument? doc = ();
+                var result = check disputeDoc.next();
+                if result is record {|DB:DisputeDocument value;|} {
+                    doc = result.value;
+                }
+                if doc is DB:DisputeDocument {
+                    disputes.push({
+                        dispute: dispute,
+                        documents: [doc]
+                    });
+                } else {
+                    disputes.push({
+                        dispute: dispute,
+                        documents: []
+                    });
+                }
+
             };
         check disputeResult.close();
         if disputes.length() == 0 {
@@ -76,7 +95,7 @@ service /legal_officer on legalOfficerMicroservice {
         return response;
     }
 
-    resource function post addEstimateTime(common:UpdateDisputeEstimateTime updateRequest) returns error|http:Response {
+    resource function post dispute/estimate_time/add(common:UpdateDisputeEstimateTime updateRequest) returns error|http:Response {
         http:Response response = new;
         common:ValidationResult validateLandInsert = Utils:validateDisputeEstimateTime(updateRequest);
         if !validateLandInsert.isValid {
