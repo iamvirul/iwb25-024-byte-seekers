@@ -3,16 +3,8 @@ import backend.db as DB;
 import backend.utils as Utils;
 
 import ballerina/http;
-import ballerina/jwt;
 import ballerina/persist;
 
-http:JwtValidatorConfig landOfficerValidator = {
-    issuer: "byteseekers",
-    audience: Utils:LAND_OFFICER,
-    signatureConfig: {certFile: "resources/certificates/public.crt"}
-};
-
-http:ListenerJwtAuthHandler landOfficerHandler = new (landOfficerValidator);
 
 listener http:Listener landMicroservice = new (9095);
 
@@ -21,7 +13,18 @@ listener http:Listener landMicroservice = new (9095);
         allowOrigins: ["*"],
         allowMethods: ["GET", "POST"],
         allowCredentials: true
-    }
+    },
+    auth: [{
+            jwtValidatorConfig: {
+                issuer: "byteseekers",
+                audience: Utils:LAND_OFFICER,
+                signatureConfig: {
+                    certFile: "resources/certificates/public.crt"
+                },
+                scopeKey: "scp"
+            },
+            scopes: [Utils:LAND_OFFICER]
+        }]
 }
 
 service /land on landMicroservice {
@@ -35,11 +38,7 @@ service /land on landMicroservice {
         check self.dbClient.close();
     }
 
-    resource function post register(@http:Payload DB:LandInsert landInsert, @http:Header string Authorization) returns http:Response|error|http:Unauthorized {
-        jwt:Payload|http:Unauthorized authn = landOfficerHandler.authenticate(Authorization);
-        if authn is http:Unauthorized {
-            return authn;
-        }
+    resource function post register(@http:Payload DB:LandInsert landInsert) returns http:Response|error|http:Unauthorized {
         landInsert.landId = Utils:generateShortId();
         http:Response response = new;
         common:ValidationResult validateLandInsert = Utils:validateLandInsert(landInsert);
@@ -64,14 +63,8 @@ service /land on landMicroservice {
         return response;
     }
 
-    resource function get getAllLands(@http:Header string Authorization) returns error|http:Response {
+    resource function get getAllLands() returns error|http:Response {
         http:Response response = new;
-        jwt:Payload|http:Unauthorized authn = landOfficerHandler.authenticate(Authorization);
-        if authn is http:Unauthorized {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
-            return response;
-        }
         common:Land[] lands = [];
         stream<common:Land, persist:Error?> landsResult = self.dbClient->/lands(common:Land);
 
@@ -90,14 +83,8 @@ service /land on landMicroservice {
         return response;
     }
 
-    resource function get getLandById/[int id](@http:Header string Authorization) returns error|http:Response {
+    resource function get getLandById/[int id]() returns error|http:Response {
         http:Response response = new;
-        jwt:Payload|http:Unauthorized authn = landOfficerHandler.authenticate(Authorization);
-        if authn is http:Unauthorized {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
-            return response;
-        }
         if id <= 0 {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, Utils:INVALID_LAND_ID);
@@ -117,35 +104,11 @@ service /land on landMicroservice {
         }
         common:Land land = landResult;
         response.statusCode = 200;
-        response = Utils:setSuccessResponse(response, {
-                                                          "land": land.toJson()
-                                                      });
-        return response;
-    }
-
-    resource function get getLegelOfficers(@http:Header string Authorization) returns error|http:Response {
-        http:Response response = new;
-        jwt:Payload|http:Unauthorized authn = landOfficerHandler.authenticate(Authorization);
-        if authn is http:Unauthorized {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
-            return response;
-        }
-        common:LegalOfficer[] legalOfficers = [];
-        stream<common:LegalOfficer, persist:Error?> legalOfficerResult = self.dbClient->/legalofficers(common:LegalOfficer);
-
-        check from var legalOfficer in legalOfficerResult
-            do {
-                legalOfficers.push(legalOfficer);
-            };
-        check legalOfficerResult.close();
-        if legalOfficers.length() == 0 {
-            response.statusCode = 404;
-            response = Utils:setErrorResponse(response, Utils:NO_LANDS_FOUND);
-        } else {
-            response.statusCode = 200;
-            response = Utils:setSuccessResponse(response, {"legal_officers": legalOfficers.toJson()});
-        }
+        response = Utils:setSuccessResponse(
+                response,
+                {
+                    "land": land.toJson()
+                });
         return response;
     }
 }

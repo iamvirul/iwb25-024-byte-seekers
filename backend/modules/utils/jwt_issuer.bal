@@ -6,6 +6,7 @@ public function issueToken(string audience) returns string|error {
         issuer: "byteseekers",
         audience: audience,
         expTime: 3600,
+        customClaims: { "scp": audience },
         signatureConfig: {
             config: {
                 keyFile: "resources/certificates/private.key"

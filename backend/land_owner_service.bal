@@ -3,17 +3,8 @@ import backend.db as DB;
 import backend.utils as Utils;
 
 import ballerina/http;
-import ballerina/jwt;
 import ballerina/persist;
 import ballerina/time;
-
-http:JwtValidatorConfig landOwnerValidator = {
-    issuer: "byteseekers",
-    audience: Utils:LAND_OWNER,
-    signatureConfig: {certFile: "resources/certificates/public.crt"}
-};
-
-http:ListenerJwtAuthHandler landOwnerHandler = new (landOwnerValidator);
 
 listener http:Listener landOwnerMicroservice = new (9098);
 
@@ -22,7 +13,18 @@ listener http:Listener landOwnerMicroservice = new (9098);
         allowOrigins: ["*"],
         allowMethods: ["GET", "POST"],
         allowCredentials: true
-    }
+    },
+    auth: [{
+            jwtValidatorConfig: {
+                issuer: "byteseekers",
+                audience: Utils:LAND_OWNER,
+                signatureConfig: {
+                    certFile: "resources/certificates/public.crt"
+                },
+                scopeKey: "scp"
+            },
+            scopes: [Utils:LAND_OWNER]
+        }]
 }
 
 service /land_owner on landOwnerMicroservice {
@@ -36,14 +38,8 @@ service /land_owner on landOwnerMicroservice {
         check self.dbClient.close();
     }
 
-    resource function get getLegelOfficers(@http:Header string Authorization) returns error|http:Response {
+    resource function get getLegelOfficers() returns error|http:Response {
         http:Response response = new;
-        jwt:Payload|http:Unauthorized authn = landOwnerHandler.authenticate(Authorization);
-        if authn is http:Unauthorized {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
-            return response;
-        }
         common:LegalOfficer[] legalOfficers = [];
         stream<common:LegalOfficer, persist:Error?> legalOfficerResult = self.dbClient->/legalofficers(common:LegalOfficer);
 
@@ -62,14 +58,8 @@ service /land_owner on landOwnerMicroservice {
         return response;
     }
 
-    resource function post createDispute(@http:Payload common:RequestDispute requestDispute, @http:Header string Authorization) returns http:Response|error {
+    resource function post createDispute(@http:Payload common:RequestDispute requestDispute) returns http:Response|error {
         http:Response response = new;
-        jwt:Payload|http:Unauthorized authn = landOwnerHandler.authenticate(Authorization);
-        if authn is http:Unauthorized {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
-            return response;
-        }
         common:ValidationResult validateLandInsert = Utils:validateDisputeInsert(requestDispute);
         if !validateLandInsert.isValid {
             response.statusCode = 400;
