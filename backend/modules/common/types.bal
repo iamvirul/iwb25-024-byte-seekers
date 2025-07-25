@@ -92,3 +92,19 @@ public type UpdateDisputeEstimateTime record {|
     string caseId;
     string estimateTime;
 |};
+
+public type LandCreate record {|
+    string landId;
+    string landName;
+    string landPlace;
+    decimal landLat;
+    decimal landLang;
+    float landSize;
+    decimal landValue;
+    string landType;
+    time:Date registerDate;
+    DB:LandLandStatus landStatus;
+    int priority;
+    DB:LandOwnerInsert from_owner;
+    DB:LandOwnerInsert to_owner;
+|};

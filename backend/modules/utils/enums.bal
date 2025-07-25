@@ -110,3 +110,10 @@ public enum LAND_ERRORS {
     FAILED_TO_UPDATE_DISPUTE = "Failed to update dispute",
     DISPUTE_ESTIMATE_TIME_UPDATED = "Dispute estimate time updated successfully"
 }
+
+public enum LAND_OWNER_ERRORS {
+    LAND_OWNER_ALREADY_EXISTS = "Land owner already exists",
+    FAILED_TO_REGISTER_LAND_OWNER = "Failed to register land owner",
+    LAND_OWNER_NOT_FOUND = "Land owner not found",
+    NO_LAND_OWNERS_FOUND = "No land owners found"
+}

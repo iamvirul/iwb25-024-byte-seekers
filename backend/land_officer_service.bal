@@ -1,10 +1,10 @@
-import backend.common;
+import backend.common as Common;
 import backend.db as DB;
 import backend.utils as Utils;
+import backend.mappers as Mappers;
 
 import ballerina/http;
 import ballerina/persist;
-
 
 listener http:Listener landMicroservice = new (9095);
 
@@ -14,7 +14,8 @@ listener http:Listener landMicroservice = new (9095);
         allowMethods: ["GET", "POST"],
         allowCredentials: true
     },
-    auth: [{
+    auth: [
+        {
             jwtValidatorConfig: {
                 issuer: "byteseekers",
                 audience: Utils:LAND_OFFICER,
@@ -24,7 +25,8 @@ listener http:Listener landMicroservice = new (9095);
                 scopeKey: "scp"
             },
             scopes: [Utils:LAND_OFFICER]
-        }]
+        }
+    ]
 }
 
 service /land_officer on landMicroservice {
@@ -38,35 +40,35 @@ service /land_officer on landMicroservice {
         check self.dbClient.close();
     }
 
-    resource function post land/register(@http:Payload DB:LandInsert landInsert) returns http:Response|error|http:Unauthorized {
-        landInsert.landId = Utils:generateShortId();
+    resource function post land/register(@http:Payload Common:LandCreate requestLandInsert ) returns http:Response|error|http:Unauthorized {
+        requestLandInsert.landId = Utils:generateShortId();
         http:Response response = new;
-        common:ValidationResult validateLandInsert = Utils:validateLandInsert(landInsert);
+        DB:LandInsert landInsert = Mappers:landInsertMapper(requestLandInsert);
+        Common:ValidationResult validateLandInsert = Utils:validateLandInsert(landInsert);
         if !validateLandInsert.isValid {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, validateLandInsert.errors);
             return response;
         }
-        int[]|persist:Error unionResult = self.dbClient->/lands.post([landInsert]);
-        if unionResult is persist:Error {
-            if unionResult is persist:AlreadyExistsError {
-                response.statusCode = 409;
-                response = Utils:setErrorResponse(response, Utils:LAND_ALREADY_EXISTS);
+        transaction {
+            int[]|persist:Error unionResult = self.dbClient->/lands.post([landInsert]);
+            if unionResult is persist:Error {
+                if unionResult is persist:AlreadyExistsError {
+                    response.statusCode = 409;
+                    response = Utils:setErrorResponse(response, Utils:LAND_ALREADY_EXISTS);
+                }
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, Utils:FAILED_TO_REGISTER_LAND);
             }
-            response.statusCode = 500;
-            response = Utils:setErrorResponse(response, Utils:FAILED_TO_REGISTER_LAND);
-        }
-        if unionResult is int[] {
-            response.statusCode = 201;
-            response = Utils:setSuccessResponse(response, {"landId": unionResult[0]});
+            check commit;
         }
         return response;
     }
 
     resource function get land/all() returns error|http:Response {
         http:Response response = new;
-        common:Land[] lands = [];
-        stream<common:Land, persist:Error?> landsResult = self.dbClient->/lands(common:Land);
+        Common:Land[] lands = [];
+        stream<Common:Land, persist:Error?> landsResult = self.dbClient->/lands(Common:Land);
 
         check from var land in landsResult
             do {
@@ -90,7 +92,7 @@ service /land_officer on landMicroservice {
             response = Utils:setErrorResponse(response, Utils:INVALID_LAND_ID);
             return response;
         }
-        common:Land|persist:Error landResult = self.dbClient->/lands/[id](common:Land);
+        Common:Land|persist:Error landResult = self.dbClient->/lands/[id](Common:Land);
 
         if landResult is persist:Error {
             if landResult is persist:NotFoundError {
@@ -102,7 +104,7 @@ service /land_officer on landMicroservice {
             }
             return response;
         }
-        common:Land land = landResult;
+        Common:Land land = landResult;
         response.statusCode = 200;
         response = Utils:setSuccessResponse(
                 response,
@@ -110,5 +112,23 @@ service /land_officer on landMicroservice {
                     "land": land.toJson()
                 });
         return response;
+    }
+
+    function creatLandOwner(DB:LandOwnerInsert landOwnerInsert) returns error|int {
+        error landError = error("Some error occurred while creating land owner");
+        transaction {
+            int[]|persist:Error landOwnerID = self.dbClient->/landowners.post([landOwnerInsert]);
+            if landOwnerID is persist:Error {
+                if landOwnerID is persist:AlreadyExistsError {
+                    landError = error(Utils:LAND_OWNER_ALREADY_EXISTS);
+                }
+                landError = error(Utils:FAILED_TO_REGISTER_LAND_OWNER);
+            }
+            check commit;
+            if landOwnerID is int[] {
+                return landOwnerID[0];
+            }
+            return landError;
+        }
     }
 }
