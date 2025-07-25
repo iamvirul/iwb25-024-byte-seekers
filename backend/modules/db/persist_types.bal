@@ -32,8 +32,7 @@ public enum LandLandStatus {
 
 public type LandDocument record {|
     readonly int id;
-    string docId;
-    string docName;
+    string docPath;
     string docSize;
     string docType;
     time:Utc uploadedDate;
@@ -44,8 +43,7 @@ public type LandDocument record {|
 
 public type LandDocumentOptionalized record {|
     int id?;
-    string docId?;
-    string docName?;
+    string docPath?;
     string docSize?;
     string docType?;
     time:Utc uploadedDate?;
@@ -63,8 +61,7 @@ public type LandDocumentWithRelations record {|
 public type LandDocumentTargetType typedesc<LandDocumentWithRelations>;
 
 public type LandDocumentInsert record {|
-    string docId;
-    string docName;
+    string docPath;
     string docSize;
     string docType;
     time:Utc uploadedDate;
@@ -74,8 +71,7 @@ public type LandDocumentInsert record {|
 |};
 
 public type LandDocumentUpdate record {|
-    string docId?;
-    string docName?;
+    string docPath?;
     string docSize?;
     string docType?;
     time:Utc uploadedDate?;
@@ -220,16 +216,14 @@ public type LegalClauseUpdate record {|
 
 public type DisputeDocument record {|
     readonly int id;
-    string docId;
-    string docName;
+    string docPath;
     time:Utc uploadedDate;
     int disputesId;
 |};
 
 public type DisputeDocumentOptionalized record {|
     int id?;
-    string docId?;
-    string docName?;
+    string docPath?;
     time:Utc uploadedDate?;
     int disputesId?;
 |};
@@ -242,15 +236,13 @@ public type DisputeDocumentWithRelations record {|
 public type DisputeDocumentTargetType typedesc<DisputeDocumentWithRelations>;
 
 public type DisputeDocumentInsert record {|
-    string docId;
-    string docName;
+    string docPath;
     time:Utc uploadedDate;
     int disputesId;
 |};
 
 public type DisputeDocumentUpdate record {|
-    string docId?;
-    string docName?;
+    string docPath?;
     time:Utc uploadedDate?;
     int disputesId?;
 |};

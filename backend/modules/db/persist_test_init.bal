@@ -151,8 +151,7 @@ CREATE TABLE "land_transfer_chain" (
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "disputes_document" (
 	"id" INT AUTO_INCREMENT,
-	"doc_id" VARCHAR(60) NOT NULL,
-	"doc_name" VARCHAR(60) NOT NULL,
+	"doc_path" VARCHAR(100) NOT NULL,
 	"uploaded_date" TIMESTAMP NOT NULL,
 	"disputes_id" INT NOT NULL,
 	FOREIGN KEY("disputes_id") REFERENCES "disputes"("id"),
@@ -161,8 +160,7 @@ CREATE TABLE "disputes_document" (
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "lands_documents" (
 	"id" INT AUTO_INCREMENT,
-	"doc_id" VARCHAR(60) NOT NULL,
-	"doc_name" VARCHAR(60) NOT NULL,
+	"doc_path" VARCHAR(60) NOT NULL,
 	"doc_size" VARCHAR(10) NOT NULL,
 	"doc_type" VARCHAR(45) NOT NULL,
 	"uploaded_date" TIMESTAMP NOT NULL,

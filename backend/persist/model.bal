@@ -31,12 +31,9 @@ public enum LandLandStatus {
 public type LandDocument record {|
     @sql:Generated
     readonly int id;
-    @sql:Name {value: "doc_id"}
+    @sql:Name {value: "doc_path"}
     @sql:Varchar {length: 60}
-    string docId;
-    @sql:Name {value: "doc_name"}
-    @sql:Varchar {length: 60}
-    string docName;
+    string docPath;
     @sql:Name {value: "doc_size"}
     @sql:Varchar {length: 10}
     string docSize;
@@ -119,12 +116,9 @@ public type LegalClause record {|
 public type DisputeDocument record {|
     @sql:Generated
     readonly int id;
-    @sql:Name {value: "doc_id"}
-    @sql:Varchar {length: 60}
-    string docId;
-    @sql:Name {value: "doc_name"}
-    @sql:Varchar {length: 60}
-    string docName;
+    @sql:Name {value: "doc_path"}
+    @sql:Varchar {length: 100}
+    string docPath;
     @sql:Name {value: "uploaded_date"}
     time:Utc uploadedDate;
     @sql:Name {value: "disputes_id"}
