@@ -20,6 +20,7 @@ const LAND_TRANSFER_CHAIN = "landtransferchains";
 const NLP_ANALYSIS_RESULT = "nlpanalysisresults";
 const LAND_OWNER = "landowners";
 const LAND = "lands";
+const DISPUTE_COMMENT = "disputecomments";
 const USER_HAS_USER_TYPE = "userhasusertypes";
 const DISPUTE = "disputes";
 const USER_TYPE = "usertypes";
@@ -339,6 +340,27 @@ public isolated client class Client {
                 landdocuments: {entity: LandDocument, fieldName: "landdocuments", refTable: "lands_documents", refColumns: ["lands_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
+        [DISPUTE_COMMENT]: {
+            entityName: "DisputeComment",
+            tableName: "dispute_comments",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                comment: {columnName: "comment"},
+                createdAt: {columnName: "created_at"},
+                disputesId: {columnName: "disputes_id"},
+                "dispute.id": {relation: {entityName: "dispute", refField: "id"}},
+                "dispute.caseId": {relation: {entityName: "dispute", refField: "caseId", refColumn: "case_id"}},
+                "dispute.witnessName": {relation: {entityName: "dispute", refField: "witnessName", refColumn: "witness_name"}},
+                "dispute.disputesDetails": {relation: {entityName: "dispute", refField: "disputesDetails", refColumn: "disputes_details"}},
+                "dispute.estimateTime": {relation: {entityName: "dispute", refField: "estimateTime", refColumn: "estimate_time"}},
+                "dispute.status": {relation: {entityName: "dispute", refField: "status"}},
+                "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt", refColumn: "created_at"}},
+                "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId", refColumn: "lands_id"}},
+                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
+            },
+            keyFields: ["id"],
+            joinMetadata: {dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputes_id"], 'type: psql:ONE_TO_MANY}}
+        },
         [USER_HAS_USER_TYPE]: {
             entityName: "UserHasUserType",
             tableName: "users_has_user_types",
@@ -377,6 +399,10 @@ public isolated client class Client {
                 createdAt: {columnName: "created_at"},
                 landsId: {columnName: "lands_id"},
                 legalOfficerId: {columnName: "legal_officer_id"},
+                "disputecomments[].id": {relation: {entityName: "disputecomments", refField: "id"}},
+                "disputecomments[].comment": {relation: {entityName: "disputecomments", refField: "comment"}},
+                "disputecomments[].createdAt": {relation: {entityName: "disputecomments", refField: "createdAt", refColumn: "created_at"}},
+                "disputecomments[].disputesId": {relation: {entityName: "disputecomments", refField: "disputesId", refColumn: "disputes_id"}},
                 "land.id": {relation: {entityName: "land", refField: "id"}},
                 "land.landId": {relation: {entityName: "land", refField: "landId", refColumn: "land_id"}},
                 "land.landName": {relation: {entityName: "land", refField: "landName", refColumn: "land_name"}},
@@ -409,6 +435,7 @@ public isolated client class Client {
             },
             keyFields: ["id"],
             joinMetadata: {
+                disputecomments: {entity: DisputeComment, fieldName: "disputecomments", refTable: "dispute_comments", refColumns: ["disputes_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
                 land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY},
                 legalofficer: {entity: LegalOfficer, fieldName: "legalofficer", refTable: "legal_officer", refColumns: ["id"], joinColumns: ["legal_officer_id"], 'type: psql:ONE_TO_MANY},
                 disputedocuments: {entity: DisputeDocument, fieldName: "disputedocuments", refTable: "disputes_document", refColumns: ["disputes_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
@@ -446,6 +473,7 @@ public isolated client class Client {
             [NLP_ANALYSIS_RESULT]: check new (dbClient, self.metadata.get(NLP_ANALYSIS_RESULT), psql:MYSQL_SPECIFICS),
             [LAND_OWNER]: check new (dbClient, self.metadata.get(LAND_OWNER), psql:MYSQL_SPECIFICS),
             [LAND]: check new (dbClient, self.metadata.get(LAND), psql:MYSQL_SPECIFICS),
+            [DISPUTE_COMMENT]: check new (dbClient, self.metadata.get(DISPUTE_COMMENT), psql:MYSQL_SPECIFICS),
             [USER_HAS_USER_TYPE]: check new (dbClient, self.metadata.get(USER_HAS_USER_TYPE), psql:MYSQL_SPECIFICS),
             [DISPUTE]: check new (dbClient, self.metadata.get(DISPUTE), psql:MYSQL_SPECIFICS),
             [USER_TYPE]: check new (dbClient, self.metadata.get(USER_TYPE), psql:MYSQL_SPECIFICS)
@@ -847,6 +875,46 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(LAND);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get disputecomments(DisputeCommentTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get disputecomments/[int id](DisputeCommentTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post disputecomments(DisputeCommentInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(DISPUTE_COMMENT);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put disputecomments/[int id](DisputeCommentUpdate value) returns DisputeComment|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(DISPUTE_COMMENT);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/disputecomments/[id].get();
+    }
+
+    isolated resource function delete disputecomments/[int id]() returns DisputeComment|persist:Error {
+        DisputeComment result = check self->/disputecomments/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(DISPUTE_COMMENT);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;
