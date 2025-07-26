@@ -48,7 +48,7 @@ service /legal_officer on legalOfficerMicroservice {
             response = Utils:setErrorResponse(response, Utils:INVALID_LEGAL_OFFICER_ID);
             return response;
         }
-        common:LegalOfficer|persist:Error legalOfficerResult = self.dbClient->/legalofficers/[id](common:LegalOfficer);
+        common:LegalOfficer|persist:Error legalOfficerResult = self.dbClient->/legalofficers/[id].get(common:LegalOfficer);
         if legalOfficerResult is persist:Error {
             if legalOfficerResult is persist:NotFoundError {
                 response.statusCode = 404;
@@ -73,9 +73,37 @@ service /legal_officer on legalOfficerMicroservice {
                         tempDocs.push(disDoc);
                     };
                 check disputeDoc.close();
+
+                DB:Land|persist:Error landResult = self.dbClient->/lands/[dispute.landsId].get(DB:Land);
+                if landResult is persist:Error {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LAND);
+                    return response;
+                }
+                DB:Land land = landResult;
+
+                sql:ParameterizedQuery transferQuery = `lands_id = ${dispute.landsId} ORDER BY transferDate DESC LIMIT 1`;
+                stream<common:LandTransferChain, persist:Error?> transferResult = self.dbClient->/landtransferchains(common:LandTransferChain, transferQuery);
+                common:LandTransferChain? latestTransfer = ();
+                check from var transfer in transferResult
+                    do {
+                        latestTransfer = transfer;
+                    };
+                check transferResult.close();
+
+                DB:LandOwner? currentOwner = ();
+                if latestTransfer is DB:LandTransferChain {
+                    DB:LandOwner|persist:Error ownerResult = self.dbClient->/landowners/[latestTransfer.toLandOwnersId].get(DB:LandOwner);
+                    if ownerResult is DB:LandOwner {
+                        currentOwner = ownerResult;
+                    }
+                }
+
                 disputes.push({
                     dispute: dispute,
-                    documents: tempDocs
+                    documents: tempDocs,
+                    land: land,
+                    currentOwner: currentOwner
                 });
             };
         check disputeResult.close();
@@ -98,7 +126,7 @@ service /legal_officer on legalOfficerMicroservice {
             return response;
         }
         sql:ParameterizedQuery query = `case_id = ${updateRequest.caseId}`;
-        stream<common:Dispute, persist:Error?> disputeStream = self.dbClient->/disputes(common:Dispute, query);
+        stream<DB:Dispute, persist:Error?> disputeStream = self.dbClient->/disputes(DB:Dispute, query);
 
         check from var dispute in disputeStream
             do {

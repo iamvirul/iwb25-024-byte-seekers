@@ -76,17 +76,6 @@ public type RequestDispute record {|
     int legalOfficerId;
 |};
 
-public type Dispute record {|
-    int id;
-    string caseId;
-    string witnessName;
-    string disputesDetails;
-    string estimateTime;
-    DB:DisputeStatus status;
-    int landsId;
-    int legalOfficerId;
-    time:Utc createdAt;
-|};
 
 public type UpdateDisputeEstimateTime record {|
     string caseId;
@@ -126,4 +115,30 @@ public type DisputeForm record {
 public type DisputeWithDocs record {|
     DB:Dispute dispute;
     DB:DisputeDocument? [] documents;
+    DB:Land land;
+    DB:LandOwner? currentOwner;
+|};
+
+public type Dispute record {|
+    int id;
+    string caseId;
+    string witnessName;
+    string disputesDetails;
+    string estimateTime;
+    DB:DisputeStatus status;
+    DB:Land land;
+    int legalOfficerId;
+    time:Utc createdAt;
+|};
+
+public type LandTransferChain record {|
+    readonly int id;
+    time:Civil transferDate;
+    string verifiedBy;
+    int blockIndex;
+    string blockHash;
+    string prevBlockHash;
+    int fromLandOwnersId?;
+    int toLandOwnersId;
+    int landsId;
 |};
