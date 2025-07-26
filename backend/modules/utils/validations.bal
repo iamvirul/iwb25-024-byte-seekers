@@ -35,6 +35,26 @@ public function getUserType(int userType) returns USER_TYPES|error {
     }
 }
 
+public function getCourtType(string courtType) returns DB:LegalPrecedentCourt|error {
+    match courtType {
+        "SUPREME_COURT" => {
+            return DB:SUPREME_COURT;
+        }
+        "APPELLATE_COURT" => {
+            return DB:APPELLATE_COURT;
+        }
+        "HIGH_COURT" => {
+            return DB:HIGH_COURT;
+        }
+        "DISTRICT_COURT" => {
+            return DB:DISTRICT_COURT;
+        }
+        _ => {
+            return error("Invalid court type");
+        }
+    }
+}
+
 public function validateRegisterUser(Common:RequestUser user) returns Common:ValidationResult {
     map<string> errorMsg = {};
     boolean errorFlag = false;
@@ -312,3 +332,59 @@ public isolated function validateLandDocument(Common:FileRecord[] documents) ret
     return {isValid: valid, errors: err};
 }
 
+public function validateLegalPrecedent(Common:RequestPrecedent precedent) returns Common:ValidationResult {
+    map<string> errorMsg = {};
+    boolean errorFlag = false;
+
+    if precedent.caseId == "" {
+        errorFlag = true;
+        errorMsg["caseId"] = "Case ID is required";
+    }
+
+    if precedent.year == "" {
+        errorFlag = true;
+        errorMsg["estimateTime"] = "Yaer is required";
+    }
+
+    if precedent.headline == "" {
+        errorFlag = true;
+        errorMsg["estimateTime"] = "Headline is required";
+    } else if precedent.headline.length() > 100 {
+        errorFlag = true;
+        errorMsg["headline"] = "Headline should not exceed 100 characters";
+    }
+
+    if precedent.court == "" {
+        errorFlag = true;
+        errorMsg["court"] = "Court is required";
+    } else if precedent.court != "SUPREME_COURT" || precedent.court != "APPELLATE_COURT" || precedent.court != "HIGH_COURT" || precedent.court != "DISTRICT_COURT" {
+        errorFlag = true;
+        errorMsg["court"] = "Invalid court type";
+    }
+    if precedent.decision == "" {
+        errorFlag = true;
+        errorMsg["decision"] = "Decision is required";
+    }
+    if precedent.summary == "" {
+        errorFlag = true;
+        errorMsg["summary"] = "Summary is required";
+    }
+
+    if precedent.lelalClauses.length() == 0 {
+        errorFlag = true;
+        errorMsg["lelalClauses"] = "Lelal clauses are required";
+    } else {
+        foreach var clause in precedent.lelalClauses {
+            if clause == "" {
+                errorFlag = true;
+                errorMsg["lelalClauses"] = "Lelal clauses cannot be empty";
+                break;
+            }
+        }
+    }
+
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}

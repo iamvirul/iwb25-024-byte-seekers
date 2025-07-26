@@ -120,7 +120,9 @@ public enum DISPUTE_ERRORS {
     FAILED_TO_UPDATE_DISPUTE = "Failed to update dispute",
     DISPUTE_ESTIMATE_TIME_UPDATED = "Dispute estimate time updated successfully",
     FAILED_TO_ADD_DISPUTE_DOCUMENT = "Failed to add dispute document",
-    FAILED_TO_ADD_COMMENT = "Failed to add comment"
+    FAILED_TO_ADD_COMMENT = "Failed to add comment",
+    FAILED_TO_ADD_PRECEDENT = "Failed to add precedent",
+    FAILED_TO_ADD_LEGAL_CLAUSE = "Failed to add legal clause"
 }
 
 public enum DOCUMENT_ERRORS {

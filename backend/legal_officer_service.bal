@@ -183,4 +183,57 @@ service /legal_officer on legalOfficerMicroservice {
         response = Utils:setErrorResponse(response, Utils:INVALID_CASE_ID);
         return response;
     }
+
+    resource function post precedents/add(common:RequestPrecedent requestPrecedent) returns error|http:Response {
+        http:Response response = new;
+        common:ValidationResult validateLandInsert = Utils:validateLegalPrecedent(requestPrecedent);
+        if !validateLandInsert.isValid {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, validateLandInsert.errors);
+            return response;
+        }
+        sql:ParameterizedQuery query = `case_id = ${requestPrecedent.caseId}`;
+        stream<DB:Dispute, persist:Error?> disputeStream = self.dbClient->/disputes(DB:Dispute, query);
+        DB:Dispute? dispute = ();
+        var result = check disputeStream.next();
+        _ = check disputeStream.close();
+        if result is record {|DB:Dispute value;|} {
+            dispute = result.value;
+        }
+        if dispute is DB:Dispute {
+            DB:LegalPrecedentInsert precedentInsert = {
+                year: {year: 0, month: 0, day: 0},
+                headline: requestPrecedent.headline,
+                court: check Utils:getCourtType(requestPrecedent.court),
+                decision: requestPrecedent.decision,
+                summary: requestPrecedent.summary,
+                disputesId: dispute.id
+            };
+            int[]|persist:Error precedentResult = self.dbClient->/legalprecedents.post([precedentInsert]);
+            if precedentResult is persist:Error {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_PRECEDENT);
+                return response;
+            }
+            foreach var clause in requestPrecedent.lelalClauses {
+                DB:LegalClauseInsert clauseInsert = {
+                    legalClause: clause,
+                    legalPrecedentsId: precedentResult[0]
+                };
+                int[]|persist:Error clauseResult = self.dbClient->/legalclauses.post([clauseInsert]);
+                if clauseResult is persist:Error {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_LEGAL_CLAUSE);
+                    return response;
+                }
+            }
+        } else {
+            response.statusCode = 404;
+            response = Utils:setErrorResponse(response, Utils:INVALID_CASE_ID);
+            return response;
+        }
+        response.statusCode = 200;
+        response = Utils:setSuccessResponse(response, {"message": "Precedent added successfully"});
+        return response;
+    }
 }

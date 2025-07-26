@@ -147,3 +147,13 @@ public type LandTransferChain record {|
     int toLandOwnersId;
     int landsId;
 |};
+
+public type RequestPrecedent record {|
+    string caseId;
+    string year;
+    string headline;
+    string court;
+    string decision;
+    string summary;
+    string[] lelalClauses;
+|};
