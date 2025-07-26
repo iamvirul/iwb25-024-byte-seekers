@@ -228,6 +228,26 @@ public function validateDisputeEstimateTime(Common:UpdateDisputeEstimateTime upd
     };
 }
 
+public function validateDisputeComment(Common:RequestDsiputeComment disputecomment) returns Common:ValidationResult {
+    map<string> errorMsg = {};
+    boolean errorFlag = false;
+
+    if disputecomment.caseId == "" {
+        errorFlag = true;
+        errorMsg["caseId"] = "Case ID is required";
+    }
+
+    if disputecomment.comment == "" {
+        errorFlag = true;
+        errorMsg["estimateTime"] = "Comment is required";
+    }
+
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
 public isolated function validateDisputeFormData(Common:DisputeForm form) returns Common:ValidationResult {
     map<string> err = {};
     boolean valid = true;
@@ -275,20 +295,20 @@ public isolated function validateDisputeFormData(Common:DisputeForm form) return
 public isolated function validateLandDocument(Common:FileRecord[] documents) returns Common:ValidationResult {
     map<string> err = {};
     boolean valid = true;
-        foreach var fr in documents {
-            if fr.data.length() > MAX_DOCUMENT_BYTES {
-                valid = false;
-                err["documents"] = DOCUMENT_SIZE_EXCEEDED;
-                break;
-            }
-            if !(fr.contentType.startsWith("image/")
+    foreach var fr in documents {
+        if fr.data.length() > MAX_DOCUMENT_BYTES {
+            valid = false;
+            err["documents"] = DOCUMENT_SIZE_EXCEEDED;
+            break;
+        }
+        if !(fr.contentType.startsWith("image/")
                 || fr.contentType == "application/pdf"
                 || fr.contentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-                valid = false;
-                err["documents"] = INVALID_DOCUMENT_TYPE;
-                break;
-            }
+            valid = false;
+            err["documents"] = INVALID_DOCUMENT_TYPE;
+            break;
         }
+    }
     return {isValid: valid, errors: err};
 }
 

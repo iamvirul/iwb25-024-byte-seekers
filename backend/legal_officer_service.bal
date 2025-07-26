@@ -6,6 +6,7 @@ import ballerina/http;
 // import ballerina/io;
 import ballerina/persist;
 import ballerina/sql;
+import ballerina/time;
 
 listener http:Listener legalOfficerMicroservice = new (9080);
 
@@ -149,4 +150,37 @@ service /legal_officer on legalOfficerMicroservice {
         return response;
     }
 
+    resource function post comment/add(common:RequestDsiputeComment updateRequest) returns error|http:Response {
+        http:Response response = new;
+        common:ValidationResult validateLandInsert = Utils:validateDisputeComment(updateRequest);
+        if !validateLandInsert.isValid {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, validateLandInsert.errors);
+            return response;
+        }
+
+        sql:ParameterizedQuery query = `case_id = ${updateRequest.caseId}`;
+        stream<DB:Dispute, persist:Error?> disputeStream = self.dbClient->/disputes(DB:Dispute, query);
+        check from var dispute in disputeStream
+            do {
+                DB:DisputeCommentInsert disputeComment = {
+                    comment: updateRequest.comment,
+                    createdAt: time:utcNow(),
+                    disputesId: dispute.id
+                };
+                int[]|persist:Error disputeCommentResult = self.dbClient->/disputecomments.post([disputeComment]);
+                if disputeCommentResult is persist:Error {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_COMMENT);
+                    return response;
+                }
+                response.statusCode = 200;
+                response = Utils:setSuccessResponse(response, {"message": "Comment added successfully"});
+                return response;
+            };
+        check disputeStream.close();
+        response.statusCode = 404;
+        response = Utils:setErrorResponse(response, Utils:INVALID_CASE_ID);
+        return response;
+    }
 }

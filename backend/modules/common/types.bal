@@ -82,6 +82,11 @@ public type UpdateDisputeEstimateTime record {|
     string estimateTime;
 |};
 
+public type RequestDsiputeComment record {|
+    string caseId;
+    string comment;
+|};
+
 public type LandCreate record {|
     string landId;
     string landName;

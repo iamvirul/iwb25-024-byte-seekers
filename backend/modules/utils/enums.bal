@@ -119,7 +119,8 @@ public enum DISPUTE_ERRORS {
     INVALID_CASE_ID = "Invalid case ID",
     FAILED_TO_UPDATE_DISPUTE = "Failed to update dispute",
     DISPUTE_ESTIMATE_TIME_UPDATED = "Dispute estimate time updated successfully",
-    FAILED_TO_ADD_DISPUTE_DOCUMENT = "Failed to add dispute document"
+    FAILED_TO_ADD_DISPUTE_DOCUMENT = "Failed to add dispute document",
+    FAILED_TO_ADD_COMMENT = "Failed to add comment"
 }
 
 public enum DOCUMENT_ERRORS {
