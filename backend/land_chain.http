@@ -21,7 +21,24 @@ date: Thu, 24 Jul 2025 23:02:29 +0530
 content-encoding: gzip
 content-length: 79
 ###
-POST http://localhost:9095/land/register
+POST http://localhost:9091/auth/users/login
+Content-Type: application/json
+
+{
+  "email": "hiranyagunawardhane@gmail.com",
+  "password": "Hiru2005@",
+  "user_type": 3
+}
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Sat, 26 Jul 2025 20:27:46 +0530
+content-encoding: gzip
+content-length: 495
+###
+POST http://localhost:9095/land_officer/land/register
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzU3NzEwLCAibmJmIjoxNzUzMzU0MTEwLCAiaWF0IjoxNzUzMzU0MTEwfQ.cwpAOVn31X74lc_440Qk1EMxgfkCIrP_lQx7-4JBTo31ca_VcGdxfyTSHGtXvGY95hkqCDveO2VnpHNtJpVGlSCpo7ZgFVyDnwum-EePyO4dzEN0jnMfO-h1PZUGKnm9zZFirL-CfyHb4UMqD1Pvgru8aXk4VvGPKhZmP-_Klhne7fCbK9NJfYomfLTqk6-kuOo4NuXkx5llJspyfJgONK_oj_aqOxk0QCtgnIrBS__ZlqMXiQ-_nxQMzAcOsbp0u3LYP3V9HRAQ7a5_FpLIz3stobCHfdQUPavRR6RNz58b_iangMtWEyT_ecED7rCp3HcpJ_5ndHVnuINtcAczRA
 Content-Type: application/json
 
@@ -51,24 +68,7 @@ date: Thu, 24 Jul 2025 17:53:12 +0530
 content-encoding: gzip
 content-length: 62
 ###
-POST http://localhost:9091/auth/users/login
-Content-Type: application/json
-
-{
-  "email": "roshan@gmail.com",
-  "password": "Hiru2005@",
-  "user_type": 4
-}
-
-HTTP/1.1 200  - OK
-content-type: application/json
-connection: close
-server: ballerina
-date: Fri, 25 Jul 2025 00:32:46 +0530
-content-encoding: gzip
-content-length: 476
-###
-GET http://localhost:9095/land/getAllLands
+GET http://localhost:9095/land_officer/land/all
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzYwODgxLCAibmJmIjoxNzUzMzU3MjgxLCAiaWF0IjoxNzUzMzU3MjgxfQ.flFVTk2MJazz9lD2cpBKUARu4rkkcSdSmUciwvUgAjo5Kseceicnjqsk0nBXGgj93YZgNmLLIA-9M5xzYjRvoRQ8_7tDmdvAoi7mvZwnEeDOP9FN6EEIOPbfLR5HK4frL4Bp-zHlnlA8u-TM095P4axckWKXU9_i9Ce7Lp6e8EdAFc6upz1jpx1WamO7dqt2FDguWT28wBGyy6KaDl_JFnS626yf45warLv0cO8VSOMJckzHZ45Xfy9sjpgufPrB852KnbnoZQbwnnOAvqx_OBsm63rB-LQH9-xvmqDERBBYem_Qt_LVLVHcbEkVztV0mCAqUhKfMArkjMzuWpgKRw
 ###
@@ -84,17 +84,16 @@ date: Thu, 24 Jul 2025 17:53:13 +0530
 content-encoding: gzip
 content-length: 263
 ###
-GET http://localhost:9095/land/getLegelOfficers
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzYwODgxLCAibmJmIjoxNzUzMzU3MjgxLCAiaWF0IjoxNzUzMzU3MjgxfQ.flFVTk2MJazz9lD2cpBKUARu4rkkcSdSmUciwvUgAjo5Kseceicnjqsk0nBXGgj93YZgNmLLIA-9M5xzYjRvoRQ8_7tDmdvAoi7mvZwnEeDOP9FN6EEIOPbfLR5HK4frL4Bp-zHlnlA8u-TM095P4axckWKXU9_i9Ce7Lp6e8EdAFc6upz1jpx1WamO7dqt2FDguWT28wBGyy6KaDl_JFnS626yf45warLv0cO8VSOMJckzHZ45Xfy9sjpgufPrB852KnbnoZQbwnnOAvqx_OBsm63rB-LQH9-xvmqDERBBYem_Qt_LVLVHcbEkVztV0mCAqUhKfMArkjMzuWpgKRw
+PUT http://localhost:9070/land_officer/land/status/1/REJECTED
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzNTQ1NDY2LCAibmJmIjoxNzUzNTQxODY2LCAiaWF0IjoxNzUzNTQxODY2LCAic2NwIjoiTEFORF9PRkZJQ0VSIn0.huH0RKCjQtWYGg3Enxxaodf-aXspTn5mXQZOx2C3e5iORkJqjn5SdLy2Geki3ro6fVRkPpK9FCHL8pQo9jwuCpkS7KsCfm1DvwsK96fnLGMVTJIoAotskc4tNOLAv9JMQdPMKWusT9SD4iOxozxNFp-LTF9GibmL2NGQSR_CwL6x7XrL7QZsyJM4Acc1p2MtqGhDQjMGnIWya6iMskfk26XLOyfK78Rf8Jo__8VsNOhHhxO6SFV6GJ1L9Nui0VyKYSfCQTnn9jaCkJje6OZHcu3wugIuEPeSTClvACnmrHbW1QgzKuaBBj6hrig3B-q8fnBxYx8KOvIU6e9VINoCSg
 
 HTTP/1.1 200  - OK
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 17:53:14 +0530
+date: Sat, 26 Jul 2025 20:29:39 +0530
 content-encoding: gzip
-content-length: 448
+content-length: 76
 ###
 POST http://localhost:9098/land_owner/createDispute
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09XTkVSIiwgImV4cCI6MTc1MzM4NzIwMSwgIm5iZiI6MTc1MzM4MzYwMSwgImlhdCI6MTc1MzM4MzYwMX0.TLulKo6FVafeFjQUA56ewW61deyOuu8tklT7lPuwylHckhyHQmqsRRB9Q8Q_fl9qKqktF_IyIoZUVr_pXrIAD2y7NurZUWvecykdq7O5pNzTNqOAbdORgY7Re85VdcyRPc6iaquHmvmmTfWbjtTSJZL53sOwioo2DJNQuo99qfw4LZTLQXab2_LBSmp4tr4cVMekiCUsVZS0ELacrMEG7TjwanPuk5n9wAi0hRhdYAWH93gmekm39XE0VG_8Fo7wg6GIQ1NPcaFbqLTKdOK3TCYM9eG-Tb6hMJo4_lxQi2CkiudP37_S_-iQfgLV-UTJXxI4P2We970AIDeR1ofgsQ

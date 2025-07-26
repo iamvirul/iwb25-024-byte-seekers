@@ -35,6 +35,23 @@ public function getUserType(int userType) returns USER_TYPES|error {
     }
 }
 
+public function getLandStatus(DB:LandLandStatus landStatus) returns boolean|error {
+    match landStatus {
+        DB:PENDING => {
+            return true;
+        }
+        DB:VERIFIED => {
+            return true;
+        }
+        DB:REJECTED => {
+            return true;
+        }
+        _ => {
+            return error(INVALID_LAND_STATUS);
+        }
+    }
+}
+
 public function getCourtType(string courtType) returns DB:LegalPrecedentCourt|error {
     match courtType {
         "SUPREME_COURT" => {

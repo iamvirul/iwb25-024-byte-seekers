@@ -15,7 +15,7 @@ configurable string blockchain_api_key = ?;
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["*"],
-        allowMethods: ["GET", "POST"],
+        allowMethods: ["GET", "POST", "PUT"],
         allowCredentials: true
     },
     auth: [
@@ -249,6 +249,44 @@ service /land_officer on landMicroservice {
                 {
                     "land": land.toJson()
                 });
+        return response;
+    }
+
+    resource function put land/status/[int landID]/[DB:LandLandStatus status]() returns error|http:Response {
+        http:Response response = new;
+        boolean|error landStatus = Utils:getLandStatus(status);
+        if landStatus is error {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, landStatus.message());
+            return response;
+        }
+        if landID <= 0 {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, Utils:INVALID_LAND_ID);
+            return response;
+        }
+        DB:LandUpdate|persist:Error landResult = self.dbClient->/lands/[landID](DB:LandUpdate);
+
+        if landResult is persist:Error {
+            if landResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, Utils:LAND_NOT_FOUND);
+            } else {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LANDS);
+            }
+            return response;
+        }
+        DB:LandUpdate land = landResult;
+        land.landStatus = status; 
+        DB:Land|persist:Error updateResult = self.dbClient->/lands/[landID].put(land);
+        if updateResult is persist:Error {
+            response.statusCode = 500;
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_LAND_STATUS);
+            return response;
+        }
+        response.statusCode = 200;
+        response = Utils:setSuccessResponse(response, Utils:LAND_UPDATE_SUCCESS);
         return response;
     }
 }

@@ -96,7 +96,9 @@ public enum LAND_ERRORS {
     FAILED_TO_REGISTER_LAND = "Failed to register land",
     FAILED_TO_FETCH_LANDS = "Failed to fetch lands",
     NO_LANDS_FOUND = "No lands found",
-    INVALID_LAND_ID = "Invalid land ID"
+    INVALID_LAND_ID = "Invalid land ID",
+    FAILED_TO_UPDATE_LAND_STATUS = "Failed to update land status",
+    INVALID_LAND_STATUS = "Invalid land status"
 }
 
 public enum LAND_OWNER_ERRORS {
