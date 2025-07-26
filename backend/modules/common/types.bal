@@ -165,5 +165,5 @@ public type RequestPrecedent record {|
     string court;
     string decision;
     string summary;
-    string[] lelalClauses;
+    string[] legalClauses;
 |};

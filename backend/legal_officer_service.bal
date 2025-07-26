@@ -1,6 +1,7 @@
 import backend.common;
 import backend.db as DB;
 import backend.utils as Utils;
+import backend.mappers as Mapper;
 
 import ballerina/http;
 // import ballerina/io;
@@ -201,21 +202,19 @@ service /legal_officer on legalOfficerMicroservice {
             dispute = result.value;
         }
         if dispute is DB:Dispute {
-            DB:LegalPrecedentInsert precedentInsert = {
-                year: {year: 0, month: 0, day: 0},
-                headline: requestPrecedent.headline,
-                court: check Utils:getCourtType(requestPrecedent.court),
-                decision: requestPrecedent.decision,
-                summary: requestPrecedent.summary,
-                disputesId: dispute.id
-            };
+            DB:LegalPrecedentInsert|error precedentInsert = Mapper:legalPrecedentInsertMapper(requestPrecedent, dispute);
+            if precedentInsert is error {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_PRECEDENT);
+                return response;
+            }
             int[]|persist:Error precedentResult = self.dbClient->/legalprecedents.post([precedentInsert]);
             if precedentResult is persist:Error {
                 response.statusCode = 500;
                 response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_PRECEDENT);
                 return response;
             }
-            foreach var clause in requestPrecedent.lelalClauses {
+            foreach var clause in requestPrecedent.legalClauses {
                 DB:LegalClauseInsert clauseInsert = {
                     legalClause: clause,
                     legalPrecedentsId: precedentResult[0]

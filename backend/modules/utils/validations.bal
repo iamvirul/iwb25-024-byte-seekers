@@ -374,7 +374,7 @@ public function validateLegalPrecedent(Common:RequestPrecedent precedent) return
     if precedent.court == "" {
         errorFlag = true;
         errorMsg["court"] = "Court is required";
-    } else if precedent.court != "SUPREME_COURT" || precedent.court != "APPELLATE_COURT" || precedent.court != "HIGH_COURT" || precedent.court != "DISTRICT_COURT" {
+    } else if getCourtType(precedent.court) is error {
         errorFlag = true;
         errorMsg["court"] = "Invalid court type";
     }
@@ -387,11 +387,11 @@ public function validateLegalPrecedent(Common:RequestPrecedent precedent) return
         errorMsg["summary"] = "Summary is required";
     }
 
-    if precedent.lelalClauses.length() == 0 {
+    if precedent.legalClauses.length() == 0 {
         errorFlag = true;
         errorMsg["lelalClauses"] = "Lelal clauses are required";
     } else {
-        foreach var clause in precedent.lelalClauses {
+        foreach var clause in precedent.legalClauses {
             if clause == "" {
                 errorFlag = true;
                 errorMsg["lelalClauses"] = "Lelal clauses cannot be empty";

@@ -1,5 +1,7 @@
 import backend.common as Common;
 import backend.db as DB;
+import backend.utils as Utils;
+
 import ballerina/time;
 
 public function landInsertMapper(Common:LandCreate landInsert) returns DB:LandInsert {
@@ -29,5 +31,17 @@ public function disputeInsertMapper(Common:DisputeForm parsed, string caseId) re
         caseId: caseId,
         estimateTime: "",
         createdAt: time:utcNow()
+    };
+}
+
+public function legalPrecedentInsertMapper(Common:RequestPrecedent requestPrecedent, DB:Dispute dispute) returns DB:LegalPrecedentInsert|error {
+    time:Date dateFromYear = check Utils:dateFromYear(requestPrecedent.year);
+    return {
+        year: {year: dateFromYear.year, month: dateFromYear.month, day: dateFromYear.day},
+        headline: requestPrecedent.headline,
+        court: check Utils:getCourtType(requestPrecedent.court),
+        decision: requestPrecedent.decision,
+        summary: requestPrecedent.summary,
+        disputesId: dispute.id
     };
 }
