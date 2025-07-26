@@ -85,32 +85,38 @@ service /land_officer on landMicroservice {
 
                 }
             }
-
-            error|int fromLandOwnerResult = self.creatLandOwner(requestLandInsert.from_owner);
-            error|int toLandOwnerResult = self.creatLandOwner(requestLandInsert.to_owner);
-            if fromLandOwnerResult is error {
-                response.statusCode = 500;
-                response = Utils:setErrorResponse(response, fromLandOwnerResult.message());
+            boolean isFromOwnerProvided = requestLandInsert.from_owner is (DB:LandOwnerInsert);
+            int fromLandOwnerResult = 0;
+            if requestLandInsert.from_owner is (DB:LandOwnerInsert) {
+                fromLandOwnerResult = check self.creatLandOwner(<DB:LandOwnerInsert>requestLandInsert.from_owner);
             }
+            error|int toLandOwnerResult = self.creatLandOwner(requestLandInsert.to_owner);
 
             if toLandOwnerResult is error {
                 response.statusCode = 500;
                 response = Utils:setErrorResponse(response, toLandOwnerResult.message());
             }
 
-            json blockchainPayload = {
+             time:Utc utc = check time:utcFromString(requestLandInsert.transferDate);
+
+            Common:LandInsertResponse rawPayload = {
                 "LandID": landInsertID is int[] ? landInsertID[0] : 0,
-                "FromOwnerID": fromLandOwnerResult is int ? fromLandOwnerResult : 0,
+                "FromOwnerID": isFromOwnerProvided ? fromLandOwnerResult : (),
                 "ToOwnerID": toLandOwnerResult is int ? toLandOwnerResult : 0,
-                "TransferDate": "2025-07-23T10:00:00Z",
-                "VerifiedBy": "hi"
+                "TransferDate": time:utcToString(utc),
+                "VerifiedBy": requestLandInsert.verified_by is string ?  requestLandInsert.verified_by is "" ? "unknown" : requestLandInsert.verified_by : "unknown"
             };
+            json payload = rawPayload.toJson();
 
             map<string> blockchainHeaders = {
                 "x-api-key": blockchain_api_key
             };
             http:Client blockchainClient = check new (blockchain_url);
-            http:Response|http:ClientError blockchain_response = blockchainClient->post("/transfer", blockchainPayload, blockchainHeaders);
+            http:Response|http:ClientError blockchain_response = blockchainClient->post("/transfer", payload, blockchainHeaders);
+            if blockchain_response is http:ClientError {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, "Failed to connect to blockchain service");
+            }
             if blockchain_response is http:Response {
                 json blockchainResponsePayload = check blockchain_response.getJsonPayload();
                 if blockchainResponsePayload.success is false {
@@ -159,12 +165,12 @@ service /land_officer on landMicroservice {
                 foreach var doc in parseLandDocuments {
                     string ext = Utils:getExtension(doc.contentType, doc.filename);
                     string base = landId.toString() + "_doc" + docIndex.toString();
-                    string path = " landdocuments/" + landId.toString()+"/";
+                    string path = " landdocuments/" + landId.toString() + "/";
                     string|error uploaded = Utils:uploadFile(doc.data, path, base, ext);
                     if uploaded is error {
                         response.statusCode = 500;
                         response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPLOAD_DOCUMENT);
-                        
+
                     } else {
                         DB:LandDocumentInsert landDocInsert = {
                             docPath: uploaded,
@@ -182,7 +188,7 @@ service /land_officer on landMicroservice {
                             }
                             response.statusCode = 500;
                             response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_DISPUTE_DOCUMENT);
-                        } 
+                        }
                     }
                     docIndex += 1;
                 }
