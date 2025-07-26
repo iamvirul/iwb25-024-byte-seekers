@@ -6,7 +6,6 @@ import backend.utils as Utils;
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
-import ballerina/io;
 
 listener http:Listener landMicroservice = new (9070);
 
@@ -108,7 +107,7 @@ service /land_officer on landMicroservice {
                 "VerifiedBy": requestLandInsert.verified_by is string ?  requestLandInsert.verified_by is "" ? "unknown" : requestLandInsert.verified_by : "unknown"
             };
             json payload = rawPayload.toJson();
-            io:println("Land Insert Response: ", payload);
+
             map<string> blockchainHeaders = {
                 "x-api-key": blockchain_api_key
             };
