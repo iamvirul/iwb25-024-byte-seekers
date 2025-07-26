@@ -76,7 +76,6 @@ public type RequestDispute record {|
     int legalOfficerId;
 |};
 
-
 public type UpdateDisputeEstimateTime record {|
     string caseId;
     string estimateTime;
@@ -129,7 +128,7 @@ public type DisputeForm record {
 
 public type DisputeWithDocs record {|
     DB:Dispute dispute;
-    DB:DisputeDocument? [] documents;
+    DB:DisputeDocument?[] documents;
     DB:Land land;
     DB:LandOwner? currentOwner;
 |};
@@ -167,3 +166,7 @@ public type RequestPrecedent record {|
     string summary;
     string[] legalClauses;
 |};
+
+public type CountResult record {
+    int total;
+};

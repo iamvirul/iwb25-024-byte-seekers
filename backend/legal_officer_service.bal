@@ -1,10 +1,9 @@
 import backend.common;
 import backend.db as DB;
-import backend.utils as Utils;
 import backend.mappers as Mapper;
+import backend.utils as Utils;
 
 import ballerina/http;
-// import ballerina/io;
 import ballerina/persist;
 import ballerina/sql;
 import ballerina/time;
@@ -233,6 +232,38 @@ service /legal_officer on legalOfficerMicroservice {
         }
         response.statusCode = 200;
         response = Utils:setSuccessResponse(response, {"message": "Precedent added successfully"});
+        return response;
+    }
+
+    resource function get stats/[int legelOfficerId]() returns error|http:Response {
+        http:Response response = new;
+        stream<common:CountResult, persist:Error?> pendingResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legelOfficerId} AND status = 'PENDING'`, common:CountResult);
+        stream<common:CountResult, persist:Error?> rejectedResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legelOfficerId} AND status = 'REJECTED'`, common:CountResult);
+        stream<common:CountResult, persist:Error?> resolvedResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legelOfficerId} AND status = 'RESOLVED'`, common:CountResult);
+        stream<common:CountResult, persist:Error?> lpResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM legal_precedents lp JOIN disputes d ON lp.disputes_id = d.id WHERE d.legal_officer_id = ${legelOfficerId}`, common:CountResult);
+
+        record {|common:CountResult value;|}? pendingResult = check pendingResultStream.next();
+        _ = check pendingResultStream.close();
+        record {|common:CountResult value;|}? rejectedResult = check rejectedResultStream.next();
+        _ = check rejectedResultStream.close();
+        record {|common:CountResult value;|}? resolvedResult = check resolvedResultStream.next();
+        _ = check resolvedResultStream.close();
+        record {|common:CountResult value;|}? lpResult = check lpResultStream.next();
+        _ = check lpResultStream.close();
+
+
+        if pendingResult is record {|common:CountResult value;|} && rejectedResult is record {|common:CountResult value;|} && resolvedResult is record {|common:CountResult value;|}  && lpResult is record {|common:CountResult value;|} {
+            response.statusCode = 200;
+            response = Utils:setSuccessResponse(response, {
+                "pending": pendingResult.value.total,
+                "rejected": rejectedResult.value.total,
+                "resolved": resolvedResult.value.total,
+                "legalPrecedents": lpResult.value.total
+            });
+        } else {
+            response.statusCode = 500;
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_STATS);
+        }
         return response;
     }
 }
