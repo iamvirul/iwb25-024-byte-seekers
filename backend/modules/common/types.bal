@@ -99,8 +99,18 @@ public type LandCreate record {|
     time:Date registerDate;
     DB:LandLandStatus landStatus;
     int priority;
-    DB:LandOwnerInsert from_owner;
+    DB:LandOwnerInsert? from_owner;
     DB:LandOwnerInsert to_owner;
+    string verified_by;
+    string transferDate;
+|};
+
+public type LandInsertResponse record {|
+    int LandID;
+    int ToOwnerID;
+    int? FromOwnerID;
+    string TransferDate;
+    string VerifiedBy;
 |};
 
 public type FileRecord record {
