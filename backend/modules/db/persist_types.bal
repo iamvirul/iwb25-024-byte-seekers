@@ -151,6 +151,7 @@ public type UserOptionalized record {|
 
 public type UserWithRelations record {|
     *UserOptionalized;
+    AuditOptionalized[] audits?;
     UserHasUserTypeOptionalized[] userhasusertypes?;
 |};
 
@@ -448,6 +449,55 @@ public type LandUpdate record {|
     time:Date registerDate?;
     LandLandStatus landStatus?;
     int priority?;
+|};
+
+public type Audit record {|
+    readonly int id;
+    string requestPath;
+    string requestMethod;
+    string userAgent;
+    string requestPayload;
+    string requestHost;
+    time:Civil requestedTime;
+    int usersId;
+|};
+
+public type AuditOptionalized record {|
+    int id?;
+    string requestPath?;
+    string requestMethod?;
+    string userAgent?;
+    string requestPayload?;
+    string requestHost?;
+    time:Civil requestedTime?;
+    int usersId?;
+|};
+
+public type AuditWithRelations record {|
+    *AuditOptionalized;
+    UserOptionalized user?;
+|};
+
+public type AuditTargetType typedesc<AuditWithRelations>;
+
+public type AuditInsert record {|
+    string requestPath;
+    string requestMethod;
+    string userAgent;
+    string requestPayload;
+    string requestHost;
+    time:Civil requestedTime;
+    int usersId;
+|};
+
+public type AuditUpdate record {|
+    string requestPath?;
+    string requestMethod?;
+    string userAgent?;
+    string requestPayload?;
+    string requestHost?;
+    time:Civil requestedTime?;
+    int usersId?;
 |};
 
 public type DisputeComment record {|

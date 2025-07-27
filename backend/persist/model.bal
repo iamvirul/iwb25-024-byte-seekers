@@ -91,6 +91,7 @@ public type User record {|
     @sql:Name {value: "contact_no"}
     byte[] contactNo;
     byte[]? address;
+    Audit[] audits;
     UserHasUserType[] userhasusertypes;
 |};
 
@@ -235,6 +236,33 @@ public type Land record {|
     Dispute[] disputes;
     LandTransferChain[] landtransferchains;
     LandDocument[] landdocuments;
+|};
+
+@sql:Name {value: "audits"}
+public type Audit record {|
+    @sql:Generated
+    readonly int id;
+    @sql:Name {value: "users_id"}
+    @sql:Index {name: "fk_audits_users1_idx"}
+    int usersId;
+    @sql:Name {value: "request_path"}
+    @sql:Varchar {length: 60}
+    string requestPath;
+    @sql:Name {value: "request_method"}
+    @sql:Varchar {length: 45}
+    string requestMethod;
+    @sql:Name {value: "user_agent"}
+    @sql:Varchar {length: 100}
+    string userAgent;
+    @sql:Name {value: "request_payload"}
+    string requestPayload;
+    @sql:Name {value: "request_host"}
+    @sql:Varchar {length: 100}
+    string requestHost;
+    @sql:Name {value: "requested_time"}
+    time:Civil requestedTime;
+    @sql:Relation {keys: ["usersId"]}
+    User user;
 |};
 
 @sql:Name {value: "dispute_comments"}

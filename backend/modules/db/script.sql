@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS `land_transfer_chain`;
 DROP TABLE IF EXISTS `dispute_comments`;
 DROP TABLE IF EXISTS `legal_clauses`;
 DROP TABLE IF EXISTS `legal_precedents`;
+DROP TABLE IF EXISTS `audits`;
 DROP TABLE IF EXISTS `disputes`;
 DROP TABLE IF EXISTS `legal_officer`;
 DROP TABLE IF EXISTS `user_types`;
@@ -85,6 +86,19 @@ CREATE TABLE `disputes` (
 	FOREIGN KEY(`lands_id`) REFERENCES `lands`(`id`),
 	`legal_officer_id` INT NOT NULL,
 	FOREIGN KEY(`legal_officer_id`) REFERENCES `legal_officer`(`id`),
+	PRIMARY KEY(`id`)
+);
+
+CREATE TABLE `audits` (
+	`id` INT AUTO_INCREMENT,
+	`request_path` VARCHAR(60) NOT NULL,
+	`request_method` VARCHAR(45) NOT NULL,
+	`user_agent` VARCHAR(100) NOT NULL,
+	`request_payload` VARCHAR(191) NOT NULL,
+	`request_host` VARCHAR(100) NOT NULL,
+	`requested_time` DATETIME NOT NULL,
+	`users_id` INT NOT NULL,
+	FOREIGN KEY(`users_id`) REFERENCES `users`(`id`),
 	PRIMARY KEY(`id`)
 );
 
@@ -170,6 +184,7 @@ CREATE INDEX `fk_disputes_document_disputes1_idx` ON `disputes_document` (`dispu
 CREATE INDEX `fk_land_transfer_chain_lands1_idx` ON `land_transfer_chain` (`lands_id`);
 CREATE INDEX `fk_land_transfer_chain_land_owners1_idx` ON `land_transfer_chain` (`from_land_owners_id`);
 CREATE INDEX `fk_land_transfer_chain_land_owners2_idx` ON `land_transfer_chain` (`to_land_owners_id`);
+CREATE INDEX `fk_audits_users1_idx` ON `audits` (`users_id`);
 CREATE INDEX `fk_dispute_comments_disputes1_idx` ON `dispute_comments` (`disputes_id`);
 CREATE INDEX `fk_users_has_user_types_users1_idx` ON `users_has_user_types` (`users_id`);
 CREATE INDEX `fk_users_has_user_types_user_types1_idx` ON `users_has_user_types` (`user_types_id`);

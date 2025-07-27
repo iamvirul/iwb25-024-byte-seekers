@@ -19,6 +19,7 @@ const LEGAL_OFFICER = "legalofficers";
 const LAND_TRANSFER_CHAIN = "landtransferchains";
 const LAND_OWNER = "landowners";
 const LAND = "lands";
+const AUDIT = "audits";
 const DISPUTE_COMMENT = "disputecomments";
 const USER_HAS_USER_TYPE = "userhasusertypes";
 const DISPUTE = "disputes";
@@ -103,11 +104,22 @@ public isolated client class H2Client {
                 sludi: {columnName: "sludi"},
                 contactNo: {columnName: "contact_no"},
                 address: {columnName: "address"},
+                "audits[].id": {relation: {entityName: "audits", refField: "id"}},
+                "audits[].requestPath": {relation: {entityName: "audits", refField: "requestPath", refColumn: "request_path"}},
+                "audits[].requestMethod": {relation: {entityName: "audits", refField: "requestMethod", refColumn: "request_method"}},
+                "audits[].userAgent": {relation: {entityName: "audits", refField: "userAgent", refColumn: "user_agent"}},
+                "audits[].requestPayload": {relation: {entityName: "audits", refField: "requestPayload", refColumn: "request_payload"}},
+                "audits[].requestHost": {relation: {entityName: "audits", refField: "requestHost", refColumn: "request_host"}},
+                "audits[].requestedTime": {relation: {entityName: "audits", refField: "requestedTime", refColumn: "requested_time"}},
+                "audits[].usersId": {relation: {entityName: "audits", refField: "usersId", refColumn: "users_id"}},
                 "userhasusertypes[].userTypesId": {relation: {entityName: "userhasusertypes", refField: "userTypesId", refColumn: "user_types_id"}},
                 "userhasusertypes[].usersId": {relation: {entityName: "userhasusertypes", refField: "usersId", refColumn: "users_id"}}
             },
             keyFields: ["id"],
-            joinMetadata: {userhasusertypes: {entity: UserHasUserType, fieldName: "userhasusertypes", refTable: "users_has_user_types", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
+            joinMetadata: {
+                audits: {entity: Audit, fieldName: "audits", refTable: "audits", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                userhasusertypes: {entity: UserHasUserType, fieldName: "userhasusertypes", refTable: "users_has_user_types", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+            }
         },
         [LEGAL_CLAUSE]: {
             entityName: "LegalClause",
@@ -302,6 +314,32 @@ public isolated client class H2Client {
                 landdocuments: {entity: LandDocument, fieldName: "landdocuments", refTable: "lands_documents", refColumns: ["lands_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
+        [AUDIT]: {
+            entityName: "Audit",
+            tableName: "audits",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                requestPath: {columnName: "request_path"},
+                requestMethod: {columnName: "request_method"},
+                userAgent: {columnName: "user_agent"},
+                requestPayload: {columnName: "request_payload"},
+                requestHost: {columnName: "request_host"},
+                requestedTime: {columnName: "requested_time"},
+                usersId: {columnName: "users_id"},
+                "user.id": {relation: {entityName: "user", refField: "id"}},
+                "user.userId": {relation: {entityName: "user", refField: "userId", refColumn: "user_id"}},
+                "user.firstName": {relation: {entityName: "user", refField: "firstName", refColumn: "first_name"}},
+                "user.lastName": {relation: {entityName: "user", refField: "lastName", refColumn: "last_name"}},
+                "user.email": {relation: {entityName: "user", refField: "email"}},
+                "user.password": {relation: {entityName: "user", refField: "password"}},
+                "user.nic": {relation: {entityName: "user", refField: "nic"}},
+                "user.sludi": {relation: {entityName: "user", refField: "sludi"}},
+                "user.contactNo": {relation: {entityName: "user", refField: "contactNo", refColumn: "contact_no"}},
+                "user.address": {relation: {entityName: "user", refField: "address"}}
+            },
+            keyFields: ["id"],
+            joinMetadata: {user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["users_id"], 'type: psql:ONE_TO_MANY}}
+        },
         [DISPUTE_COMMENT]: {
             entityName: "DisputeComment",
             tableName: "dispute_comments",
@@ -433,6 +471,7 @@ public isolated client class H2Client {
             [LAND_TRANSFER_CHAIN]: check new (dbClient, self.metadata.get(LAND_TRANSFER_CHAIN), psql:H2_SPECIFICS),
             [LAND_OWNER]: check new (dbClient, self.metadata.get(LAND_OWNER), psql:H2_SPECIFICS),
             [LAND]: check new (dbClient, self.metadata.get(LAND), psql:H2_SPECIFICS),
+            [AUDIT]: check new (dbClient, self.metadata.get(AUDIT), psql:H2_SPECIFICS),
             [DISPUTE_COMMENT]: check new (dbClient, self.metadata.get(DISPUTE_COMMENT), psql:H2_SPECIFICS),
             [USER_HAS_USER_TYPE]: check new (dbClient, self.metadata.get(USER_HAS_USER_TYPE), psql:H2_SPECIFICS),
             [DISPUTE]: check new (dbClient, self.metadata.get(DISPUTE), psql:H2_SPECIFICS),
@@ -795,6 +834,46 @@ public isolated client class H2Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(LAND);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get audits(AuditTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.H2Processor",
+        name: "query"
+    } external;
+
+    isolated resource function get audits/[int id](AuditTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.H2Processor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post audits(AuditInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(AUDIT);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put audits/[int id](AuditUpdate value) returns Audit|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(AUDIT);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/audits/[id].get();
+    }
+
+    isolated resource function delete audits/[int id]() returns Audit|persist:Error {
+        Audit result = check self->/audits/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(AUDIT);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;

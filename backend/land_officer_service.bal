@@ -33,7 +33,7 @@ configurable string blockchain_api_key = ?;
     ]
 }
 
-service /land_officer on landMicroservice {
+service http:InterceptableService /land_officer on landMicroservice {
     private final DB:Client dbClient;
 
     function init() returns error? {
@@ -44,6 +44,9 @@ service /land_officer on landMicroservice {
         check self.dbClient.close();
     }
 
+    public function createInterceptors() returns RequestInterceptor {
+        return new RequestInterceptor() ;
+    }
     private function creatLandOwner(DB:LandOwnerInsert landOwnerInsert) returns error|int {
         transaction {
             int[]|persist:Error landOwnerID = self.dbClient->/landowners.post([landOwnerInsert]);

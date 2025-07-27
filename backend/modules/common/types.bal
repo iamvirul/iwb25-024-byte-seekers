@@ -170,3 +170,4 @@ public type RequestPrecedent record {|
 public type CountResult record {
     int total;
 };
+
