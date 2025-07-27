@@ -19,11 +19,9 @@ const int INITIAL_RETRY_DELAY_MS = 1000;
 }
 service on rabbitmqListener {
     private final DB:Client dbClient;
-    private final rabbitmq:Client rabbitmqClient;
 
     function init() returns error? {
         self.dbClient = check new ();
-        self.rabbitmqClient = check new (rabbitmq:DEFAULT_HOST, rabbitmq:DEFAULT_PORT);
     }
 
     remote function onMessage(Common:DisputeMessage disputeMessage) returns error? {
@@ -87,7 +85,7 @@ service on rabbitmqListener {
         log:printInfo("Scheduling retry " + disputeMessage.retryCount.toString() +
                     " for dispute " + disputeMessage.disputeInsert.caseId +
                     " with delay " + delayMs.toString() + "ms");
-        check self.rabbitmqClient->publishMessage({
+        check rabbitmqClient->publishMessage({
             content: disputeMessage,
             routingKey: disputeQueueName,
             properties: {headers: {"x-delay": delayMs}}
@@ -97,7 +95,7 @@ service on rabbitmqListener {
     private function handleFailure(Common:DisputeMessage disputeMessage) returns error? {
         log:printError("Max retries exceeded or non-retryable error for dispute: " +
                     disputeMessage.disputeInsert.caseId);
-        check self.rabbitmqClient->publishMessage({
+        check rabbitmqClient->publishMessage({
             content: disputeMessage,
             routingKey: deadLetterQueueName
         });
