@@ -1,11 +1,11 @@
 import ballerinax/rabbitmq;
 
-configurable string rabbitmqUsername = ?;
-configurable string rabbitmqPassword = ?;
+configurable string username = ?;
+configurable string password = ?;
 
 rabbitmq:ConnectionConfiguration config = {
-    username: rabbitmqUsername,
-    password: rabbitmqPassword
+    username: username,
+    password: password
 };
 
 public final rabbitmq:Client rabbitmqClient = check new (

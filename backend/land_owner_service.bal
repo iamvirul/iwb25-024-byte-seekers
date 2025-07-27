@@ -1,6 +1,7 @@
 import backend.common;
 import backend.db as DB;
 import backend.mappers as Mappers;
+import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
 
 import ballerina/http;
@@ -105,7 +106,7 @@ service /land_owner on landOwnerMicroservice {
             DB:DisputeInsert disputeInsert = Mappers:disputeInsertMapper(parsed, caseId);
             common:DisputeMessage disputeMessage = {disputeInsert, documents: parsed.documents};
             //publish dispute message to RabbitMQ
-            error? publishDisputeMessageResult = publishDisputeMessage(disputeMessage);
+            error? publishDisputeMessageResult = RabbitMQ:publishDisputeMessage(disputeMessage);
             if publishDisputeMessageResult is error {
                 response.statusCode = 500;
                 response = Utils:setErrorResponse(response, Utils:FAILED_TO_QUEUE_DISPUTE);

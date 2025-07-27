@@ -524,6 +524,7 @@ modules = [
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.common"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.db"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.mappers"},
+	{org = "virulnirmala", packageName = "backend", moduleName = "backend.rabbitmq"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.utils"}
 ]
 
