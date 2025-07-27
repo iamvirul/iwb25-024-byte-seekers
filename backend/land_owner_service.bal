@@ -5,7 +5,6 @@ import backend.utils as Utils;
 
 import ballerina/http;
 import ballerina/persist;
-// import ballerina/time;
 
 listener http:Listener landOwnerMicroservice = new (9098);
 
@@ -104,43 +103,16 @@ service /land_owner on landOwnerMicroservice {
                 return response;
             }
             DB:DisputeInsert disputeInsert = Mappers:disputeInsertMapper(parsed, caseId);
-            error? publishDisputeMessageResult = publishDisputeMessage(disputeInsert);
-            // //insert dispute
-            // int[]|persist:Error disputeResult = self.dbClient->/disputes.post([disputeInsert]);
-            // if disputeResult is persist:Error {
-            //     response.statusCode = 500;
-            //     response = Utils:setErrorResponse(response, Utils:FAILED_TO_REGISTER_LAND);
-            //     return response;
-            // }
-            // int insertedDisputeId = disputeResult[0];
-            // //upload documents
-            // int docIndex = 1;
-            // foreach var doc in parsed.documents {
-            //     string ext = Utils:getExtension(doc.contentType, doc.filename);
-            //     string base = caseId + "_doc" + docIndex.toString();
-            //     string|error uploaded = Utils:uploadFile(doc.data, "disputes/", base, ext);
-            //     if uploaded is error {
-            //         response.statusCode = 500;
-            //         response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPLOAD_DOCUMENT);
-            //         return response;
-            //     } else {
-            //         DB:DisputeDocumentInsert disputeDocInsert = {
-            //             disputesId: insertedDisputeId,
-            //             docPath: uploaded,
-            //             uploadedDate: time:utcNow()
-            //         };
-            //         int[]|persist:Error docResult = self.dbClient->/disputedocuments.post([disputeDocInsert]);
-            //         if docResult is persist:Error {
-            //             response.statusCode = 500;
-            //             response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_DISPUTE_DOCUMENT);
-            //             return response;
-            //         }
-            //     }
-            //     docIndex += 1;
-            // }
-
+            common:DisputeMessage disputeMessage = {disputeInsert, documents: parsed.documents};
+            //publish dispute message to RabbitMQ
+            error? publishDisputeMessageResult = publishDisputeMessage(disputeMessage);
+            if publishDisputeMessageResult is error {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, Utils:FAILED_TO_QUEUE_DISPUTE);
+                return response;
+            }
             response.statusCode = 201;
-            // response = Utils:setSuccessResponse(response, {"message": Utils:LAND_INSERT_SUCCESS, "case_id": disputeInsert.caseId});
+            response = Utils:setSuccessResponse(response, {"message": Utils:LAND_INSERT_SUCCESS, "case_id": disputeInsert.caseId});
             return response;
         }
         else {
@@ -149,6 +121,5 @@ service /land_owner on landOwnerMicroservice {
             return response;
         }
     }
-
 }
 
