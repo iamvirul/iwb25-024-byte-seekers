@@ -174,4 +174,5 @@ public type CountResult record {
 public type DisputeMessage record {|
     DB:DisputeInsert disputeInsert;
     FileRecord[] documents;
+    int retryCount = 0;
 |};

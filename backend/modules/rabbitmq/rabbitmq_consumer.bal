@@ -1,4 +1,4 @@
-import backend.common;
+import backend.common as Common;
 import backend.db as DB;
 import backend.utils as Utils;
 
@@ -7,52 +7,99 @@ import ballerina/persist;
 import ballerina/time;
 import ballerinax/rabbitmq;
 
-listener rabbitmq:Listener disputeListener = check new (rabbitmq:DEFAULT_HOST, rabbitmq:DEFAULT_PORT);
-public const string disputeQueueName = "dispute_queue";
+listener rabbitmq:Listener rabbitmqListener = check new (rabbitmq:DEFAULT_HOST, rabbitmq:DEFAULT_PORT);
+public const string disputeQueueName = "DISPUTE_QUEUE";
+public const string deadLetterQueueName = "DISPUTE_DLQ";
+const int MAX_RETRIES = 3;
+const int INITIAL_RETRY_DELAY_MS = 1000;
 
 @rabbitmq:ServiceConfig {
     queueName: disputeQueueName,
     autoAck: false
 }
-service on disputeListener {
+service on rabbitmqListener {
     private final DB:Client dbClient;
+    private final rabbitmq:Client rabbitmqClient;
 
     function init() returns error? {
         self.dbClient = check new ();
+        self.rabbitmqClient = check new (rabbitmq:DEFAULT_HOST, rabbitmq:DEFAULT_PORT);
     }
 
-    remote function onMessage(common:DisputeMessage message) returns error? {
-        log:printInfo("Received message: " + message.disputeInsert.caseId);
+    remote function onMessage(Common:DisputeMessage disputeMessage) returns error? {
+        log:printInfo("Processing dispute: " + disputeMessage.disputeInsert.caseId +
+                    ", Retry attempt: " + disputeMessage.retryCount.toString());
+        error? processingError = self.processDispute(disputeMessage);
+        if processingError is error {
+            log:printError("Error processing dispute", processingError);
+            if self.shouldRetry(disputeMessage, processingError) {
+                check self.handleRetry(disputeMessage);
+            } else {
+                check self.handleFailure(disputeMessage);
+            }
+        } else {
+            log:printInfo("Successfully processed dispute: " + disputeMessage.disputeInsert.caseId);
+        }
+    }
 
-        DB:DisputeInsert disputeInsert = message.disputeInsert;
+    private function processDispute(Common:DisputeMessage disputeMessage) returns error? {
+        DB:DisputeInsert disputeInsert = disputeMessage.disputeInsert;
         int[]|persist:Error disputeResult = self.dbClient->/disputes.post([disputeInsert]);
         if disputeResult is persist:Error {
-            check publishDisputeMessage(message);
-            return;
+            return error("Failed to insert dispute", disputeResult);
         }
         int insertedDisputeId = disputeResult[0];
-        //upload documents
         int docIndex = 1;
-        foreach var doc in message.documents {
+        foreach var doc in disputeMessage.documents {
             string ext = Utils:getExtension(doc.contentType, doc.filename);
             string base = disputeInsert.caseId + "_doc" + docIndex.toString();
             string|error uploaded = Utils:uploadFile(doc.data, "disputes/", base, ext);
             if uploaded is error {
-                return;
-            } else {
-                DB:DisputeDocumentInsert disputeDocInsert = {
-                    disputesId: insertedDisputeId,
-                    docPath: uploaded,
-                    uploadedDate: time:utcNow()
-                };
-                int[]|persist:Error docResult = self.dbClient->/disputedocuments.post([disputeDocInsert]);
-                if docResult is persist:Error {
-                    return;
-                }
+                return error("Failed to upload document", uploaded);
+            }
+            DB:DisputeDocumentInsert disputeDocInsert = {
+                disputesId: insertedDisputeId,
+                docPath: uploaded,
+                uploadedDate: time:utcNow()
+            };
+            int[]|persist:Error docResult = self.dbClient->/disputedocuments.post([disputeDocInsert]);
+            if docResult is persist:Error {
+                return error("Failed to insert dispute document", docResult);
             }
             docIndex += 1;
         }
     }
 
-}
+    private function shouldRetry(Common:DisputeMessage disputeMessage, error err) returns boolean {
+        if disputeMessage.retryCount >= MAX_RETRIES {
+            return false;
+        }
+        if err is persist:ConstraintViolationError {
+            return false;
+        }
+        return true;
+    }
 
+    private function handleRetry(Common:DisputeMessage disputeMessage) returns error? {
+        disputeMessage.retryCount += 1;
+        int delayMs = INITIAL_RETRY_DELAY_MS * (2 ^ (disputeMessage.retryCount - 1));
+
+        log:printInfo("Scheduling retry " + disputeMessage.retryCount.toString() +
+                    " for dispute " + disputeMessage.disputeInsert.caseId +
+                    " with delay " + delayMs.toString() + "ms");
+        check self.rabbitmqClient->publishMessage({
+            content: disputeMessage,
+            routingKey: disputeQueueName,
+            properties: {headers: {"x-delay": delayMs}}
+        });
+    }
+
+    private function handleFailure(Common:DisputeMessage disputeMessage) returns error? {
+        log:printError("Max retries exceeded or non-retryable error for dispute: " +
+                    disputeMessage.disputeInsert.caseId);
+        check self.rabbitmqClient->publishMessage({
+            content: disputeMessage,
+            routingKey: deadLetterQueueName
+        });
+    }
+}
