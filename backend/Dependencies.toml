@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.12.4"
+distribution-version = "2201.12.7"
 
 [[package]]
 org = "ballerina"
@@ -480,6 +480,19 @@ modules = [
 ]
 
 [[package]]
+org = "ballerinax"
+name = "rabbitmq"
+version = "3.2.1"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "uuid"}
+]
+modules = [
+	{org = "ballerinax", packageName = "rabbitmq", moduleName = "rabbitmq"}
+]
+
+[[package]]
 org = "virulnirmala"
 name = "backend"
 version = "0.1.0"
@@ -503,7 +516,8 @@ dependencies = [
 	{org = "ballerinax", name = "java.jdbc"},
 	{org = "ballerinax", name = "mysql"},
 	{org = "ballerinax", name = "mysql.driver"},
-	{org = "ballerinax", name = "persist.sql"}
+	{org = "ballerinax", name = "persist.sql"},
+	{org = "ballerinax", name = "rabbitmq"}
 ]
 modules = [
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend"},

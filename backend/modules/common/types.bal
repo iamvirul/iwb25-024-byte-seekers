@@ -171,3 +171,11 @@ public type CountResult record {
     int total;
 };
 
+public type DisputeMessage record {
+    string caseId;
+    DisputeForm disputeForm;
+    FileRecord[] documents;
+    string initiatedBy;
+    time:Utc initiatedAt;
+};
+
