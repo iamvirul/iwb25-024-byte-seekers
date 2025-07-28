@@ -32,56 +32,47 @@ public enum LandLandStatus {
 
 public type LandDocument record {|
     readonly int id;
-    string docId;
-    string docName;
+    string docPath;
     string docSize;
     string docType;
     time:Utc uploadedDate;
     LandDocumentDocStatus docStatus;
     int landsId;
-    int nlpAnalysisResultId;
 |};
 
 public type LandDocumentOptionalized record {|
     int id?;
-    string docId?;
-    string docName?;
+    string docPath?;
     string docSize?;
     string docType?;
     time:Utc uploadedDate?;
     LandDocumentDocStatus docStatus?;
     int landsId?;
-    int nlpAnalysisResultId?;
 |};
 
 public type LandDocumentWithRelations record {|
     *LandDocumentOptionalized;
     LandOptionalized land?;
-    NlpAnalysisResultOptionalized nlpanalysisresult?;
 |};
 
 public type LandDocumentTargetType typedesc<LandDocumentWithRelations>;
 
 public type LandDocumentInsert record {|
-    string docId;
-    string docName;
+    string docPath;
     string docSize;
     string docType;
     time:Utc uploadedDate;
     LandDocumentDocStatus docStatus;
     int landsId;
-    int nlpAnalysisResultId;
 |};
 
 public type LandDocumentUpdate record {|
-    string docId?;
-    string docName?;
+    string docPath?;
     string docSize?;
     string docType?;
     time:Utc uploadedDate?;
     LandDocumentDocStatus docStatus?;
     int landsId?;
-    int nlpAnalysisResultId?;
 |};
 
 public type LegalPrecedent record {|
@@ -160,6 +151,7 @@ public type UserOptionalized record {|
 
 public type UserWithRelations record {|
     *UserOptionalized;
+    AuditOptionalized[] audits?;
     UserHasUserTypeOptionalized[] userhasusertypes?;
 |};
 
@@ -220,16 +212,14 @@ public type LegalClauseUpdate record {|
 
 public type DisputeDocument record {|
     readonly int id;
-    string docId;
-    string docName;
+    string docPath;
     time:Utc uploadedDate;
     int disputesId;
 |};
 
 public type DisputeDocumentOptionalized record {|
     int id?;
-    string docId?;
-    string docName?;
+    string docPath?;
     time:Utc uploadedDate?;
     int disputesId?;
 |};
@@ -242,15 +232,13 @@ public type DisputeDocumentWithRelations record {|
 public type DisputeDocumentTargetType typedesc<DisputeDocumentWithRelations>;
 
 public type DisputeDocumentInsert record {|
-    string docId;
-    string docName;
+    string docPath;
     time:Utc uploadedDate;
     int disputesId;
 |};
 
 public type DisputeDocumentUpdate record {|
-    string docId?;
-    string docName?;
+    string docPath?;
     time:Utc uploadedDate?;
     int disputesId?;
 |};
@@ -346,48 +334,6 @@ public type LandTransferChainUpdate record {|
     int fromLandOwnersId?;
     int toLandOwnersId?;
     int landsId?;
-|};
-
-public type NlpAnalysisResult record {|
-    readonly int id;
-    string hashId;
-    string? results;
-    string? resultSummary;
-    string? tags;
-    string? trust;
-
-|};
-
-public type NlpAnalysisResultOptionalized record {|
-    int id?;
-    string hashId?;
-    string? results?;
-    string? resultSummary?;
-    string? tags?;
-    string? trust?;
-|};
-
-public type NlpAnalysisResultWithRelations record {|
-    *NlpAnalysisResultOptionalized;
-    LandDocumentOptionalized[] landdocuments?;
-|};
-
-public type NlpAnalysisResultTargetType typedesc<NlpAnalysisResultWithRelations>;
-
-public type NlpAnalysisResultInsert record {|
-    string hashId;
-    string? results;
-    string? resultSummary;
-    string? tags;
-    string? trust;
-|};
-
-public type NlpAnalysisResultUpdate record {|
-    string hashId?;
-    string? results?;
-    string? resultSummary?;
-    string? tags?;
-    string? trust?;
 |};
 
 public type LandOwner record {|
@@ -505,6 +451,88 @@ public type LandUpdate record {|
     int priority?;
 |};
 
+public type Audit record {|
+    readonly int id;
+    string requestPath;
+    string requestMethod;
+    string userAgent;
+    string requestPayload;
+    string requestHost;
+    time:Civil requestedTime;
+    int usersId;
+|};
+
+public type AuditOptionalized record {|
+    int id?;
+    string requestPath?;
+    string requestMethod?;
+    string userAgent?;
+    string requestPayload?;
+    string requestHost?;
+    time:Civil requestedTime?;
+    int usersId?;
+|};
+
+public type AuditWithRelations record {|
+    *AuditOptionalized;
+    UserOptionalized user?;
+|};
+
+public type AuditTargetType typedesc<AuditWithRelations>;
+
+public type AuditInsert record {|
+    string requestPath;
+    string requestMethod;
+    string userAgent;
+    string requestPayload;
+    string requestHost;
+    time:Civil requestedTime;
+    int usersId;
+|};
+
+public type AuditUpdate record {|
+    string requestPath?;
+    string requestMethod?;
+    string userAgent?;
+    string requestPayload?;
+    string requestHost?;
+    time:Civil requestedTime?;
+    int usersId?;
+|};
+
+public type DisputeComment record {|
+    readonly int id;
+    string comment;
+    time:Utc createdAt;
+    int disputesId;
+|};
+
+public type DisputeCommentOptionalized record {|
+    int id?;
+    string comment?;
+    time:Utc createdAt?;
+    int disputesId?;
+|};
+
+public type DisputeCommentWithRelations record {|
+    *DisputeCommentOptionalized;
+    DisputeOptionalized dispute?;
+|};
+
+public type DisputeCommentTargetType typedesc<DisputeCommentWithRelations>;
+
+public type DisputeCommentInsert record {|
+    string comment;
+    time:Utc createdAt;
+    int disputesId;
+|};
+
+public type DisputeCommentUpdate record {|
+    string comment?;
+    time:Utc createdAt?;
+    int disputesId?;
+|};
+
 public type UserHasUserType record {|
     int userTypesId;
     int usersId;
@@ -538,6 +566,7 @@ public type Dispute record {|
     string estimateTime;
     DisputeStatus status;
     time:Utc createdAt;
+
     int landsId;
     int legalOfficerId;
 
@@ -557,6 +586,7 @@ public type DisputeOptionalized record {|
 
 public type DisputeWithRelations record {|
     *DisputeOptionalized;
+    DisputeCommentOptionalized[] disputecomments?;
     LandOptionalized land?;
     LegalOfficerOptionalized legalofficer?;
     DisputeDocumentOptionalized[] disputedocuments?;

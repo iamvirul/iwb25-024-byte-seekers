@@ -31,12 +31,9 @@ public enum LandLandStatus {
 public type LandDocument record {|
     @sql:Generated
     readonly int id;
-    @sql:Name {value: "doc_id"}
+    @sql:Name {value: "doc_path"}
     @sql:Varchar {length: 60}
-    string docId;
-    @sql:Name {value: "doc_name"}
-    @sql:Varchar {length: 60}
-    string docName;
+    string docPath;
     @sql:Name {value: "doc_size"}
     @sql:Varchar {length: 10}
     string docSize;
@@ -50,13 +47,8 @@ public type LandDocument record {|
     @sql:Name {value: "lands_id"}
     @sql:Index {name: "fk_lands_documents_lands1_idx"}
     int landsId;
-    @sql:Name {value: "nlp_analysis_result_id"}
-    @sql:Index {name: "fk_lands_documents_nlp_analysis_result1_idx"}
-    int? nlpAnalysisResultId;
     @sql:Relation {keys: ["landsId"]}
     Land land;
-    @sql:Relation {keys: ["nlpAnalysisResultId"]}
-    NlpAnalysisResult nlpanalysisresult;
 |};
 
 @sql:Name {value: "legal_precedents"}
@@ -99,6 +91,7 @@ public type User record {|
     @sql:Name {value: "contact_no"}
     byte[] contactNo;
     byte[]? address;
+    Audit[] audits;
     UserHasUserType[] userhasusertypes;
 |};
 
@@ -119,12 +112,9 @@ public type LegalClause record {|
 public type DisputeDocument record {|
     @sql:Generated
     readonly int id;
-    @sql:Name {value: "doc_id"}
-    @sql:Varchar {length: 60}
-    string docId;
-    @sql:Name {value: "doc_name"}
-    @sql:Varchar {length: 60}
-    string docName;
+    @sql:Name {value: "doc_path"}
+    @sql:Varchar {length: 100}
+    string docPath;
     @sql:Name {value: "uploaded_date"}
     time:Utc uploadedDate;
     @sql:Name {value: "disputes_id"}
@@ -185,23 +175,6 @@ public type LandTransferChain record {|
     LandOwner landowner1;
     @sql:Relation {keys: ["landsId"]}
     Land land;
-|};
-
-@sql:Name {value: "nlp_analysis_result"}
-public type NlpAnalysisResult record {|
-    @sql:Generated
-    readonly int id;
-    @sql:Name {value: "_hashId"}
-    @sql:Varchar {length: 60}
-    string hashId;
-    string? results;
-    @sql:Name {value: "result_summary"}
-    string? resultSummary;
-    @sql:Varchar {length: 60}
-    string? tags;
-    @sql:Varchar {length: 20}
-    string? trust;
-    LandDocument[] landdocuments;
 |};
 
 @sql:Name {value: "land_owner"}
@@ -265,6 +238,47 @@ public type Land record {|
     LandDocument[] landdocuments;
 |};
 
+@sql:Name {value: "audits"}
+public type Audit record {|
+    @sql:Generated
+    readonly int id;
+    @sql:Name {value: "users_id"}
+    @sql:Index {name: "fk_audits_users1_idx"}
+    int usersId;
+    @sql:Name {value: "request_path"}
+    @sql:Varchar {length: 60}
+    string requestPath;
+    @sql:Name {value: "request_method"}
+    @sql:Varchar {length: 45}
+    string requestMethod;
+    @sql:Name {value: "user_agent"}
+    @sql:Varchar {length: 100}
+    string userAgent;
+    @sql:Name {value: "request_payload"}
+    string requestPayload;
+    @sql:Name {value: "request_host"}
+    @sql:Varchar {length: 100}
+    string requestHost;
+    @sql:Name {value: "requested_time"}
+    time:Civil requestedTime;
+    @sql:Relation {keys: ["usersId"]}
+    User user;
+|};
+
+@sql:Name {value: "dispute_comments"}
+public type DisputeComment record {|
+    @sql:Generated
+    readonly int id;
+    @sql:Name {value: "disputes_id"}
+    @sql:Index {name: "fk_dispute_comments_disputes1_idx"}
+    int disputesId;
+    string comment;
+    @sql:Name {value: "created_at"}
+    time:Utc createdAt;
+    @sql:Relation {keys: ["disputesId"]}
+    Dispute dispute;
+|};
+
 @sql:Name {value: "users_has_user_types"}
 public type UserHasUserType record {|
     @sql:Name {value: "users_id"}
@@ -303,6 +317,7 @@ public type Dispute record {|
     DisputeStatus status;
     @sql:Name {value: "created_at"}
     time:Utc createdAt;
+    DisputeComment[] disputecomments;
     @sql:Relation {keys: ["landsId"]}
     Land land;
     @sql:Relation {keys: ["legalOfficerId"]}
