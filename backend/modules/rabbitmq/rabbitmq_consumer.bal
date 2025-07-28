@@ -201,6 +201,7 @@ service on rabbitmqListener {
     private function processDisputeComment(Common:DisputeCommentMessage message) returns error? {
         int[]|persist:Error disputeCommentResult = self.dbClient->/disputecomments.post([message.dispute]);
         if disputeCommentResult is persist:Error {
+            return error("Failed to insert dispute comment", disputeCommentResult);
         }
     }
 
@@ -219,7 +220,7 @@ service on rabbitmqListener {
         int delayMs = INITIAL_RETRY_DELAY_MS * (2 ^ (disputeMessage.retryCount - 1));
 
         log:printInfo("Scheduling retry " + disputeMessage.retryCount.toString() +
-                    " for dispute " + disputeMessage.dispute.disputesId.toString() +
+                    " for comment " + disputeMessage.dispute.disputesId.toString() +
                     " with delay " + delayMs.toString() + "ms");
         check rabbitmqClient->publishMessage({
             content: disputeMessage,
@@ -232,6 +233,82 @@ service on rabbitmqListener {
         log:printError(`Max retries exceeded or non-retryable error for dispute: ${disputeMessage.dispute.disputesId}`);
         check rabbitmqClient->publishMessage({
             content: disputeMessage,
+            routingKey: deadLetterQueueName
+        });
+    }
+}
+
+@rabbitmq:ServiceConfig {
+    queueName: disputePrecedentQueueName,
+    autoAck: false
+}
+service on rabbitmqListener {
+    private final DB:Client dbClient;
+
+    function init() returns error? {
+        self.dbClient = check new ();
+    }
+
+    remote function onMessage(Common:LegalPrecedentMessage message) returns error? {
+        log:printInfo(`Received legal precedent message for dispute: ${message.legalPrecedent.disputesId}`);
+        error? processingError = self.processLegalPrecedent(message);
+        if processingError is error {
+            log:printError("Error processing dispute comment", processingError);
+            if self.shouldRetry(message, processingError) {
+                check self.handleRetry(message);
+            } else {
+                check self.handleFailure(message);
+            }
+        } else {
+            log:printInfo(`Successfully processed legal precedent for dispute: ${message.legalPrecedent.disputesId}`);
+        }
+    }
+
+    private function processLegalPrecedent(Common:LegalPrecedentMessage message) returns error? {
+        int[]|persist:Error precedentResult = self.dbClient->/legalprecedents.post([message.legalPrecedent]);
+        if precedentResult is persist:Error {
+            return error("Failed to insert legal precedent", precedentResult);
+        }
+        foreach var clause in message.legalClauses {
+            DB:LegalClauseInsert clauseInsert = {
+                legalClause: clause,
+                legalPrecedentsId: precedentResult[0]
+            };
+            int[]|persist:Error clauseResult = self.dbClient->/legalclauses.post([clauseInsert]);
+            if clauseResult is persist:Error {
+                return error("Failed to insert legal clause", clauseResult);
+            }
+        }
+    }
+
+    private function shouldRetry(Common:LegalPrecedentMessage disputeMessage, error err) returns boolean {
+        if disputeMessage.retryCount >= MAX_RETRIES {
+            return false;
+        }
+        if err is persist:ConstraintViolationError {
+            return false;
+        }
+        return true;
+    }
+
+    private function handleRetry(Common:LegalPrecedentMessage message) returns error? {
+        message.retryCount += 1;
+        int delayMs = INITIAL_RETRY_DELAY_MS * (2 ^ (message.retryCount - 1));
+
+        log:printInfo("Scheduling retry " + message.retryCount.toString() +
+                    " for legal precedent " + message.legalPrecedent.disputesId.toString() +
+                    " with delay " + delayMs.toString() + "ms");
+        check rabbitmqClient->publishMessage({
+            content: message,
+            routingKey: disputePrecedentQueueName,
+            properties: {headers: {"x-delay": delayMs}}
+        });
+    }
+
+    private function handleFailure(Common:LegalPrecedentMessage message) returns error? {
+        log:printError(`Max retries exceeded or non-retryable error for legal precedent: ${message.legalPrecedent.disputesId}`);
+        check rabbitmqClient->publishMessage({
+            content: message,
             routingKey: deadLetterQueueName
         });
     }

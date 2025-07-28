@@ -187,3 +187,9 @@ public type DisputeCommentMessage record {|
     DB:DisputeCommentInsert dispute;
     int retryCount = 0;
 |};
+
+public type LegalPrecedentMessage record {|
+    DB:LegalPrecedentInsert legalPrecedent;
+    string[] legalClauses;
+    int retryCount = 0;
+|};
