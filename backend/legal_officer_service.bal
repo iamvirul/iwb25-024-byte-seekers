@@ -89,28 +89,23 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                 }
                 DB:Land land = landResult;
 
-                sql:ParameterizedQuery transferQuery = `lands_id = ${dispute.landsId} ORDER BY transfer_date DESC LIMIT 1`;
-                stream<common:LandTransferChain, persist:Error?> transferResult = self.dbClient->/landtransferchains(common:LandTransferChain, transferQuery);
-                common:LandTransferChain? latestTransfer = ();
-                check from var transfer in transferResult
-                    do {
-                        latestTransfer = transfer;
-                    };
-                check transferResult.close();
-
-                DB:LandOwner? currentOwner = ();
-                if latestTransfer is DB:LandTransferChain {
-                    DB:LandOwner|persist:Error ownerResult = self.dbClient->/landowners/[latestTransfer.toLandOwnersId].get(DB:LandOwner);
-                    if ownerResult is DB:LandOwner {
-                        currentOwner = ownerResult;
+                DB:User|persist:Error userResult = self.dbClient->/users/[dispute.usersId](DB:User);
+                if userResult is persist:Error {
+                    if userResult is persist:NotFoundError {
+                        response.statusCode = 404;
+                        response = Utils:setErrorResponse(response, Utils:USER_NOT_FOUND);
+                    } else {
+                        response.statusCode = 500;
+                        response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_USER);
                     }
+                    return response;
                 }
 
                 disputes.push({
                     dispute: dispute,
                     documents: tempDocs,
                     land: land,
-                    currentOwner: currentOwner
+                    user: userResult.firstName + " " + userResult.lastName
                 });
             };
         check disputeResult.close();

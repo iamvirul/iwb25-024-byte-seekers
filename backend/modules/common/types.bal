@@ -131,7 +131,7 @@ public type DisputeWithDocs record {|
     DB:Dispute dispute;
     DB:DisputeDocument?[] documents;
     DB:Land land;
-    DB:LandOwner? currentOwner;
+    string user;
 |};
 
 public type Dispute record {|
