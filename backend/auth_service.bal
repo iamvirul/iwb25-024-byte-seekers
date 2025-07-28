@@ -77,7 +77,8 @@ service /auth on authMicroservice {
                             {
                                 message: "Login successful",
                                 token: jwt,
-                                socketToken: socketToken
+                                socketToken: socketToken,
+                                userId:user.id
                             }
                     );
                     return response;
