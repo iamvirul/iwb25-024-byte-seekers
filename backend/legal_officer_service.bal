@@ -3,6 +3,8 @@ import backend.db as DB;
 import backend.mappers as Mapper;
 import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
+import backend.interceptors as Interceptors;
+
 
 import ballerina/http;
 import ballerina/persist;
@@ -32,11 +34,15 @@ listener http:Listener legalOfficerMicroservice = new (9080);
     ]
 }
 
-service /legal_officer on legalOfficerMicroservice {
+service http:InterceptableService /legal_officer on legalOfficerMicroservice {
     private final DB:Client dbClient;
 
     function init() returns error? {
         self.dbClient = check new ();
+    }
+
+    public function createInterceptors() returns Interceptors:RequestInterceptor {
+        return new Interceptors:RequestInterceptor();
     }
 
     function __deinit() returns error? {
