@@ -25,18 +25,18 @@ POST http://localhost:9091/auth/users/login
 Content-Type: application/json
 
 {
-  "email": "hiranyagunawardhane@gmail.com",
+  "email": "asela@gmail.com",
   "password": "Hiru2005@",
-  "user_type": 3
+  "user_type": 2
 }
 
 HTTP/1.1 200  - OK
 content-type: application/json
 connection: close
 server: ballerina
-date: Mon, 28 Jul 2025 02:59:57 +0530
+date: Tue, 29 Jul 2025 00:20:33 +0530
 content-encoding: gzip
-content-length: 533
+content-length: 796
 ###
 POST http://localhost:9095/land_officer/land/register
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzU3NzEwLCAibmJmIjoxNzUzMzU0MTEwLCAiaWF0IjoxNzUzMzU0MTEwfQ.cwpAOVn31X74lc_440Qk1EMxgfkCIrP_lQx7-4JBTo31ca_VcGdxfyTSHGtXvGY95hkqCDveO2VnpHNtJpVGlSCpo7ZgFVyDnwum-EePyO4dzEN0jnMfO-h1PZUGKnm9zZFirL-CfyHb4UMqD1Pvgru8aXk4VvGPKhZmP-_Klhne7fCbK9NJfYomfLTqk6-kuOo4NuXkx5llJspyfJgONK_oj_aqOxk0QCtgnIrBS__ZlqMXiQ-_nxQMzAcOsbp0u3LYP3V9HRAQ7a5_FpLIz3stobCHfdQUPavRR6RNz58b_iangMtWEyT_ecED7rCp3HcpJ_5ndHVnuINtcAczRA

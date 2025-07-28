@@ -55,7 +55,6 @@ public type LandDocument record {|
 public type LegalPrecedent record {|
     @sql:Generated
     readonly int id;
-    @sql:Name {value: "disputes_id"}
     @sql:Index {name: "fk_legal_precedents_disputes1_idx"}
     int disputesId;
     time:Date year;
@@ -100,9 +99,7 @@ public type User record {|
 public type LegalClause record {|
     @sql:Generated
     readonly int id;
-    @sql:Name {value: "legal_clause"}
     string legalClause;
-    @sql:Name {value: "legal_precedents_id"}
     @sql:Index {name: "fk_legal_clauses_legal_precedents1_idx"}
     int legalPrecedentsId;
     @sql:Relation {keys: ["legalPrecedentsId"]}
@@ -113,12 +110,9 @@ public type LegalClause record {|
 public type DisputeDocument record {|
     @sql:Generated
     readonly int id;
-    @sql:Name {value: "doc_path"}
     @sql:Varchar {length: 100}
     string docPath;
-    @sql:Name {value: "uploaded_date"}
     time:Utc uploadedDate;
-    @sql:Name {value: "disputes_id"}
     @sql:Index {name: "fk_disputes_document_disputes1_idx"}
     int disputesId;
     @sql:Relation {keys: ["disputesId"]}
@@ -270,11 +264,9 @@ public type Audit record {|
 public type DisputeComment record {|
     @sql:Generated
     readonly int id;
-    @sql:Name {value: "disputes_id"}
     @sql:Index {name: "fk_dispute_comments_disputes1_idx"}
     int disputesId;
     string comment;
-    @sql:Name {value: "created_at"}
     time:Utc createdAt;
     @sql:Relation {keys: ["disputesId"]}
     Dispute dispute;
@@ -298,27 +290,19 @@ public type UserHasUserType record {|
 public type Dispute record {|
     @sql:Generated
     readonly int id;
-    @sql:Name {value: "case_id"}
     @sql:Varchar {length: 50}
     string caseId;
-    @sql:Name {value: "lands_id"}
     @sql:Index {name: "fk_disputes_lands1_idx"}
     int landsId;
-    @sql:Name {value: "witness_name"}
     @sql:Varchar {length: 60}
     string witnessName;
-    @sql:Name {value: "disputes_details"}
     string disputesDetails;
-    @sql:Name {value: "legal_officer_id"}
     @sql:Index {name: "fk_disputes_legal_officer1_idx"}
     int legalOfficerId;
-    @sql:Name {value: "estimate_time"}
     @sql:Varchar {length: 45}
     string estimateTime;
     DisputeStatus status;
-    @sql:Name {value: "created_at"}
     time:Utc createdAt;
-    @sql:Name {value: "users_id"}
     @sql:Index {name: "fk_disputes_users1_idx"}
     int usersId;
     DisputeComment[] disputecomments;

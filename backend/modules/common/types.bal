@@ -144,14 +144,14 @@ public type UserDisputesWithDocs record {|
 |};
 
 public type LegalPrecedentWithLegalClauses record {|
-    readonly int id;
-    time:Date year;
-    string headline;
-    DB:LegalPrecedentCourt court;
-    string decision;
-    string summary;
-    int disputesId;
-    DB:LegalClause[] legalClauses;
+    int? id;
+    time:Date? year;
+    string? headline;
+    DB:LegalPrecedentCourt? court;
+    string? decision;
+    string? summary;
+    int? disputesId;
+    DB:LegalClauseOptionalized[]? legalClauses;
 |};
 
 public type Dispute record {|
@@ -213,4 +213,16 @@ public type LegalPrecedentMessage record {|
     DB:LegalPrecedentInsert legalPrecedent;
     string[] legalClauses;
     int retryCount = 0;
+|};
+
+public type LegalPrecedent record {|
+    readonly int id;
+    int disputesId;
+    time:Date year;
+    string headline;
+    DB:LegalPrecedentCourt court;
+    string decision;
+    string summary;
+    DB:LegalClause[] legalclauses;
+    Dispute dispute;
 |};

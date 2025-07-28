@@ -81,18 +81,18 @@ CREATE TABLE "legal_officer" (
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "disputes" (
 	"id" INT AUTO_INCREMENT,
-	"case_id" VARCHAR(50) NOT NULL,
-	"witness_name" VARCHAR(60) NOT NULL,
-	"disputes_details" VARCHAR(191) NOT NULL,
-	"estimate_time" VARCHAR(45) NOT NULL,
+	"caseId" VARCHAR(50) NOT NULL,
+	"witnessName" VARCHAR(60) NOT NULL,
+	"disputesDetails" VARCHAR(191) NOT NULL,
+	"estimateTime" VARCHAR(45) NOT NULL,
 	"status" VARCHAR(8) CHECK ("status" IN ('PENDING', 'RESOLVED', 'REJECTED')) NOT NULL,
-	"created_at" TIMESTAMP NOT NULL,
-	"lands_id" INT NOT NULL,
-	FOREIGN KEY("lands_id") REFERENCES "lands"("id"),
-	"legal_officer_id" INT NOT NULL,
-	FOREIGN KEY("legal_officer_id") REFERENCES "legal_officer"("id"),
-	"users_id" INT NOT NULL,
-	FOREIGN KEY("users_id") REFERENCES "users"("id"),
+	"createdAt" TIMESTAMP NOT NULL,
+	"landsId" INT NOT NULL,
+	FOREIGN KEY("landsId") REFERENCES "lands"("id"),
+	"legalOfficerId" INT NOT NULL,
+	FOREIGN KEY("legalOfficerId") REFERENCES "legal_officer"("id"),
+	"usersId" INT NOT NULL,
+	FOREIGN KEY("usersId") REFERENCES "users"("id"),
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
@@ -116,25 +116,25 @@ CREATE TABLE "legal_precedents" (
 	"court" VARCHAR(15) CHECK ("court" IN ('SUPREME_COURT', 'APPELLATE_COURT', 'HIGH_COURT', 'DISTRICT_COURT')) NOT NULL,
 	"decision" VARCHAR(191) NOT NULL,
 	"summary" VARCHAR(191) NOT NULL,
-	"disputes_id" INT NOT NULL,
-	FOREIGN KEY("disputes_id") REFERENCES "disputes"("id"),
+	"disputesId" INT NOT NULL,
+	FOREIGN KEY("disputesId") REFERENCES "disputes"("id"),
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "legal_clauses" (
 	"id" INT AUTO_INCREMENT,
-	"legal_clause" VARCHAR(191) NOT NULL,
-	"legal_precedents_id" INT NOT NULL,
-	FOREIGN KEY("legal_precedents_id") REFERENCES "legal_precedents"("id"),
+	"legalClause" VARCHAR(191) NOT NULL,
+	"legalPrecedentsId" INT NOT NULL,
+	FOREIGN KEY("legalPrecedentsId") REFERENCES "legal_precedents"("id"),
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "dispute_comments" (
 	"id" INT AUTO_INCREMENT,
 	"comment" VARCHAR(191) NOT NULL,
-	"created_at" TIMESTAMP NOT NULL,
-	"disputes_id" INT NOT NULL,
-	FOREIGN KEY("disputes_id") REFERENCES "disputes"("id"),
+	"createdAt" TIMESTAMP NOT NULL,
+	"disputesId" INT NOT NULL,
+	FOREIGN KEY("disputesId") REFERENCES "disputes"("id"),
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
@@ -156,10 +156,10 @@ CREATE TABLE "land_transfer_chain" (
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "disputes_document" (
 	"id" INT AUTO_INCREMENT,
-	"doc_path" VARCHAR(100) NOT NULL,
-	"uploaded_date" TIMESTAMP NOT NULL,
-	"disputes_id" INT NOT NULL,
-	FOREIGN KEY("disputes_id") REFERENCES "disputes"("id"),
+	"docPath" VARCHAR(100) NOT NULL,
+	"uploadedDate" TIMESTAMP NOT NULL,
+	"disputesId" INT NOT NULL,
+	FOREIGN KEY("disputesId") REFERENCES "disputes"("id"),
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
@@ -183,19 +183,19 @@ CREATE TABLE "users_has_user_types" (
 	PRIMARY KEY("users_id","user_types_id")
 );`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_lands_documents_lands1_idx" ON "lands_documents" ("lands_id");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_legal_precedents_disputes1_idx" ON "legal_precedents" ("disputes_id");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_legal_clauses_legal_precedents1_idx" ON "legal_clauses" ("legal_precedents_id");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_document_disputes1_idx" ON "disputes_document" ("disputes_id");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_legal_precedents_disputes1_idx" ON "legal_precedents" ("disputesId");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_legal_clauses_legal_precedents1_idx" ON "legal_clauses" ("legalPrecedentsId");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_document_disputes1_idx" ON "disputes_document" ("disputesId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_land_transfer_chain_lands1_idx" ON "land_transfer_chain" ("lands_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_land_transfer_chain_land_owners1_idx" ON "land_transfer_chain" ("from_land_owners_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_land_transfer_chain_land_owners2_idx" ON "land_transfer_chain" ("to_land_owners_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_audits_users1_idx" ON "audits" ("users_id");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_dispute_comments_disputes1_idx" ON "dispute_comments" ("disputes_id");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_dispute_comments_disputes1_idx" ON "dispute_comments" ("disputesId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_users_has_user_types_users1_idx" ON "users_has_user_types" ("users_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_users_has_user_types_user_types1_idx" ON "users_has_user_types" ("user_types_id");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_lands1_idx" ON "disputes" ("lands_id");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_legal_officer1_idx" ON "disputes" ("legal_officer_id");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_users1_idx" ON "disputes" ("users_id");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_lands1_idx" ON "disputes" ("landsId");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_legal_officer1_idx" ON "disputes" ("legalOfficerId");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_users1_idx" ON "disputes" ("usersId");`);
 }
 
 public isolated function cleanupTestDB() returns persist:Error? {

@@ -1,11 +1,12 @@
 import backend.common;
 import backend.db as DB;
+import backend.interceptors as Interceptors;
 import backend.mappers as Mappers;
 import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
-import backend.interceptors as Interceptors;
 
 import ballerina/http;
+import ballerina/io;
 import ballerina/jwt;
 import ballerina/persist;
 import ballerina/regex;
@@ -155,87 +156,31 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         }
     }
 
-    resource function get disputes/[int userId]()  returns error|http:Response{
+    resource function get disputes/[int userId]() returns error|http:Response {
         http:Response response = new;
-        common:UserDisputesWithDocs[] disputes = [];
-        DB:DisputeDocument[] tempDocs = [];
-        DB:DisputeComment[] tempComments = [];
-        stream<DB:Dispute, persist:Error?> disputeResult = self.dbClient->/disputes(DB:Dispute, `users_id = ${userId}`);
-        check from var dispute in disputeResult
+
+        DB:DisputeWithRelations[] disputes = [];
+        DB:LegalPrecedentWithRelations[][] precedentArrayResponse = [];
+        stream<DB:DisputeWithRelations, persist:Error?> streamResult = self.dbClient->/disputes(DB:DisputeWithRelations, `usersId = ${userId}`);
+        check from var result in streamResult
             do {
-                tempDocs = [];
-                stream<DB:DisputeDocument, persist:Error?> disputeDoc = self.dbClient->/disputedocuments(DB:DisputeDocument, `disputes_id = ${dispute.id}`);
-                check from var disDoc in disputeDoc
+                DB:LegalPrecedentWithRelations[] precedentArray = [];
+                stream<DB:LegalPrecedentWithRelations, persist:Error?> precedentResult = self.dbClient->/legalprecedents(DB:LegalPrecedentWithRelations, `disputesId = ${result.id}`);
+                check from var precedent in precedentResult
                     do {
-                        tempDocs.push(disDoc);
+                        precedentArray.push(precedent);
+                        precedentArrayResponse.push(precedentArray);
                     };
-                check disputeDoc.close();
+                check precedentResult.close();
+                disputes.push(result);
+                
 
-                tempComments = [];
-                stream<DB:DisputeComment, persist:Error?> disputeComment = self.dbClient->/disputecomments(DB:DisputeComment, `disputes_id = ${dispute.id}`);
-                check from var disComment in disputeComment
-                    do {
-                        tempComments.push(disComment);
-                    };
-                check disputeComment.close();
-
-                DB:Land|persist:Error landResult = self.dbClient->/lands/[dispute.landsId](DB:Land);
-                if landResult is persist:Error {
-                    response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LAND);
-                    return response;
-                }
-                DB:Land land = landResult;
-                DB:User|persist:Error userResult = self.dbClient->/users/[dispute.usersId](DB:User);
-                if userResult is persist:Error {
-                    response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_USER);
-                    return response;
-                }
-
-                common:LegalPrecedentWithLegalClauses[] legalPrecedent = [];
-                stream<DB:LegalPrecedent, persist:Error?> legalPrecedentResult = self.dbClient->/legalprecedents(DB:LegalPrecedent, `disputes_id = ${dispute.id}`);
-                check from var legalPrecedentIn in legalPrecedentResult
-                    do {
-                        DB:LegalClause[] legalClauses = [];
-                        stream<DB:LegalClause, persist:Error?> legalClauseResult = self.dbClient->/legalclauses(DB:LegalClause, `legal_precedents_id = ${legalPrecedentIn.id}`);
-                        check from var legalClause in legalClauseResult
-                            do {
-                                legalClauses.push(legalClause);
-                            };
-                        check legalClauseResult.close();
-                        legalPrecedent.push({
-                            id: legalPrecedentIn.id,
-                            year: legalPrecedentIn.year,
-                            headline: legalPrecedentIn.headline,
-                            court: legalPrecedentIn.court,
-                            decision: legalPrecedentIn.decision,
-                            summary: legalPrecedentIn.summary,
-                            disputesId: legalPrecedentIn.disputesId,
-                            legalClauses: legalClauses
-                        });
-                    };
-                check legalPrecedentResult.close();
-
-                disputes.push({
-                    dispute: dispute,
-                    documents: tempDocs,
-                    land: land,
-                    user: userResult.firstName + " " + userResult.lastName,
-                    comments: tempComments,
-                    legalPrecedent: legalPrecedent
-                });
             };
-        check disputeResult.close();
-        if disputes.length() == 0 {
-            response.statusCode = 404;
-            response = Utils:setErrorResponse(response, Utils:NO_DISPUTES_FOUND);
-            return response;
-        } else {
-            response.statusCode = 200;
-            response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson()});
-            return response;
-        }
+        check streamResult.close();
+
+        io:println(streamResult);
+        response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson(), "precedents": precedentArrayResponse.toJson()});
+        return response;
     }
 }
 
