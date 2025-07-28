@@ -1,8 +1,10 @@
-import ballerina/websocket;
 import backend.utils as Utils;
-import ballerina/io;
 
-listener websocket:Listener chatListener = new (9090,
+import ballerina/websocket;
+import ballerina/http;
+import ballerina/log;
+
+listener websocket:Listener statsListener = new (9090,
     secureSocket = {
         key: {
             certFile: "resources/certificates/sockets/public.crt",
@@ -26,18 +28,39 @@ listener websocket:Listener chatListener = new (9090,
         }
     ]
 }
-service /chat on chatListener {
+service /stats on statsListener {
 
-    resource function get .() returns websocket:Service {
-        return new ChatService();
+    resource function get [string userID](http:Request req) returns websocket:Service {
+        return new statsService(userID, req);
     }
 }
 
-service class ChatService {
+service class statsService {
     *websocket:Service;
+    private final string userID;
+    private final http:Request req;
 
-    remote function onMessage(websocket:Caller caller, string chatMessage) returns error? {
-        check caller->writeMessage("Hello, How are you?");
-        io:println("Message received : ", chatMessage);
+    function init(string userID, http:Request req) {
+        self.userID = userID;
+        self.req = req;
+    }
+
+    remote function onOpen(websocket:Caller caller) returns error? {
+        check caller->writeMessage(string `Welcome ${self.userID}!`);
+        string header = check self.req.getHeader("x-service-token");
+        map<string> serviceHeaders = {
+                "Authorization": header
+            };
+        http:Client serviceClient = check new ("localhost:9070/land_officer");
+        anydata|http:ClientError allLand = serviceClient->get("/land/all",serviceHeaders);
+        if allLand is http:ClientError {
+            log:printError("Error fetching all lands: ");
+            return;
+        }
+        check caller->writeMessage(allLand);
+    }
+
+    remote function onMessage(websocket:Caller caller,string data) returns error? {
+        check caller->writeMessage("Hello, How are you?" + self.userID);
     }
 }

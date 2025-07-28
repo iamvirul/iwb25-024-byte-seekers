@@ -31,7 +31,13 @@ public service class RequestInterceptor {
             }
 
             int userId = check int:fromString(textPayload);
-            json jsonPayload = check req.getJsonPayload();
+            json jsonPayload = {};
+            if req.method == http:POST || req.method == http:PUT || req.method == http:PATCH {
+                if req.getContentType().length() > 0 {
+                    jsonPayload = check req.getJsonPayload();
+                }
+            }
+
             string host = check req.getHeader("Host");
             time:Utc utcNow = time:utcNow();
             time:Civil civilNow = time:utcToCivil(utcNow);

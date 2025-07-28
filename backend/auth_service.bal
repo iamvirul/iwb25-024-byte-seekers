@@ -48,13 +48,13 @@ service /auth on authMicroservice {
             user = result.value;
         }
         if user is Common:User {
-            
+
             if crypto:verifyArgon2(loginUser.password, user.password) is false {
                 response.statusCode = 401;
                 response = Utils:setErrorResponse(response, Utils:INVALID_PASSWORD);
                 return response;
             }
-            stream<Common:UserHasTypes, persist:Error?> userHasType = self.dbClient->queryNativeSQL(`SELECT * FROM users_has_user_types WHERE users_id = ${user.id} AND user_types_id = ${loginUser.user_type}`,Common:UserHasTypes);
+            stream<Common:UserHasTypes, persist:Error?> userHasType = self.dbClient->queryNativeSQL(`SELECT * FROM users_has_user_types WHERE users_id = ${user.id} AND user_types_id = ${loginUser.user_type}`, Common:UserHasTypes);
             Common:UserHasTypes? userTypeResult = ();
             var userTypeCheck = check userHasType.next();
             _ = check userHasType.close();
@@ -68,19 +68,27 @@ service /auth on authMicroservice {
             }
             Utils:USER_TYPES userType = check Utils:getUserType(loginUser.user_type);
             string|error jwt = Utils:issueToken(userType, user.email);
+            string|error socketToken = Utils:issueSocketToken(userType, user.email);
             if jwt is string {
-                response.statusCode = 200;
-                response = Utils:setSuccessResponse(
+                if socketToken is string {
+                    response.statusCode = 200;
+                    response = Utils:setSuccessResponse(
                             response,
-                        {
-                            message: "Login successful",
-                            token: jwt
-                        }
+                            {
+                                message: "Login successful",
+                                token: jwt,
+                                socketToken: socketToken
+                            }
                     );
-                return response;
+                    return response;
+                }else {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, "Failed to issue socket token");
+                    return response;
+                }
             } else {
                 response.statusCode = 500;
-                response = Utils:setErrorResponse(response, "Failed to generate token");
+                response = Utils:setErrorResponse(response, "Failed to generate tokens");
                 return response;
             }
         } else {
