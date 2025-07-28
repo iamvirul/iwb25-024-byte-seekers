@@ -134,6 +134,26 @@ public type DisputeWithDocs record {|
     string user;
 |};
 
+public type UserDisputesWithDocs record {|
+    DB:Dispute dispute;
+    DB:DisputeDocument?[] documents;
+    DB:Land land;
+    string user;
+    DB:DisputeComment[] comments;
+    LegalPrecedentWithLegalClauses[] legalPrecedent;
+|};
+
+public type LegalPrecedentWithLegalClauses record {|
+    readonly int id;
+    time:Date year;
+    string headline;
+    DB:LegalPrecedentCourt court;
+    string decision;
+    string summary;
+    int disputesId;
+    DB:LegalClause[] legalClauses;
+|};
+
 public type Dispute record {|
     int id;
     string caseId;

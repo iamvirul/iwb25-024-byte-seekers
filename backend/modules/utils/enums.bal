@@ -132,7 +132,12 @@ public enum DISPUTE_ERRORS {
     FAILED_TO_QUEUE_PRECEDENT = "Failed to queue precedent",
     USER_ID_REQUIRED = "User ID is required",
     FAILED_TO_FETCH_USER = "Failed to fetch user",
-    INVALID_USER_ID = "Invalid user ID"
+    INVALID_USER_ID = "Invalid user ID",
+    NO_DISPUTES_FOUND = "No disputes found",
+    NO_LANDS_FOUND = "No lands found",
+    DISPUTE_NOT_FOUND = "Dispute not found",
+    FAILED_TO_FETCH_DISPUTE = "Failed to fetch dispute",
+    FAILED_TO_FETCH_DISPUTES = "Failed to fetch disputes"
 }
 
 public enum DOCUMENT_ERRORS {
