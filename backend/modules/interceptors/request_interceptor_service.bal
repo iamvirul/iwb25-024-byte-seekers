@@ -35,6 +35,9 @@ public service class RequestInterceptor {
             if req.method == http:POST || req.method == http:PUT || req.method == http:PATCH {
                 if req.getContentType().length() > 0 {
                     jsonPayload = check req.getJsonPayload();
+                } 
+                if req.getContentType().startsWith("multipart/form-data") {
+                    jsonPayload = {"content:": "multipart/form-data"};
                 }
             }
 
