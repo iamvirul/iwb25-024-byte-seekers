@@ -293,4 +293,24 @@ service http:InterceptableService /land_officer on landMicroservice {
         response = Utils:setSuccessResponse(response, Utils:LAND_UPDATE_SUCCESS);
         return response;
     }
+
+    resource function post land/landowner/add(@http:Payload DB:LandOwnerInsert landOwnerInsert) returns error|http:Response  {
+        http:Response response = new;
+
+        Common:ValidationResult validateLandOwnerInsert = Utils:validateLandOwnerInsert(landOwnerInsert);
+        if !validateLandOwnerInsert.isValid {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, validateLandOwnerInsert.errors);
+            return response;
+        }
+        error|int creatLandOwnerResult = self.creatLandOwner(landOwnerInsert);
+        if creatLandOwnerResult is error {
+            response.statusCode = 500;
+            response = Utils:setErrorResponse(response, creatLandOwnerResult.message());
+            return response;
+        }
+        response.statusCode = 201;
+        response = Utils:setSuccessResponse(response, "Land owner added successfully");
+        return response;
+    }
 }

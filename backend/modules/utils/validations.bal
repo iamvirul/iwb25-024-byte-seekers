@@ -409,3 +409,37 @@ public function validateLegalPrecedent(Common:RequestPrecedent precedent) return
         errors: errorMsg
     };
 }
+
+public function validateLandOwnerInsert(DB:LandOwnerInsert landOwner) returns Common:ValidationResult {
+    boolean errorFlag = false;
+    map<string> errorMsg = {};
+    if landOwner.firstName == "" {
+        errorFlag = true;
+        errorMsg["firstName"] = "First name is required";
+    }else if landOwner.firstName.length() > 45 {
+        errorFlag = true;
+        errorMsg["firstName"] = "First name should not exceed 45 characters";
+    }
+    if landOwner.lastName == "" {
+        errorFlag = true;
+        errorMsg["lastName"] = "Last name is required";
+    }else if landOwner.lastName.length() > 45 {
+        errorFlag = true;
+        errorMsg["lastName"] = "Last name should not exceed 45 characters";
+    }
+    if landOwner.nic == "" {
+        errorFlag = true;
+        errorMsg["nic"] = NIC_REQUIRED;
+    } else if !regex:matches(landOwner.nic, NIC_REGEX) {
+        errorFlag = true;
+        errorMsg["nic"] = NIC_INVALID_FORMAT;
+    }
+    if landOwner.address == "" {
+        errorFlag = true;
+        errorMsg["address"] = "Address is required";
+    }
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
