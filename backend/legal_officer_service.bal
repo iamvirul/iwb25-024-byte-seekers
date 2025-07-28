@@ -127,7 +127,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
             response = Utils:setErrorResponse(response, validateLandInsert.errors);
             return response;
         }
-        sql:ParameterizedQuery query = `case_id = ${updateRequest.caseId}`;
+        sql:ParameterizedQuery query = `caseId = ${updateRequest.caseId}`;
         stream<DB:Dispute, persist:Error?> disputeStream = self.dbClient->/disputes(DB:Dispute, query);
         check from var dispute in disputeStream
             do {
@@ -156,7 +156,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
             return response;
         }
 
-        sql:ParameterizedQuery query = `case_id = ${updateRequest.caseId}`;
+        sql:ParameterizedQuery query = `caseId = ${updateRequest.caseId}`;
         stream<DB:Dispute, persist:Error?> disputeStream = self.dbClient->/disputes(DB:Dispute, query);
         check from var dispute in disputeStream
             do {
@@ -189,7 +189,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
             response = Utils:setErrorResponse(response, validateLandInsert.errors);
             return response;
         }
-        sql:ParameterizedQuery query = `case_id = ${requestPrecedent.caseId}`;
+        sql:ParameterizedQuery query = `caseId = ${requestPrecedent.caseId}`;
         stream<DB:Dispute, persist:Error?> disputeStream = self.dbClient->/disputes(DB:Dispute, query);
         DB:Dispute? dispute = ();
         var result = check disputeStream.next();
