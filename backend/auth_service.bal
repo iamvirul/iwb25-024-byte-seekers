@@ -67,7 +67,7 @@ service /auth on authMicroservice {
                 return response;
             }
             Utils:USER_TYPES userType = check Utils:getUserType(loginUser.user_type);
-            string|error jwt = Utils:issueToken(userType);
+            string|error jwt = Utils:issueToken(userType, user.email);
             if jwt is string {
                 response.statusCode = 200;
                 response = Utils:setSuccessResponse(

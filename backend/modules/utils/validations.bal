@@ -1,7 +1,8 @@
-import ballerina/http;
-import ballerina/regex;
 import backend.common as Common;
 import backend.db as DB;
+
+import ballerina/http;
+import ballerina/regex;
 
 public function setErrorResponse(http:Response response, string|json message) returns http:Response {
     response.setJsonPayload({"success": false, "content": message});
@@ -13,14 +14,61 @@ public function setSuccessResponse(http:Response response, string|json message) 
     return response;
 }
 
-public function getUserType(int userType) returns USER_TYPES | error {
+public function getUserType(int userType) returns USER_TYPES|error {
     match userType {
-        1 => {return ADMIN;}
-        2 => {return LAND_OWNER;}
-        3 => {return LAND_OFFICER;}
-        4 => {return LEGAL_OFFICER;}
-        _ => {return error("Invalid user type");}
-        
+        1 => {
+            return ADMIN;
+        }
+        2 => {
+            return LAND_OWNER;
+        }
+        3 => {
+            return LAND_OFFICER;
+        }
+        4 => {
+            return LEGAL_OFFICER;
+        }
+        _ => {
+            return error("Invalid user type");
+        }
+
+    }
+}
+
+public function getLandStatus(DB:LandLandStatus landStatus) returns boolean|error {
+    match landStatus {
+        DB:PENDING => {
+            return true;
+        }
+        DB:VERIFIED => {
+            return true;
+        }
+        DB:REJECTED => {
+            return true;
+        }
+        _ => {
+            return error(INVALID_LAND_STATUS);
+        }
+    }
+}
+
+public function getCourtType(string courtType) returns DB:LegalPrecedentCourt|error {
+    match courtType {
+        "SUPREME_COURT" => {
+            return DB:SUPREME_COURT;
+        }
+        "APPELLATE_COURT" => {
+            return DB:APPELLATE_COURT;
+        }
+        "HIGH_COURT" => {
+            return DB:HIGH_COURT;
+        }
+        "DISTRICT_COURT" => {
+            return DB:DISTRICT_COURT;
+        }
+        _ => {
+            return error("Invalid court type");
+        }
     }
 }
 
@@ -175,7 +223,7 @@ public function validateDisputeInsert(Common:RequestDispute requestDispute) retu
     if requestDispute.disputesDetails == "" {
         errorFlag = true;
         errorMsg["disputesDetails"] = DISPUTES_DETAILS_REQUIRED;
-    } 
+    }
     if requestDispute.witnessName == "" {
         errorFlag = true;
         errorMsg["witnessName"] = WITNESS_NAME_REQUIRED;
@@ -183,7 +231,7 @@ public function validateDisputeInsert(Common:RequestDispute requestDispute) retu
         errorFlag = true;
         errorMsg["witnessName"] = WITNESS_NAME_LENGTH;
     }
-    if requestDispute.legalOfficerId <=0 {
+    if requestDispute.legalOfficerId <= 0 {
         errorFlag = true;
         errorMsg["legalOfficerId"] = LEGAL_OFFICER_ID_REQUIRED;
     }
@@ -200,17 +248,158 @@ public function validateDisputeInsert(Common:RequestDispute requestDispute) retu
 public function validateDisputeEstimateTime(Common:UpdateDisputeEstimateTime updateRequest) returns Common:ValidationResult {
     map<string> errorMsg = {};
     boolean errorFlag = false;
-    
+
     if updateRequest.caseId == "" {
         errorFlag = true;
         errorMsg["caseId"] = "Case ID is required";
     }
-    
+
     if updateRequest.estimateTime == "" {
         errorFlag = true;
         errorMsg["estimateTime"] = "Estimate time is required";
     }
-    
+
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
+public function validateDisputeComment(Common:RequestDsiputeComment disputecomment) returns Common:ValidationResult {
+    map<string> errorMsg = {};
+    boolean errorFlag = false;
+
+    if disputecomment.caseId == "" {
+        errorFlag = true;
+        errorMsg["caseId"] = "Case ID is required";
+    }
+
+    if disputecomment.comment == "" {
+        errorFlag = true;
+        errorMsg["estimateTime"] = "Comment is required";
+    }
+
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
+public isolated function validateDisputeFormData(Common:DisputeForm form) returns Common:ValidationResult {
+    map<string> err = {};
+    boolean valid = true;
+    if form.witnessName == "" {
+        valid = false;
+        err["witnessName"] = WITNESS_NAME_REQUIRED;
+    } else if form.witnessName.length() > 60 {
+        valid = false;
+        err["witnessName"] = WITNESS_NAME_LENGTH;
+    }
+    if form.disputesDetails == "" {
+        valid = false;
+        err["disputesDetails"] = DISPUTES_DETAILS_REQUIRED;
+    }
+    if form.landsId <= 0 {
+        valid = false;
+        err["landsId"] = LAND_ID_REQUIRED;
+    }
+    if form.legalOfficerId <= 0 {
+        valid = false;
+        err["legalOfficerId"] = LEGAL_OFFICER_ID_REQUIRED;
+    }
+    if form.documents.length() == 0 {
+        valid = false;
+        err["documents"] = DOCUMENTS_REQUIRED;
+    } else {
+        foreach var fr in form.documents {
+            if fr.data.length() > MAX_DOCUMENT_BYTES {
+                valid = false;
+                err["documents"] = DOCUMENT_SIZE_EXCEEDED;
+                break;
+            }
+            if !(fr.contentType.startsWith("image/")
+                || fr.contentType == "application/pdf"
+                || fr.contentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+                valid = false;
+                err["documents"] = INVALID_DOCUMENT_TYPE;
+                break;
+            }
+        }
+    }
+    return {isValid: valid, errors: err};
+}
+
+public isolated function validateLandDocument(Common:FileRecord[] documents) returns Common:ValidationResult {
+    map<string> err = {};
+    boolean valid = true;
+    foreach var fr in documents {
+        if fr.data.length() > MAX_DOCUMENT_BYTES {
+            valid = false;
+            err["documents"] = DOCUMENT_SIZE_EXCEEDED;
+            break;
+        }
+        if !(fr.contentType.startsWith("image/")
+                || fr.contentType == "application/pdf"
+                || fr.contentType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+            valid = false;
+            err["documents"] = INVALID_DOCUMENT_TYPE;
+            break;
+        }
+    }
+    return {isValid: valid, errors: err};
+}
+
+public function validateLegalPrecedent(Common:RequestPrecedent precedent) returns Common:ValidationResult {
+    map<string> errorMsg = {};
+    boolean errorFlag = false;
+
+    if precedent.caseId == "" {
+        errorFlag = true;
+        errorMsg["caseId"] = "Case ID is required";
+    }
+
+    if precedent.year == "" {
+        errorFlag = true;
+        errorMsg["estimateTime"] = "Yaer is required";
+    }
+
+    if precedent.headline == "" {
+        errorFlag = true;
+        errorMsg["estimateTime"] = "Headline is required";
+    } else if precedent.headline.length() > 100 {
+        errorFlag = true;
+        errorMsg["headline"] = "Headline should not exceed 100 characters";
+    }
+
+    if precedent.court == "" {
+        errorFlag = true;
+        errorMsg["court"] = "Court is required";
+    } else if getCourtType(precedent.court) is error {
+        errorFlag = true;
+        errorMsg["court"] = "Invalid court type";
+    }
+    if precedent.decision == "" {
+        errorFlag = true;
+        errorMsg["decision"] = "Decision is required";
+    }
+    if precedent.summary == "" {
+        errorFlag = true;
+        errorMsg["summary"] = "Summary is required";
+    }
+
+    if precedent.legalClauses.length() == 0 {
+        errorFlag = true;
+        errorMsg["lelalClauses"] = "Lelal clauses are required";
+    } else {
+        foreach var clause in precedent.legalClauses {
+            if clause == "" {
+                errorFlag = true;
+                errorMsg["lelalClauses"] = "Lelal clauses cannot be empty";
+                break;
+            }
+        }
+    }
+
     return {
         isValid: !errorFlag,
         errors: errorMsg

@@ -97,6 +97,18 @@ public enum LAND_ERRORS {
     FAILED_TO_FETCH_LANDS = "Failed to fetch lands",
     NO_LANDS_FOUND = "No lands found",
     INVALID_LAND_ID = "Invalid land ID",
+    FAILED_TO_UPDATE_LAND_STATUS = "Failed to update land status",
+    INVALID_LAND_STATUS = "Invalid land status"
+}
+
+public enum LAND_OWNER_ERRORS {
+    LAND_OWNER_ALREADY_EXISTS = "Land owner already exists",
+    FAILED_TO_REGISTER_LAND_OWNER = "Failed to register land owner",
+    LAND_OWNER_NOT_FOUND = "Land owner not found",
+    NO_LAND_OWNERS_FOUND = "No land owners found"
+}
+
+public enum DISPUTE_ERRORS {
     LAND_ID_REQUIRED = "Land ID is required",
     LEGAL_OFFICER_ID_REQUIRED = "Legal officer ID is required",
     WITNESS_NAME_LENGTH = "Witness name should not exceed 60 characters",
@@ -108,5 +120,21 @@ public enum LAND_ERRORS {
     INVALID_LEGAL_OFFICER_ID = "Invalid legal officer ID",
     INVALID_CASE_ID = "Invalid case ID",
     FAILED_TO_UPDATE_DISPUTE = "Failed to update dispute",
-    DISPUTE_ESTIMATE_TIME_UPDATED = "Dispute estimate time updated successfully"
+    DISPUTE_ESTIMATE_TIME_UPDATED = "Dispute estimate time updated successfully",
+    FAILED_TO_ADD_DISPUTE_DOCUMENT = "Failed to add dispute document",
+    FAILED_TO_ADD_COMMENT = "Failed to add comment",
+    FAILED_TO_ADD_PRECEDENT = "Failed to add precedent",
+    FAILED_TO_ADD_LEGAL_CLAUSE = "Failed to add legal clause",
+    FAILED_TO_FETCH_STATS = "Failed to fetch stats",
+    FAILED_TO_QUEUE_DISPUTE = "Failed to queue dispute",
+    FAILED_TO_QUEUE_DISPUTE_ESTIMATE_TIME = "Failed to queue dispute estimate time",
+    FAILED_TO_QUEUE_DISPUTE_COMMENT = "Failed to queue dispute comment"
+}
+
+public enum DOCUMENT_ERRORS {
+    FAILED_TO_UPLOAD_DOCUMENT = "Failed to upload document",
+    DOCUMENTS_REQUIRED = "Documents are required",
+    DOCUMENT_SIZE_EXCEEDED = "Document size exceeded",
+    INVALID_DOCUMENT_TYPE = "Invalid document type",
+    DOCUMENT_ALREADY_EXISTS = "Document already exists"
 }

@@ -76,6 +76,63 @@ public type RequestDispute record {|
     int legalOfficerId;
 |};
 
+public type UpdateDisputeEstimateTime record {|
+    string caseId;
+    string estimateTime;
+|};
+
+public type RequestDsiputeComment record {|
+    string caseId;
+    string comment;
+|};
+
+public type LandCreate record {|
+    string landId;
+    string landName;
+    string landPlace;
+    decimal landLat;
+    decimal landLang;
+    float landSize;
+    decimal landValue;
+    string landType;
+    time:Date registerDate;
+    DB:LandLandStatus landStatus;
+    int priority;
+    DB:LandOwnerInsert? from_owner;
+    DB:LandOwnerInsert to_owner;
+    string verified_by;
+    string transferDate;
+|};
+
+public type LandInsertResponse record {|
+    int LandID;
+    int ToOwnerID;
+    int? FromOwnerID;
+    string TransferDate;
+    string VerifiedBy;
+|};
+
+public type FileRecord record {
+    string filename;
+    string contentType;
+    byte[] data;
+};
+
+public type DisputeForm record {
+    FileRecord[] documents;
+    string witnessName;
+    string disputesDetails;
+    int landsId;
+    int legalOfficerId;
+};
+
+public type DisputeWithDocs record {|
+    DB:Dispute dispute;
+    DB:DisputeDocument?[] documents;
+    DB:Land land;
+    DB:LandOwner? currentOwner;
+|};
+
 public type Dispute record {|
     int id;
     string caseId;
@@ -83,12 +140,50 @@ public type Dispute record {|
     string disputesDetails;
     string estimateTime;
     DB:DisputeStatus status;
-    int landsId;
+    DB:Land land;
     int legalOfficerId;
     time:Utc createdAt;
 |};
 
-public type UpdateDisputeEstimateTime record {|
+public type LandTransferChain record {|
+    readonly int id;
+    time:Civil transferDate;
+    string verifiedBy;
+    int blockIndex;
+    string blockHash;
+    string prevBlockHash;
+    int fromLandOwnersId?;
+    int toLandOwnersId;
+    int landsId;
+|};
+
+public type RequestPrecedent record {|
     string caseId;
+    string year;
+    string headline;
+    string court;
+    string decision;
+    string summary;
+    string[] legalClauses;
+|};
+
+public type CountResult record {
+    int total;
+};
+
+public type DisputeMessage record {|
+    DB:DisputeInsert disputeInsert;
+    FileRecord[] documents;
+    int retryCount = 0;
+|};
+
+public type DisputeEstimateTimeMessage record {|
+    DB:Dispute dispute;
     string estimateTime;
+    int retryCount = 0;
+|};
+
+public type DisputeCommentMessage record {|
+    DB:DisputeCommentInsert dispute;
+    int retryCount = 0;
 |};

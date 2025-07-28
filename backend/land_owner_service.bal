@@ -1,19 +1,13 @@
 import backend.common;
 import backend.db as DB;
+import backend.mappers as Mappers;
+import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
+import backend.interceptors as Interceptors;
+
 
 import ballerina/http;
-import ballerina/jwt;
 import ballerina/persist;
-import ballerina/time;
-
-http:JwtValidatorConfig landOwnerValidator = {
-    issuer: "byteseekers",
-    audience: Utils:LAND_OWNER,
-    signatureConfig: {certFile: "resources/certificates/public.crt"}
-};
-
-http:ListenerJwtAuthHandler landOwnerHandler = new (landOwnerValidator);
 
 listener http:Listener landOwnerMicroservice = new (9098);
 
@@ -22,12 +16,28 @@ listener http:Listener landOwnerMicroservice = new (9098);
         allowOrigins: ["*"],
         allowMethods: ["GET", "POST"],
         allowCredentials: true
-    }
+    },
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: "byteseekers",
+                audience: Utils:LAND_OWNER,
+                signatureConfig: {
+                    certFile: "resources/certificates/public.crt"
+                },
+                scopeKey: "scp"
+            },
+            scopes: [Utils:LAND_OWNER]
+        }
+    ]
 }
 
-service /land_owner on landOwnerMicroservice {
+service http:InterceptableService /land_owner on landOwnerMicroservice {
     private final DB:Client dbClient;
 
+    public function createInterceptors() returns Interceptors:RequestInterceptor {
+        return new Interceptors:RequestInterceptor();
+    }
     function init() returns error? {
         self.dbClient = check new ();
     }
@@ -36,14 +46,8 @@ service /land_owner on landOwnerMicroservice {
         check self.dbClient.close();
     }
 
-    resource function get getLegelOfficers(@http:Header string Authorization) returns error|http:Response {
+    resource function get legal_officers() returns error|http:Response {
         http:Response response = new;
-        jwt:Payload|http:Unauthorized authn = landOwnerHandler.authenticate(Authorization);
-        if authn is http:Unauthorized {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
-            return response;
-        }
         common:LegalOfficer[] legalOfficers = [];
         stream<common:LegalOfficer, persist:Error?> legalOfficerResult = self.dbClient->/legalofficers(common:LegalOfficer);
 
@@ -62,66 +66,66 @@ service /land_owner on landOwnerMicroservice {
         return response;
     }
 
-    resource function post createDispute(@http:Payload common:RequestDispute requestDispute, @http:Header string Authorization) returns http:Response|error {
+    resource function post dispute/add(http:Request req) returns http:Response|error {
         http:Response response = new;
-        jwt:Payload|http:Unauthorized authn = landOwnerHandler.authenticate(Authorization);
-        if authn is http:Unauthorized {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, Utils:UNAUTHORIZED_REQUEST);
+        if req.getContentType().startsWith("multipart/form-data") {
+            //parse multipart form data
+            common:DisputeForm|error parsed = Utils:parseDisputeMultipartFormData(req.getBodyParts());
+            if parsed is error {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, Utils:INVALID_MULTIPART_REQUEST);
+                return response;
+            }
+            //validate parsed data
+            common:ValidationResult validateDispute = Utils:validateDisputeFormData(parsed);
+            if !validateDispute.isValid {
+                response.statusCode = 400;
+                response = Utils:setErrorResponse(response, validateDispute.errors);
+                return response;
+            }
+            string caseId = Utils:getUniqueIDByCurrentTime();
+            //check if land and legal officer exist
+            common:Land|persist:Error landResult = self.dbClient->/lands/[parsed.landsId](common:Land);
+            if landResult is persist:Error {
+                if landResult is persist:NotFoundError {
+                    response.statusCode = 404;
+                    response = Utils:setErrorResponse(response, Utils:LAND_NOT_FOUND);
+                } else {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LAND);
+                }
+                return response;
+            }
+            //check if legal officer exists
+            common:LegalOfficer|persist:Error legalOfficerResult = self.dbClient->/legalofficers/[parsed.legalOfficerId](common:LegalOfficer);
+            if legalOfficerResult is persist:Error {
+                if legalOfficerResult is persist:NotFoundError {
+                    response.statusCode = 404;
+                    response = Utils:setErrorResponse(response, Utils:LEGAL_OFFICER_NOT_FOUND);
+                } else {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LEGAL_OFFICER);
+                }
+                return response;
+            }
+            DB:DisputeInsert disputeInsert = Mappers:disputeInsertMapper(parsed, caseId);
+            common:DisputeMessage disputeMessage = {disputeInsert, documents: parsed.documents};
+            //publish dispute message to RabbitMQ
+            error? publishDisputeMessageResult = RabbitMQ:publishDisputeMessage(disputeMessage);
+            if publishDisputeMessageResult is error {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, Utils:FAILED_TO_QUEUE_DISPUTE);
+                return response;
+            }
+            response.statusCode = 201;
+            response = Utils:setSuccessResponse(response, {"message": Utils:LAND_INSERT_SUCCESS, "case_id": disputeInsert.caseId});
             return response;
         }
-        common:ValidationResult validateLandInsert = Utils:validateDisputeInsert(requestDispute);
-        if !validateLandInsert.isValid {
+        else {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, validateLandInsert.errors);
+            response = Utils:setErrorResponse(response, Utils:INVALID_CONTENT_TYPE);
             return response;
         }
-
-        string caseId = Utils:getUniqueIDByCurrentTime();
-        
-        common:Land|persist:Error landResult = self.dbClient->/lands/[requestDispute.landsId](common:Land);
-        if landResult is persist:Error {
-            if landResult is persist:NotFoundError {
-                response.statusCode = 404;
-                response = Utils:setErrorResponse(response, Utils:LAND_NOT_FOUND);
-            } else {
-                response.statusCode = 500;
-                response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LAND);
-            }
-            return response;
-        }
-        common:LegalOfficer|persist:Error legalOfficerResult = self.dbClient->/legalofficers/[requestDispute.legalOfficerId](common:LegalOfficer);
-        if legalOfficerResult is persist:Error {
-            if legalOfficerResult is persist:NotFoundError {
-                response.statusCode = 404;
-                response = Utils:setErrorResponse(response, Utils:LEGAL_OFFICER_NOT_FOUND);
-            } else {
-                response.statusCode = 500;
-                response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LEGAL_OFFICER);
-            }
-            return response;
-        }
-        DB:DisputeInsert disputeInsert = {
-            witnessName: requestDispute.witnessName,
-            disputesDetails: requestDispute.disputesDetails,
-            landsId: requestDispute.landsId,
-            legalOfficerId: requestDispute.legalOfficerId,
-            status: DB:PENDING,
-            caseId: caseId,
-            estimateTime: "",
-            createdAt: time:utcNow()
-        };
-        int[]|persist:Error disputeResult = self.dbClient->/disputes.post([disputeInsert]);
-        if disputeResult is persist:Error {
-            response.statusCode = 500;
-            response = Utils:setErrorResponse(response, Utils:FAILED_TO_REGISTER_LAND);
-            return response;
-        }
-        response.statusCode = 201;
-        response = Utils:setSuccessResponse(response, {
-            "message": Utils:LAND_INSERT_SUCCESS,
-            "case_id": disputeInsert.caseId
-        });
-        return response;
     }
 }
+

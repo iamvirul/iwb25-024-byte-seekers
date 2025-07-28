@@ -12,13 +12,14 @@ public isolated function setupTestDB() returns persist:Error? {
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "lands_documents";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "disputes_document";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "land_transfer_chain";`);
+    _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "dispute_comments";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_clauses";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_precedents";`);
+    _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "audits";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "disputes";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_officer";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "user_types";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "users";`);
-    _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "nlp_analysis_result";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "land_owner";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "lands";`);
     _ = check h2Client->executeNativeSQL(`
@@ -46,16 +47,6 @@ CREATE TABLE "land_owner" (
 	"nic" VARCHAR(20) NOT NULL,
 	"address" VARCHAR(255),
 	"contact_no" VARCHAR(20),
-	PRIMARY KEY("id")
-);`);
-    _ = check h2Client->executeNativeSQL(`
-CREATE TABLE "nlp_analysis_result" (
-	"id" INT AUTO_INCREMENT,
-	"_hashId" VARCHAR(60) NOT NULL,
-	"results" VARCHAR(191),
-	"result_summary" VARCHAR(191),
-	"tags" VARCHAR(60),
-	"trust" VARCHAR(20),
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
@@ -103,6 +94,19 @@ CREATE TABLE "disputes" (
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
+CREATE TABLE "audits" (
+	"id" INT AUTO_INCREMENT,
+	"request_path" VARCHAR(60) NOT NULL,
+	"request_method" VARCHAR(45) NOT NULL,
+	"user_agent" VARCHAR(100) NOT NULL,
+	"request_payload" VARCHAR(191) NOT NULL,
+	"request_host" VARCHAR(100) NOT NULL,
+	"requested_time" DATETIME NOT NULL,
+	"users_id" INT NOT NULL,
+	FOREIGN KEY("users_id") REFERENCES "users"("id"),
+	PRIMARY KEY("id")
+);`);
+    _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "legal_precedents" (
 	"id" INT AUTO_INCREMENT,
 	"year" DATE NOT NULL,
@@ -120,6 +124,15 @@ CREATE TABLE "legal_clauses" (
 	"legal_clause" VARCHAR(191) NOT NULL,
 	"legal_precedents_id" INT NOT NULL,
 	FOREIGN KEY("legal_precedents_id") REFERENCES "legal_precedents"("id"),
+	PRIMARY KEY("id")
+);`);
+    _ = check h2Client->executeNativeSQL(`
+CREATE TABLE "dispute_comments" (
+	"id" INT AUTO_INCREMENT,
+	"comment" VARCHAR(191) NOT NULL,
+	"created_at" TIMESTAMP NOT NULL,
+	"disputes_id" INT NOT NULL,
+	FOREIGN KEY("disputes_id") REFERENCES "disputes"("id"),
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
@@ -141,8 +154,7 @@ CREATE TABLE "land_transfer_chain" (
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "disputes_document" (
 	"id" INT AUTO_INCREMENT,
-	"doc_id" VARCHAR(60) NOT NULL,
-	"doc_name" VARCHAR(60) NOT NULL,
+	"doc_path" VARCHAR(100) NOT NULL,
 	"uploaded_date" TIMESTAMP NOT NULL,
 	"disputes_id" INT NOT NULL,
 	FOREIGN KEY("disputes_id") REFERENCES "disputes"("id"),
@@ -151,16 +163,13 @@ CREATE TABLE "disputes_document" (
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "lands_documents" (
 	"id" INT AUTO_INCREMENT,
-	"doc_id" VARCHAR(60) NOT NULL,
-	"doc_name" VARCHAR(60) NOT NULL,
+	"doc_path" VARCHAR(60) NOT NULL,
 	"doc_size" VARCHAR(10) NOT NULL,
 	"doc_type" VARCHAR(45) NOT NULL,
 	"uploaded_date" TIMESTAMP NOT NULL,
 	"doc_status" VARCHAR(8) CHECK ("doc_status" IN ('PENDING', 'APPROVED', 'REJECTED')) NOT NULL,
 	"lands_id" INT NOT NULL,
 	FOREIGN KEY("lands_id") REFERENCES "lands"("id"),
-	"nlp_analysis_result_id" INT NOT NULL,
-	FOREIGN KEY("nlp_analysis_result_id") REFERENCES "nlp_analysis_result"("id"),
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
@@ -172,13 +181,14 @@ CREATE TABLE "users_has_user_types" (
 	PRIMARY KEY("users_id","user_types_id")
 );`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_lands_documents_lands1_idx" ON "lands_documents" ("lands_id");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_lands_documents_nlp_analysis_result1_idx" ON "lands_documents" ("nlp_analysis_result_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_legal_precedents_disputes1_idx" ON "legal_precedents" ("disputes_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_legal_clauses_legal_precedents1_idx" ON "legal_clauses" ("legal_precedents_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_document_disputes1_idx" ON "disputes_document" ("disputes_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_land_transfer_chain_lands1_idx" ON "land_transfer_chain" ("lands_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_land_transfer_chain_land_owners1_idx" ON "land_transfer_chain" ("from_land_owners_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_land_transfer_chain_land_owners2_idx" ON "land_transfer_chain" ("to_land_owners_id");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_audits_users1_idx" ON "audits" ("users_id");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_dispute_comments_disputes1_idx" ON "dispute_comments" ("disputes_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_users_has_user_types_users1_idx" ON "users_has_user_types" ("users_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_users_has_user_types_user_types1_idx" ON "users_has_user_types" ("user_types_id");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_lands1_idx" ON "disputes" ("lands_id");`);
@@ -190,13 +200,14 @@ public isolated function cleanupTestDB() returns persist:Error? {
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "lands_documents";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "disputes_document";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "land_transfer_chain";`);
+    _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "dispute_comments";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_clauses";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_precedents";`);
+    _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "audits";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "disputes";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_officer";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "user_types";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "users";`);
-    _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "nlp_analysis_result";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "land_owner";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "lands";`);
 }

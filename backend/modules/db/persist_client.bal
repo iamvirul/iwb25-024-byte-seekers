@@ -17,9 +17,10 @@ const LEGAL_CLAUSE = "legalclauses";
 const DISPUTE_DOCUMENT = "disputedocuments";
 const LEGAL_OFFICER = "legalofficers";
 const LAND_TRANSFER_CHAIN = "landtransferchains";
-const NLP_ANALYSIS_RESULT = "nlpanalysisresults";
 const LAND_OWNER = "landowners";
 const LAND = "lands";
+const AUDIT = "audits";
+const DISPUTE_COMMENT = "disputecomments";
 const USER_HAS_USER_TYPE = "userhasusertypes";
 const DISPUTE = "disputes";
 const USER_TYPE = "usertypes";
@@ -37,14 +38,12 @@ public isolated client class Client {
             tableName: "lands_documents",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                docId: {columnName: "doc_id"},
-                docName: {columnName: "doc_name"},
+                docPath: {columnName: "doc_path"},
                 docSize: {columnName: "doc_size"},
                 docType: {columnName: "doc_type"},
                 uploadedDate: {columnName: "uploaded_date"},
                 docStatus: {columnName: "doc_status"},
                 landsId: {columnName: "lands_id"},
-                nlpAnalysisResultId: {columnName: "nlp_analysis_result_id"},
                 "land.id": {relation: {entityName: "land", refField: "id"}},
                 "land.landId": {relation: {entityName: "land", refField: "landId", refColumn: "land_id"}},
                 "land.landName": {relation: {entityName: "land", refField: "landName", refColumn: "land_name"}},
@@ -56,19 +55,10 @@ public isolated client class Client {
                 "land.landType": {relation: {entityName: "land", refField: "landType", refColumn: "land_type"}},
                 "land.registerDate": {relation: {entityName: "land", refField: "registerDate", refColumn: "register_date"}},
                 "land.landStatus": {relation: {entityName: "land", refField: "landStatus", refColumn: "land_status"}},
-                "land.priority": {relation: {entityName: "land", refField: "priority"}},
-                "nlpanalysisresult.id": {relation: {entityName: "nlpanalysisresult", refField: "id"}},
-                "nlpanalysisresult.hashId": {relation: {entityName: "nlpanalysisresult", refField: "hashId", refColumn: "_hashId"}},
-                "nlpanalysisresult.results": {relation: {entityName: "nlpanalysisresult", refField: "results"}},
-                "nlpanalysisresult.resultSummary": {relation: {entityName: "nlpanalysisresult", refField: "resultSummary", refColumn: "result_summary"}},
-                "nlpanalysisresult.tags": {relation: {entityName: "nlpanalysisresult", refField: "tags"}},
-                "nlpanalysisresult.trust": {relation: {entityName: "nlpanalysisresult", refField: "trust"}}
+                "land.priority": {relation: {entityName: "land", refField: "priority"}}
             },
             keyFields: ["id"],
-            joinMetadata: {
-                land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY},
-                nlpanalysisresult: {entity: NlpAnalysisResult, fieldName: "nlpanalysisresult", refTable: "nlp_analysis_result", refColumns: ["id"], joinColumns: ["nlp_analysis_result_id"], 'type: psql:ONE_TO_MANY}
-            }
+            joinMetadata: {land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY}}
         },
         [LEGAL_PRECEDENT]: {
             entityName: "LegalPrecedent",
@@ -114,11 +104,22 @@ public isolated client class Client {
                 sludi: {columnName: "sludi"},
                 contactNo: {columnName: "contact_no"},
                 address: {columnName: "address"},
+                "audits[].id": {relation: {entityName: "audits", refField: "id"}},
+                "audits[].requestPath": {relation: {entityName: "audits", refField: "requestPath", refColumn: "request_path"}},
+                "audits[].requestMethod": {relation: {entityName: "audits", refField: "requestMethod", refColumn: "request_method"}},
+                "audits[].userAgent": {relation: {entityName: "audits", refField: "userAgent", refColumn: "user_agent"}},
+                "audits[].requestPayload": {relation: {entityName: "audits", refField: "requestPayload", refColumn: "request_payload"}},
+                "audits[].requestHost": {relation: {entityName: "audits", refField: "requestHost", refColumn: "request_host"}},
+                "audits[].requestedTime": {relation: {entityName: "audits", refField: "requestedTime", refColumn: "requested_time"}},
+                "audits[].usersId": {relation: {entityName: "audits", refField: "usersId", refColumn: "users_id"}},
                 "userhasusertypes[].userTypesId": {relation: {entityName: "userhasusertypes", refField: "userTypesId", refColumn: "user_types_id"}},
                 "userhasusertypes[].usersId": {relation: {entityName: "userhasusertypes", refField: "usersId", refColumn: "users_id"}}
             },
             keyFields: ["id"],
-            joinMetadata: {userhasusertypes: {entity: UserHasUserType, fieldName: "userhasusertypes", refTable: "users_has_user_types", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
+            joinMetadata: {
+                audits: {entity: Audit, fieldName: "audits", refTable: "audits", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                userhasusertypes: {entity: UserHasUserType, fieldName: "userhasusertypes", refTable: "users_has_user_types", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+            }
         },
         [LEGAL_CLAUSE]: {
             entityName: "LegalClause",
@@ -143,8 +144,7 @@ public isolated client class Client {
             tableName: "disputes_document",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                docId: {columnName: "doc_id"},
-                docName: {columnName: "doc_name"},
+                docPath: {columnName: "doc_path"},
                 uploadedDate: {columnName: "uploaded_date"},
                 disputesId: {columnName: "disputes_id"},
                 "dispute.id": {relation: {entityName: "dispute", refField: "id"}},
@@ -229,29 +229,6 @@ public isolated client class Client {
                 land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY}
             }
         },
-        [NLP_ANALYSIS_RESULT]: {
-            entityName: "NlpAnalysisResult",
-            tableName: "nlp_analysis_result",
-            fieldMetadata: {
-                id: {columnName: "id", dbGenerated: true},
-                hashId: {columnName: "_hashId"},
-                results: {columnName: "results"},
-                resultSummary: {columnName: "result_summary"},
-                tags: {columnName: "tags"},
-                trust: {columnName: "trust"},
-                "landdocuments[].id": {relation: {entityName: "landdocuments", refField: "id"}},
-                "landdocuments[].docId": {relation: {entityName: "landdocuments", refField: "docId", refColumn: "doc_id"}},
-                "landdocuments[].docName": {relation: {entityName: "landdocuments", refField: "docName", refColumn: "doc_name"}},
-                "landdocuments[].docSize": {relation: {entityName: "landdocuments", refField: "docSize", refColumn: "doc_size"}},
-                "landdocuments[].docType": {relation: {entityName: "landdocuments", refField: "docType", refColumn: "doc_type"}},
-                "landdocuments[].uploadedDate": {relation: {entityName: "landdocuments", refField: "uploadedDate", refColumn: "uploaded_date"}},
-                "landdocuments[].docStatus": {relation: {entityName: "landdocuments", refField: "docStatus", refColumn: "doc_status"}},
-                "landdocuments[].landsId": {relation: {entityName: "landdocuments", refField: "landsId", refColumn: "lands_id"}},
-                "landdocuments[].nlpAnalysisResultId": {relation: {entityName: "landdocuments", refField: "nlpAnalysisResultId", refColumn: "nlp_analysis_result_id"}}
-            },
-            keyFields: ["id"],
-            joinMetadata: {landdocuments: {entity: LandDocument, fieldName: "landdocuments", refTable: "lands_documents", refColumns: ["nlp_analysis_result_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
-        },
         [LAND_OWNER]: {
             entityName: "LandOwner",
             tableName: "land_owner",
@@ -323,14 +300,12 @@ public isolated client class Client {
                 "landtransferchains[].toLandOwnersId": {relation: {entityName: "landtransferchains", refField: "toLandOwnersId", refColumn: "to_land_owners_id"}},
                 "landtransferchains[].landsId": {relation: {entityName: "landtransferchains", refField: "landsId", refColumn: "lands_id"}},
                 "landdocuments[].id": {relation: {entityName: "landdocuments", refField: "id"}},
-                "landdocuments[].docId": {relation: {entityName: "landdocuments", refField: "docId", refColumn: "doc_id"}},
-                "landdocuments[].docName": {relation: {entityName: "landdocuments", refField: "docName", refColumn: "doc_name"}},
+                "landdocuments[].docPath": {relation: {entityName: "landdocuments", refField: "docPath", refColumn: "doc_path"}},
                 "landdocuments[].docSize": {relation: {entityName: "landdocuments", refField: "docSize", refColumn: "doc_size"}},
                 "landdocuments[].docType": {relation: {entityName: "landdocuments", refField: "docType", refColumn: "doc_type"}},
                 "landdocuments[].uploadedDate": {relation: {entityName: "landdocuments", refField: "uploadedDate", refColumn: "uploaded_date"}},
                 "landdocuments[].docStatus": {relation: {entityName: "landdocuments", refField: "docStatus", refColumn: "doc_status"}},
-                "landdocuments[].landsId": {relation: {entityName: "landdocuments", refField: "landsId", refColumn: "lands_id"}},
-                "landdocuments[].nlpAnalysisResultId": {relation: {entityName: "landdocuments", refField: "nlpAnalysisResultId", refColumn: "nlp_analysis_result_id"}}
+                "landdocuments[].landsId": {relation: {entityName: "landdocuments", refField: "landsId", refColumn: "lands_id"}}
             },
             keyFields: ["id"],
             joinMetadata: {
@@ -338,6 +313,53 @@ public isolated client class Client {
                 landtransferchains: {entity: LandTransferChain, fieldName: "landtransferchains", refTable: "land_transfer_chain", refColumns: ["lands_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
                 landdocuments: {entity: LandDocument, fieldName: "landdocuments", refTable: "lands_documents", refColumns: ["lands_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
+        },
+        [AUDIT]: {
+            entityName: "Audit",
+            tableName: "audits",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                requestPath: {columnName: "request_path"},
+                requestMethod: {columnName: "request_method"},
+                userAgent: {columnName: "user_agent"},
+                requestPayload: {columnName: "request_payload"},
+                requestHost: {columnName: "request_host"},
+                requestedTime: {columnName: "requested_time"},
+                usersId: {columnName: "users_id"},
+                "user.id": {relation: {entityName: "user", refField: "id"}},
+                "user.userId": {relation: {entityName: "user", refField: "userId", refColumn: "user_id"}},
+                "user.firstName": {relation: {entityName: "user", refField: "firstName", refColumn: "first_name"}},
+                "user.lastName": {relation: {entityName: "user", refField: "lastName", refColumn: "last_name"}},
+                "user.email": {relation: {entityName: "user", refField: "email"}},
+                "user.password": {relation: {entityName: "user", refField: "password"}},
+                "user.nic": {relation: {entityName: "user", refField: "nic"}},
+                "user.sludi": {relation: {entityName: "user", refField: "sludi"}},
+                "user.contactNo": {relation: {entityName: "user", refField: "contactNo", refColumn: "contact_no"}},
+                "user.address": {relation: {entityName: "user", refField: "address"}}
+            },
+            keyFields: ["id"],
+            joinMetadata: {user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["users_id"], 'type: psql:ONE_TO_MANY}}
+        },
+        [DISPUTE_COMMENT]: {
+            entityName: "DisputeComment",
+            tableName: "dispute_comments",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                comment: {columnName: "comment"},
+                createdAt: {columnName: "created_at"},
+                disputesId: {columnName: "disputes_id"},
+                "dispute.id": {relation: {entityName: "dispute", refField: "id"}},
+                "dispute.caseId": {relation: {entityName: "dispute", refField: "caseId", refColumn: "case_id"}},
+                "dispute.witnessName": {relation: {entityName: "dispute", refField: "witnessName", refColumn: "witness_name"}},
+                "dispute.disputesDetails": {relation: {entityName: "dispute", refField: "disputesDetails", refColumn: "disputes_details"}},
+                "dispute.estimateTime": {relation: {entityName: "dispute", refField: "estimateTime", refColumn: "estimate_time"}},
+                "dispute.status": {relation: {entityName: "dispute", refField: "status"}},
+                "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt", refColumn: "created_at"}},
+                "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId", refColumn: "lands_id"}},
+                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
+            },
+            keyFields: ["id"],
+            joinMetadata: {dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputes_id"], 'type: psql:ONE_TO_MANY}}
         },
         [USER_HAS_USER_TYPE]: {
             entityName: "UserHasUserType",
@@ -377,6 +399,10 @@ public isolated client class Client {
                 createdAt: {columnName: "created_at"},
                 landsId: {columnName: "lands_id"},
                 legalOfficerId: {columnName: "legal_officer_id"},
+                "disputecomments[].id": {relation: {entityName: "disputecomments", refField: "id"}},
+                "disputecomments[].comment": {relation: {entityName: "disputecomments", refField: "comment"}},
+                "disputecomments[].createdAt": {relation: {entityName: "disputecomments", refField: "createdAt", refColumn: "created_at"}},
+                "disputecomments[].disputesId": {relation: {entityName: "disputecomments", refField: "disputesId", refColumn: "disputes_id"}},
                 "land.id": {relation: {entityName: "land", refField: "id"}},
                 "land.landId": {relation: {entityName: "land", refField: "landId", refColumn: "land_id"}},
                 "land.landName": {relation: {entityName: "land", refField: "landName", refColumn: "land_name"}},
@@ -395,8 +421,7 @@ public isolated client class Client {
                 "legalofficer.baslId": {relation: {entityName: "legalofficer", refField: "baslId", refColumn: "BASL_ID"}},
                 "legalofficer.initialCost": {relation: {entityName: "legalofficer", refField: "initialCost", refColumn: "initial_cost"}},
                 "disputedocuments[].id": {relation: {entityName: "disputedocuments", refField: "id"}},
-                "disputedocuments[].docId": {relation: {entityName: "disputedocuments", refField: "docId", refColumn: "doc_id"}},
-                "disputedocuments[].docName": {relation: {entityName: "disputedocuments", refField: "docName", refColumn: "doc_name"}},
+                "disputedocuments[].docPath": {relation: {entityName: "disputedocuments", refField: "docPath", refColumn: "doc_path"}},
                 "disputedocuments[].uploadedDate": {relation: {entityName: "disputedocuments", refField: "uploadedDate", refColumn: "uploaded_date"}},
                 "disputedocuments[].disputesId": {relation: {entityName: "disputedocuments", refField: "disputesId", refColumn: "disputes_id"}},
                 "legalprecedents[].id": {relation: {entityName: "legalprecedents", refField: "id"}},
@@ -409,6 +434,7 @@ public isolated client class Client {
             },
             keyFields: ["id"],
             joinMetadata: {
+                disputecomments: {entity: DisputeComment, fieldName: "disputecomments", refTable: "dispute_comments", refColumns: ["disputes_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
                 land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY},
                 legalofficer: {entity: LegalOfficer, fieldName: "legalofficer", refTable: "legal_officer", refColumns: ["id"], joinColumns: ["legal_officer_id"], 'type: psql:ONE_TO_MANY},
                 disputedocuments: {entity: DisputeDocument, fieldName: "disputedocuments", refTable: "disputes_document", refColumns: ["disputes_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
@@ -443,9 +469,10 @@ public isolated client class Client {
             [DISPUTE_DOCUMENT]: check new (dbClient, self.metadata.get(DISPUTE_DOCUMENT), psql:MYSQL_SPECIFICS),
             [LEGAL_OFFICER]: check new (dbClient, self.metadata.get(LEGAL_OFFICER), psql:MYSQL_SPECIFICS),
             [LAND_TRANSFER_CHAIN]: check new (dbClient, self.metadata.get(LAND_TRANSFER_CHAIN), psql:MYSQL_SPECIFICS),
-            [NLP_ANALYSIS_RESULT]: check new (dbClient, self.metadata.get(NLP_ANALYSIS_RESULT), psql:MYSQL_SPECIFICS),
             [LAND_OWNER]: check new (dbClient, self.metadata.get(LAND_OWNER), psql:MYSQL_SPECIFICS),
             [LAND]: check new (dbClient, self.metadata.get(LAND), psql:MYSQL_SPECIFICS),
+            [AUDIT]: check new (dbClient, self.metadata.get(AUDIT), psql:MYSQL_SPECIFICS),
+            [DISPUTE_COMMENT]: check new (dbClient, self.metadata.get(DISPUTE_COMMENT), psql:MYSQL_SPECIFICS),
             [USER_HAS_USER_TYPE]: check new (dbClient, self.metadata.get(USER_HAS_USER_TYPE), psql:MYSQL_SPECIFICS),
             [DISPUTE]: check new (dbClient, self.metadata.get(DISPUTE), psql:MYSQL_SPECIFICS),
             [USER_TYPE]: check new (dbClient, self.metadata.get(USER_TYPE), psql:MYSQL_SPECIFICS)
@@ -732,46 +759,6 @@ public isolated client class Client {
         return result;
     }
 
-    isolated resource function get nlpanalysisresults(NlpAnalysisResultTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
-        name: "query"
-    } external;
-
-    isolated resource function get nlpanalysisresults/[int id](NlpAnalysisResultTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
-        name: "queryOne"
-    } external;
-
-    isolated resource function post nlpanalysisresults(NlpAnalysisResultInsert[] data) returns int[]|persist:Error {
-        psql:SQLClient sqlClient;
-        lock {
-            sqlClient = self.persistClients.get(NLP_ANALYSIS_RESULT);
-        }
-        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
-        return from sql:ExecutionResult inserted in result
-            where inserted.lastInsertId != ()
-            select <int>inserted.lastInsertId;
-    }
-
-    isolated resource function put nlpanalysisresults/[int id](NlpAnalysisResultUpdate value) returns NlpAnalysisResult|persist:Error {
-        psql:SQLClient sqlClient;
-        lock {
-            sqlClient = self.persistClients.get(NLP_ANALYSIS_RESULT);
-        }
-        _ = check sqlClient.runUpdateQuery(id, value);
-        return self->/nlpanalysisresults/[id].get();
-    }
-
-    isolated resource function delete nlpanalysisresults/[int id]() returns NlpAnalysisResult|persist:Error {
-        NlpAnalysisResult result = check self->/nlpanalysisresults/[id].get();
-        psql:SQLClient sqlClient;
-        lock {
-            sqlClient = self.persistClients.get(NLP_ANALYSIS_RESULT);
-        }
-        _ = check sqlClient.runDeleteQuery(id);
-        return result;
-    }
-
     isolated resource function get landowners(LandOwnerTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
         'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
         name: "query"
@@ -847,6 +834,86 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(LAND);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get audits(AuditTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get audits/[int id](AuditTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post audits(AuditInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(AUDIT);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put audits/[int id](AuditUpdate value) returns Audit|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(AUDIT);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/audits/[id].get();
+    }
+
+    isolated resource function delete audits/[int id]() returns Audit|persist:Error {
+        Audit result = check self->/audits/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(AUDIT);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get disputecomments(DisputeCommentTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get disputecomments/[int id](DisputeCommentTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post disputecomments(DisputeCommentInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(DISPUTE_COMMENT);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put disputecomments/[int id](DisputeCommentUpdate value) returns DisputeComment|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(DISPUTE_COMMENT);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/disputecomments/[id].get();
+    }
+
+    isolated resource function delete disputecomments/[int id]() returns DisputeComment|persist:Error {
+        DisputeComment result = check self->/disputecomments/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(DISPUTE_COMMENT);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;
