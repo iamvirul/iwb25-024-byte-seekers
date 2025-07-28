@@ -7,7 +7,7 @@ import ballerina/log;
 import ballerina/regex;
 import ballerina/time;
 
-service class RequestInterceptor {
+public service class RequestInterceptor {
 
     *http:RequestInterceptor;
 

@@ -2,6 +2,7 @@ import backend.common as Common;
 import backend.db as DB;
 import backend.mappers as Mappers;
 import backend.utils as Utils;
+import backend.interceptors as Interceptors;
 
 import ballerina/http;
 import ballerina/persist;
@@ -44,8 +45,8 @@ service http:InterceptableService /land_officer on landMicroservice {
         check self.dbClient.close();
     }
 
-    public function createInterceptors() returns RequestInterceptor {
-        return new RequestInterceptor() ;
+    public function createInterceptors() returns Interceptors:RequestInterceptor {
+        return new Interceptors:RequestInterceptor() ;
     }
     private function creatLandOwner(DB:LandOwnerInsert landOwnerInsert) returns error|int {
         transaction {

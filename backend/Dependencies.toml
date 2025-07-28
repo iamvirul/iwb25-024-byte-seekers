@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.12.7"
+distribution-version = "2201.12.4"
 
 [[package]]
 org = "ballerina"
@@ -523,6 +523,7 @@ modules = [
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.common"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.db"},
+	{org = "virulnirmala", packageName = "backend", moduleName = "backend.interceptors"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.mappers"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.rabbitmq"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.utils"}
