@@ -54,7 +54,7 @@ service /auth on authMicroservice {
                 response = Utils:setErrorResponse(response, Utils:INVALID_PASSWORD);
                 return response;
             }
-            stream<Common:UserHasTypes, persist:Error?> userHasType = self.dbClient->queryNativeSQL(`SELECT * FROM users_has_user_types WHERE users_id = ${user.id} AND user_types_id = ${loginUser.user_type}`, Common:UserHasTypes);
+            stream<Common:UserHasTypes, persist:Error?> userHasType = self.dbClient->queryNativeSQL(`SELECT * FROM users_has_user_types WHERE usersId = ${user.id} AND userTypesId = ${loginUser.user_type}`, Common:UserHasTypes);
             Common:UserHasTypes? userTypeResult = ();
             var userTypeCheck = check userHasType.next();
             _ = check userHasType.close();

@@ -56,7 +56,7 @@ public service class RequestInterceptor {
             };
             anydata|http:ClientError unionResult = auditClient->/audit/log.post(auditInsert);
             if unionResult is http:ClientError {
-                log:printError("Error inserting audit log: ");
+                log:printError("Error inserting audit log: " + unionResult.message());
                 return ctx.next();
             }
         }

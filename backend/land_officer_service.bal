@@ -1,8 +1,9 @@
 import backend.common as Common;
 import backend.db as DB;
+import backend.interceptors as Interceptors;
+import backend.managers as Managers;
 import backend.mappers as Mappers;
 import backend.utils as Utils;
-import backend.interceptors as Interceptors;
 
 import ballerina/http;
 import ballerina/persist;
@@ -46,8 +47,9 @@ service http:InterceptableService /land_officer on landMicroservice {
     }
 
     public function createInterceptors() returns Interceptors:RequestInterceptor {
-        return new Interceptors:RequestInterceptor() ;
+        return new Interceptors:RequestInterceptor();
     }
+
     private function creatLandOwner(DB:LandOwnerInsert landOwnerInsert) returns error|int {
         transaction {
             int[]|persist:Error landOwnerID = self.dbClient->/landowners.post([landOwnerInsert]);
@@ -101,14 +103,14 @@ service http:InterceptableService /land_officer on landMicroservice {
                 response = Utils:setErrorResponse(response, toLandOwnerResult.message());
             }
 
-             time:Utc utc = check time:utcFromString(requestLandInsert.transferDate);
+            time:Utc utc = check time:utcFromString(requestLandInsert.transferDate);
 
             Common:LandInsertResponse rawPayload = {
                 "LandID": landInsertID is int[] ? landInsertID[0] : 0,
                 "FromOwnerID": isFromOwnerProvided ? fromLandOwnerResult : (),
                 "ToOwnerID": toLandOwnerResult is int ? toLandOwnerResult : 0,
                 "TransferDate": time:utcToString(utc),
-                "VerifiedBy": requestLandInsert.verified_by is string ?  requestLandInsert.verified_by is "" ? "unknown" : requestLandInsert.verified_by : "unknown"
+                "VerifiedBy": requestLandInsert.verified_by is string ? requestLandInsert.verified_by is "" ? "unknown" : requestLandInsert.verified_by : "unknown"
             };
             json payload = rawPayload.toJson();
 
@@ -133,6 +135,13 @@ service http:InterceptableService /land_officer on landMicroservice {
             }
             response.statusCode = 201;
             response = Utils:setSuccessResponse(response, "Land registered successfully");
+
+            Common:socketMessage socketNotify = {
+                event: Common:CREATED,
+                message: landInsert.toJson()
+            };
+
+            Managers:connectionStore.broadcast(socketNotify);
             check commit;
         }
         return response;
@@ -282,7 +291,7 @@ service http:InterceptableService /land_officer on landMicroservice {
             return response;
         }
         DB:LandUpdate land = landResult;
-        land.landStatus = status; 
+        land.landStatus = status;
         DB:Land|persist:Error updateResult = self.dbClient->/lands/[landID].put(land);
         if updateResult is persist:Error {
             response.statusCode = 500;
@@ -294,7 +303,7 @@ service http:InterceptableService /land_officer on landMicroservice {
         return response;
     }
 
-    resource function post land/landowner/add(@http:Payload DB:LandOwnerInsert landOwnerInsert) returns error|http:Response  {
+    resource function post land/landowner/add(@http:Payload DB:LandOwnerInsert landOwnerInsert) returns error|http:Response {
         http:Response response = new;
 
         Common:ValidationResult validateLandOwnerInsert = Utils:validateLandOwnerInsert(landOwnerInsert);

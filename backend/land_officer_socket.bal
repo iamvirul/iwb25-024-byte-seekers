@@ -3,6 +3,9 @@ import backend.utils as Utils;
 import ballerina/websocket;
 import ballerina/http;
 import ballerina/log;
+import backend.managers as Managers;
+
+
 
 listener websocket:Listener statsListener = new (9090,
     secureSocket = {
@@ -12,6 +15,7 @@ listener websocket:Listener statsListener = new (9090,
         }
     }
 );
+
 
 @websocket:ServiceConfig {
     auth: [
@@ -46,6 +50,7 @@ service class statsService {
     }
 
     remote function onOpen(websocket:Caller caller) returns error? {
+        Managers:connectionStore.addClient(self.userID,caller);
         check caller->writeMessage(string `Welcome ${self.userID}!`);
         string header = check self.req.getHeader("x-service-token");
         map<string> serviceHeaders = {
@@ -58,6 +63,9 @@ service class statsService {
             return;
         }
         check caller->writeMessage(allLand);
+    }
+    remote function onClose(websocket:Caller caller) returns error? {
+        Managers:connectionStore.removeClient(self.userID);
     }
 
     remote function onMessage(websocket:Caller caller,string data) returns error? {

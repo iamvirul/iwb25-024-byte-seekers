@@ -2,6 +2,12 @@ import backend.db as DB;
 
 import ballerina/time;
 
+public enum EVENTS {
+    CREATED = "Created",
+    UPDATED = "Updated",
+    DELETED = "Deleted"
+}
+
 public type LoginUser record {
     string email;
     string password;
@@ -10,16 +16,15 @@ public type LoginUser record {
 
 public type User record {|
     int id;
-    string first_name;
-    string last_name;
-    string user_id;
+    string firstName;
+    string lastName;
+    string userId;
     string email;
     byte[] nic;
     byte[] sludi;
     byte[] contactNo;
     byte[]? address;
     string password;
-    string contact_no;
     string user_status;
     string user_type;
 |};
@@ -42,8 +47,8 @@ public type ValidationResult record {|
 |};
 
 public type UserHasTypes record {|
-    int users_id;
-    int user_types_id;
+    int usersId;
+    int userTypesId;
 |};
 
 public type Land record {|
@@ -215,6 +220,8 @@ public type LegalPrecedentMessage record {|
     int retryCount = 0;
 |};
 
+
+
 public type LegalPrecedent record {|
     readonly int id;
     int disputesId;
@@ -226,3 +233,9 @@ public type LegalPrecedent record {|
     DB:LegalClause[] legalclauses;
     Dispute dispute;
 |};
+
+public type socketMessage record {|
+    EVENTS event;
+    json message;
+|};
+
