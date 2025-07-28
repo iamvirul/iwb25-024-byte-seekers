@@ -171,3 +171,68 @@ service on rabbitmqListener {
         });
     }
 }
+
+@rabbitmq:ServiceConfig {
+    queueName: disputeCommentQueueName,
+    autoAck: false
+}
+service on rabbitmqListener {
+    private final DB:Client dbClient;
+
+    function init() returns error? {
+        self.dbClient = check new ();
+    }
+
+    remote function onMessage(Common:DisputeCommentMessage message) returns error? {
+        log:printInfo(`Received dispute comment message for dispute: ${message.dispute.disputesId}`);
+        error? processingError = self.processDisputeComment(message);
+        if processingError is error {
+            log:printError("Error processing dispute comment", processingError);
+            if self.shouldRetry(message, processingError) {
+                check self.handleRetry(message);
+            } else {
+                check self.handleFailure(message);
+            }
+        } else {
+            log:printInfo(`Successfully processed dispute comment for dispute: ${message.dispute.disputesId}`);
+        }
+    }
+
+    private function processDisputeComment(Common:DisputeCommentMessage message) returns error? {
+        int[]|persist:Error disputeCommentResult = self.dbClient->/disputecomments.post([message.dispute]);
+        if disputeCommentResult is persist:Error {
+        }
+    }
+
+    private function shouldRetry(Common:DisputeCommentMessage disputeMessage, error err) returns boolean {
+        if disputeMessage.retryCount >= MAX_RETRIES {
+            return false;
+        }
+        if err is persist:ConstraintViolationError {
+            return false;
+        }
+        return true;
+    }
+
+    private function handleRetry(Common:DisputeCommentMessage disputeMessage) returns error? {
+        disputeMessage.retryCount += 1;
+        int delayMs = INITIAL_RETRY_DELAY_MS * (2 ^ (disputeMessage.retryCount - 1));
+
+        log:printInfo("Scheduling retry " + disputeMessage.retryCount.toString() +
+                    " for dispute " + disputeMessage.dispute.disputesId.toString() +
+                    " with delay " + delayMs.toString() + "ms");
+        check rabbitmqClient->publishMessage({
+            content: disputeMessage,
+            routingKey: disputeCommentQueueName,
+            properties: {headers: {"x-delay": delayMs}}
+        });
+    }
+
+    private function handleFailure(Common:DisputeCommentMessage disputeMessage) returns error? {
+        log:printError(`Max retries exceeded or non-retryable error for dispute: ${disputeMessage.dispute.disputesId}`);
+        check rabbitmqClient->publishMessage({
+            content: disputeMessage,
+            routingKey: deadLetterQueueName
+        });
+    }
+}

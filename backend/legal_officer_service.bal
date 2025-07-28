@@ -129,7 +129,6 @@ service /legal_officer on legalOfficerMicroservice {
         }
         sql:ParameterizedQuery query = `case_id = ${updateRequest.caseId}`;
         stream<DB:Dispute, persist:Error?> disputeStream = self.dbClient->/disputes(DB:Dispute, query);
-
         check from var dispute in disputeStream
             do {
                 error? publishDisputeEstimateTimeMessage = RabbitMQ:publishDisputeEstimateTimeMessage({dispute: dispute, estimateTime: updateRequest.estimateTime});
@@ -166,10 +165,10 @@ service /legal_officer on legalOfficerMicroservice {
                     createdAt: time:utcNow(),
                     disputesId: dispute.id
                 };
-                int[]|persist:Error disputeCommentResult = self.dbClient->/disputecomments.post([disputeComment]);
-                if disputeCommentResult is persist:Error {
+                error? publishDisputeCommentMessage = RabbitMQ:publishDisputeCommentMessage({dispute: disputeComment, retryCount: 0});
+                if publishDisputeCommentMessage is error {
                     response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_COMMENT);
+                    response = Utils:setErrorResponse(response, {"message": Utils:FAILED_TO_QUEUE_DISPUTE_COMMENT});
                     return response;
                 }
                 response.statusCode = 200;

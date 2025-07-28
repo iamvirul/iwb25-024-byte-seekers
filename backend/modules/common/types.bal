@@ -182,3 +182,8 @@ public type DisputeEstimateTimeMessage record {|
     string estimateTime;
     int retryCount = 0;
 |};
+
+public type DisputeCommentMessage record {|
+    DB:DisputeCommentInsert dispute;
+    int retryCount = 0;
+|};
