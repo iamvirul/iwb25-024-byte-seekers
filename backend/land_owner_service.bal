@@ -5,9 +5,10 @@ import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
 import backend.interceptors as Interceptors;
 
-
 import ballerina/http;
+import ballerina/jwt;
 import ballerina/persist;
+import ballerina/regex;
 
 listener http:Listener landOwnerMicroservice = new (9098);
 
@@ -35,9 +36,10 @@ listener http:Listener landOwnerMicroservice = new (9098);
 service http:InterceptableService /land_owner on landOwnerMicroservice {
     private final DB:Client dbClient;
 
-    public function createInterceptors() returns Interceptors:RequestInterceptor {
+    public function createInterceptors() returns http:Interceptor|http:Interceptor[] {
         return new Interceptors:RequestInterceptor();
     }
+
     function init() returns error? {
         self.dbClient = check new ();
     }
@@ -66,8 +68,16 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         return response;
     }
 
-    resource function post dispute/add(http:Request req) returns http:Response|error {
+    resource function post dispute/add(http:Request req, @http:Header string Authorization) returns http:Response|error {
         http:Response response = new;
+        string token = regex:replace(Authorization, "Bearer ", "");
+        [jwt:Header, jwt:Payload]|jwt:Error validateToken = Utils:validateToken(token);
+        if validateToken is jwt:Error {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, "Invalid token");
+            return response;
+        }
+        string? email = validateToken[1].sub;
         if req.getContentType().startsWith("multipart/form-data") {
             //parse multipart form data
             common:DisputeForm|error parsed = Utils:parseDisputeMultipartFormData(req.getBodyParts());
@@ -108,6 +118,23 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                 }
                 return response;
             }
+            DB:User|persist:Error userResult = self.dbClient->/users/[parsed.userId](DB:User);
+            if userResult is persist:Error {
+                if userResult is persist:NotFoundError {
+                    response.statusCode = 404;
+                    response = Utils:setErrorResponse(response, Utils:USER_NOT_FOUND);
+                } else {
+                    response.statusCode = 500;
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_USER);
+                }
+                return response;
+            }
+            if userResult.email != email {
+                response.statusCode = 401;
+                response = Utils:setErrorResponse(response, Utils:INVALID_USER_ID);
+                return response;
+            }
+
             DB:DisputeInsert disputeInsert = Mappers:disputeInsertMapper(parsed, caseId);
             common:DisputeMessage disputeMessage = {disputeInsert, documents: parsed.documents};
             //publish dispute message to RabbitMQ
@@ -118,7 +145,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                 return response;
             }
             response.statusCode = 201;
-            response = Utils:setSuccessResponse(response, {"message": Utils:LAND_INSERT_SUCCESS, "case_id": disputeInsert.caseId});
+            response = Utils:setSuccessResponse(response, {"message": "Dispute added successfully", "case_id": disputeInsert.caseId});
             return response;
         }
         else {
@@ -127,5 +154,12 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             return response;
         }
     }
+
+    resource function get disputes() {
+        common:DisputeWithDocs[] disputes = [];
+        DB:DisputeDocument[] tempDocs = [];
+        // stream<DB:Dispute, persist:Error?> disputeResult = self.dbClient->/disputes/[0]();
+    }
+
 }
 

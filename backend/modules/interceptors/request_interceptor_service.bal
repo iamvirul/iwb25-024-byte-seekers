@@ -33,11 +33,12 @@ public service class RequestInterceptor {
             int userId = check int:fromString(textPayload);
             json jsonPayload = {};
             if req.method == http:POST || req.method == http:PUT || req.method == http:PATCH {
-                if req.getContentType().length() > 0 {
-                    jsonPayload = check req.getJsonPayload();
-                } 
                 if req.getContentType().startsWith("multipart/form-data") {
                     jsonPayload = {"content:": "multipart/form-data"};
+                } else if req.getContentType().startsWith("application/json") {
+                    jsonPayload = check req.getJsonPayload();
+                }else{
+                    jsonPayload = {"content:": "No content type found"};
                 }
             }
 

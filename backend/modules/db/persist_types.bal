@@ -152,6 +152,7 @@ public type UserOptionalized record {|
 public type UserWithRelations record {|
     *UserOptionalized;
     AuditOptionalized[] audits?;
+    DisputeOptionalized[] disputes?;
     UserHasUserTypeOptionalized[] userhasusertypes?;
 |};
 
@@ -569,6 +570,7 @@ public type Dispute record {|
 
     int landsId;
     int legalOfficerId;
+    int usersId;
 
 |};
 
@@ -582,6 +584,7 @@ public type DisputeOptionalized record {|
     time:Utc createdAt?;
     int landsId?;
     int legalOfficerId?;
+    int usersId?;
 |};
 
 public type DisputeWithRelations record {|
@@ -589,6 +592,7 @@ public type DisputeWithRelations record {|
     DisputeCommentOptionalized[] disputecomments?;
     LandOptionalized land?;
     LegalOfficerOptionalized legalofficer?;
+    UserOptionalized user?;
     DisputeDocumentOptionalized[] disputedocuments?;
     LegalPrecedentOptionalized[] legalprecedents?;
 |};
@@ -604,6 +608,7 @@ public type DisputeInsert record {|
     time:Utc createdAt;
     int landsId;
     int legalOfficerId;
+    int usersId;
 |};
 
 public type DisputeUpdate record {|
@@ -615,6 +620,7 @@ public type DisputeUpdate record {|
     time:Utc createdAt?;
     int landsId?;
     int legalOfficerId?;
+    int usersId?;
 |};
 
 public type UserType record {|

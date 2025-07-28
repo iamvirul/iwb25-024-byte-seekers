@@ -129,7 +129,10 @@ public enum DISPUTE_ERRORS {
     FAILED_TO_QUEUE_DISPUTE = "Failed to queue dispute",
     FAILED_TO_QUEUE_DISPUTE_ESTIMATE_TIME = "Failed to queue dispute estimate time",
     FAILED_TO_QUEUE_DISPUTE_COMMENT = "Failed to queue dispute comment",
-    FAILED_TO_QUEUE_PRECEDENT = "Failed to queue precedent"
+    FAILED_TO_QUEUE_PRECEDENT = "Failed to queue precedent",
+    USER_ID_REQUIRED = "User ID is required",
+    FAILED_TO_FETCH_USER = "Failed to fetch user",
+    INVALID_USER_ID = "Invalid user ID"
 }
 
 public enum DOCUMENT_ERRORS {
