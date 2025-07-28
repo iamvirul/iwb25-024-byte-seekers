@@ -8,8 +8,7 @@ import ballerina/time;
 import ballerinax/rabbitmq;
 
 listener rabbitmq:Listener rabbitmqListener = check new (rabbitmq:DEFAULT_HOST, rabbitmq:DEFAULT_PORT);
-public const string disputeQueueName = "DISPUTE_QUEUE";
-public const string deadLetterQueueName = "DISPUTE_DLQ";
+
 const int MAX_RETRIES = 3;
 const int INITIAL_RETRY_DELAY_MS = 1000;
 
@@ -95,6 +94,77 @@ service on rabbitmqListener {
     private function handleFailure(Common:DisputeMessage disputeMessage) returns error? {
         log:printError("Max retries exceeded or non-retryable error for dispute: " +
                     disputeMessage.disputeInsert.caseId);
+        check rabbitmqClient->publishMessage({
+            content: disputeMessage,
+            routingKey: deadLetterQueueName
+        });
+    }
+}
+
+@rabbitmq:ServiceConfig {
+    queueName: estimateTimeQueueName,
+    autoAck: false
+}
+service on rabbitmqListener {
+    private final DB:Client dbClient;
+
+    function init() returns error? {
+        self.dbClient = check new ();
+    }
+
+    remote function onMessage(Common:DisputeEstimateTimeMessage disputeMessage) returns error? {
+        log:printInfo("Processing dispute: " + disputeMessage.dispute.caseId +
+                    ", Retry attempt: " + disputeMessage.retryCount.toString());
+        error? processingError = self.processDispute(disputeMessage);
+        if processingError is error {
+            log:printError("Error processing dispute", processingError);
+            if self.shouldRetry(disputeMessage, processingError) {
+                check self.handleRetry(disputeMessage);
+            } else {
+                check self.handleFailure(disputeMessage);
+            }
+        } else {
+            log:printInfo("Successfully processed dispute: " + disputeMessage.dispute.caseId);
+        }
+    }
+
+    private function processDispute(Common:DisputeEstimateTimeMessage disputeMessage) returns error? {
+        DB:DisputeUpdate updateDispute = {
+            estimateTime: disputeMessage.estimateTime
+        };
+        DB:Dispute|persist:Error updateResult = self.dbClient->/disputes/[disputeMessage.dispute.id].put(updateDispute);
+        if updateResult is persist:Error {
+            return error("Failed to update dispute", updateResult);
+        }
+    }
+
+    private function shouldRetry(Common:DisputeEstimateTimeMessage disputeMessage, error err) returns boolean {
+        if disputeMessage.retryCount >= MAX_RETRIES {
+            return false;
+        }
+        if err is persist:ConstraintViolationError {
+            return false;
+        }
+        return true;
+    }
+
+    private function handleRetry(Common:DisputeEstimateTimeMessage disputeMessage) returns error? {
+        disputeMessage.retryCount += 1;
+        int delayMs = INITIAL_RETRY_DELAY_MS * (2 ^ (disputeMessage.retryCount - 1));
+
+        log:printInfo("Scheduling retry " + disputeMessage.retryCount.toString() +
+                    " for dispute " + disputeMessage.dispute.caseId +
+                    " with delay " + delayMs.toString() + "ms");
+        check rabbitmqClient->publishMessage({
+            content: disputeMessage,
+            routingKey: estimateTimeQueueName,
+            properties: {headers: {"x-delay": delayMs}}
+        });
+    }
+
+    private function handleFailure(Common:DisputeEstimateTimeMessage disputeMessage) returns error? {
+        log:printError("Max retries exceeded or non-retryable error for dispute: " +
+                    disputeMessage.dispute.caseId);
         check rabbitmqClient->publishMessage({
             content: disputeMessage,
             routingKey: deadLetterQueueName

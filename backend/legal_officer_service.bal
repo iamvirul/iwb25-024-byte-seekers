@@ -1,6 +1,7 @@
 import backend.common;
 import backend.db as DB;
 import backend.mappers as Mapper;
+import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
 
 import ballerina/http;
@@ -131,13 +132,10 @@ service /legal_officer on legalOfficerMicroservice {
 
         check from var dispute in disputeStream
             do {
-                DB:DisputeUpdate updateDispute = {
-                    estimateTime: updateRequest.estimateTime
-                };
-                DB:Dispute|persist:Error updateResult = self.dbClient->/disputes/[dispute.id].put(updateDispute);
-                if updateResult is persist:Error {
+                error? publishDisputeEstimateTimeMessage = RabbitMQ:publishDisputeEstimateTimeMessage({dispute: dispute, estimateTime: updateRequest.estimateTime});
+                if publishDisputeEstimateTimeMessage is error {
                     response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_DISPUTE);
+                    response = Utils:setErrorResponse(response, {"message": Utils:FAILED_TO_QUEUE_DISPUTE_ESTIMATE_TIME});
                     return response;
                 }
                 response.statusCode = 200;
@@ -251,15 +249,14 @@ service /legal_officer on legalOfficerMicroservice {
         record {|common:CountResult value;|}? lpResult = check lpResultStream.next();
         _ = check lpResultStream.close();
 
-
-        if pendingResult is record {|common:CountResult value;|} && rejectedResult is record {|common:CountResult value;|} && resolvedResult is record {|common:CountResult value;|}  && lpResult is record {|common:CountResult value;|} {
+        if pendingResult is record {|common:CountResult value;|} && rejectedResult is record {|common:CountResult value;|} && resolvedResult is record {|common:CountResult value;|} && lpResult is record {|common:CountResult value;|} {
             response.statusCode = 200;
             response = Utils:setSuccessResponse(response, {
-                "pending": pendingResult.value.total,
-                "rejected": rejectedResult.value.total,
-                "resolved": resolvedResult.value.total,
-                "legalPrecedents": lpResult.value.total
-            });
+                                                              "pending": pendingResult.value.total,
+                                                              "rejected": rejectedResult.value.total,
+                                                              "resolved": resolvedResult.value.total,
+                                                              "legalPrecedents": lpResult.value.total
+                                                          });
         } else {
             response.statusCode = 500;
             response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_STATS);

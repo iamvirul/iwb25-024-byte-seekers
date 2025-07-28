@@ -176,3 +176,9 @@ public type DisputeMessage record {|
     FileRecord[] documents;
     int retryCount = 0;
 |};
+
+public type DisputeEstimateTimeMessage record {|
+    DB:Dispute dispute;
+    string estimateTime;
+    int retryCount = 0;
+|};

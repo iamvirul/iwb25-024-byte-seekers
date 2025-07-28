@@ -126,7 +126,8 @@ public enum DISPUTE_ERRORS {
     FAILED_TO_ADD_PRECEDENT = "Failed to add precedent",
     FAILED_TO_ADD_LEGAL_CLAUSE = "Failed to add legal clause",
     FAILED_TO_FETCH_STATS = "Failed to fetch stats",
-    FAILED_TO_QUEUE_DISPUTE = "Failed to queue dispute"
+    FAILED_TO_QUEUE_DISPUTE = "Failed to queue dispute",
+    FAILED_TO_QUEUE_DISPUTE_ESTIMATE_TIME = "Failed to queue dispute estimate time"
 }
 
 public enum DOCUMENT_ERRORS {
