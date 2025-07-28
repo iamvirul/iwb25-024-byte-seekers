@@ -124,6 +124,7 @@ public type DisputeForm record {
     string disputesDetails;
     int landsId;
     int legalOfficerId;
+    int userId;
 };
 
 public type DisputeWithDocs record {|

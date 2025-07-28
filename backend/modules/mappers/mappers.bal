@@ -30,7 +30,8 @@ public function disputeInsertMapper(Common:DisputeForm parsed, string caseId) re
         status: DB:PENDING,
         caseId: caseId,
         estimateTime: "",
-        createdAt: time:utcNow()
+        createdAt: time:utcNow(),
+        usersId: parsed.userId
     };
 }
 

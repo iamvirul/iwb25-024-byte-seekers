@@ -92,6 +92,7 @@ public type User record {|
     byte[] contactNo;
     byte[]? address;
     Audit[] audits;
+    Dispute[] disputes;
     UserHasUserType[] userhasusertypes;
 |};
 
@@ -317,11 +318,16 @@ public type Dispute record {|
     DisputeStatus status;
     @sql:Name {value: "created_at"}
     time:Utc createdAt;
+    @sql:Name {value: "users_id"}
+    @sql:Index {name: "fk_disputes_users1_idx"}
+    int usersId;
     DisputeComment[] disputecomments;
     @sql:Relation {keys: ["landsId"]}
     Land land;
     @sql:Relation {keys: ["legalOfficerId"]}
     LegalOfficer legalofficer;
+    @sql:Relation {keys: ["usersId"]}
+    User user;
     DisputeDocument[] disputedocuments;
     LegalPrecedent[] legalprecedents;
 |};

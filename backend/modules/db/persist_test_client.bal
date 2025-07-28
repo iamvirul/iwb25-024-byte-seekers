@@ -82,7 +82,8 @@ public isolated client class H2Client {
                 "dispute.status": {relation: {entityName: "dispute", refField: "status"}},
                 "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt", refColumn: "created_at"}},
                 "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId", refColumn: "lands_id"}},
-                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
+                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}},
+                "dispute.usersId": {relation: {entityName: "dispute", refField: "usersId", refColumn: "users_id"}}
             },
             keyFields: ["id"],
             joinMetadata: {
@@ -112,12 +113,23 @@ public isolated client class H2Client {
                 "audits[].requestHost": {relation: {entityName: "audits", refField: "requestHost", refColumn: "request_host"}},
                 "audits[].requestedTime": {relation: {entityName: "audits", refField: "requestedTime", refColumn: "requested_time"}},
                 "audits[].usersId": {relation: {entityName: "audits", refField: "usersId", refColumn: "users_id"}},
+                "disputes[].id": {relation: {entityName: "disputes", refField: "id"}},
+                "disputes[].caseId": {relation: {entityName: "disputes", refField: "caseId", refColumn: "case_id"}},
+                "disputes[].witnessName": {relation: {entityName: "disputes", refField: "witnessName", refColumn: "witness_name"}},
+                "disputes[].disputesDetails": {relation: {entityName: "disputes", refField: "disputesDetails", refColumn: "disputes_details"}},
+                "disputes[].estimateTime": {relation: {entityName: "disputes", refField: "estimateTime", refColumn: "estimate_time"}},
+                "disputes[].status": {relation: {entityName: "disputes", refField: "status"}},
+                "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt", refColumn: "created_at"}},
+                "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId", refColumn: "lands_id"}},
+                "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId", refColumn: "legal_officer_id"}},
+                "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId", refColumn: "users_id"}},
                 "userhasusertypes[].userTypesId": {relation: {entityName: "userhasusertypes", refField: "userTypesId", refColumn: "user_types_id"}},
                 "userhasusertypes[].usersId": {relation: {entityName: "userhasusertypes", refField: "usersId", refColumn: "users_id"}}
             },
             keyFields: ["id"],
             joinMetadata: {
                 audits: {entity: Audit, fieldName: "audits", refTable: "audits", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                disputes: {entity: Dispute, fieldName: "disputes", refTable: "disputes", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
                 userhasusertypes: {entity: UserHasUserType, fieldName: "userhasusertypes", refTable: "users_has_user_types", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
@@ -155,7 +167,8 @@ public isolated client class H2Client {
                 "dispute.status": {relation: {entityName: "dispute", refField: "status"}},
                 "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt", refColumn: "created_at"}},
                 "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId", refColumn: "lands_id"}},
-                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
+                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}},
+                "dispute.usersId": {relation: {entityName: "dispute", refField: "usersId", refColumn: "users_id"}}
             },
             keyFields: ["id"],
             joinMetadata: {dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputes_id"], 'type: psql:ONE_TO_MANY}}
@@ -177,7 +190,8 @@ public isolated client class H2Client {
                 "disputes[].status": {relation: {entityName: "disputes", refField: "status"}},
                 "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt", refColumn: "created_at"}},
                 "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId", refColumn: "lands_id"}},
-                "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
+                "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId", refColumn: "legal_officer_id"}},
+                "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId", refColumn: "users_id"}}
             },
             keyFields: ["id"],
             joinMetadata: {disputes: {entity: Dispute, fieldName: "disputes", refTable: "disputes", refColumns: ["legal_officer_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
@@ -290,6 +304,7 @@ public isolated client class H2Client {
                 "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt", refColumn: "created_at"}},
                 "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId", refColumn: "lands_id"}},
                 "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId", refColumn: "legal_officer_id"}},
+                "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId", refColumn: "users_id"}},
                 "landtransferchains[].id": {relation: {entityName: "landtransferchains", refField: "id"}},
                 "landtransferchains[].transferDate": {relation: {entityName: "landtransferchains", refField: "transferDate", refColumn: "transfer_date"}},
                 "landtransferchains[].verifiedBy": {relation: {entityName: "landtransferchains", refField: "verifiedBy", refColumn: "verified_by"}},
@@ -356,7 +371,8 @@ public isolated client class H2Client {
                 "dispute.status": {relation: {entityName: "dispute", refField: "status"}},
                 "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt", refColumn: "created_at"}},
                 "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId", refColumn: "lands_id"}},
-                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
+                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}},
+                "dispute.usersId": {relation: {entityName: "dispute", refField: "usersId", refColumn: "users_id"}}
             },
             keyFields: ["id"],
             joinMetadata: {dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputes_id"], 'type: psql:ONE_TO_MANY}}
@@ -399,6 +415,7 @@ public isolated client class H2Client {
                 createdAt: {columnName: "created_at"},
                 landsId: {columnName: "lands_id"},
                 legalOfficerId: {columnName: "legal_officer_id"},
+                usersId: {columnName: "users_id"},
                 "disputecomments[].id": {relation: {entityName: "disputecomments", refField: "id"}},
                 "disputecomments[].comment": {relation: {entityName: "disputecomments", refField: "comment"}},
                 "disputecomments[].createdAt": {relation: {entityName: "disputecomments", refField: "createdAt", refColumn: "created_at"}},
@@ -420,6 +437,16 @@ public isolated client class H2Client {
                 "legalofficer.lastName": {relation: {entityName: "legalofficer", refField: "lastName", refColumn: "last_name"}},
                 "legalofficer.baslId": {relation: {entityName: "legalofficer", refField: "baslId", refColumn: "BASL_ID"}},
                 "legalofficer.initialCost": {relation: {entityName: "legalofficer", refField: "initialCost", refColumn: "initial_cost"}},
+                "user.id": {relation: {entityName: "user", refField: "id"}},
+                "user.userId": {relation: {entityName: "user", refField: "userId", refColumn: "user_id"}},
+                "user.firstName": {relation: {entityName: "user", refField: "firstName", refColumn: "first_name"}},
+                "user.lastName": {relation: {entityName: "user", refField: "lastName", refColumn: "last_name"}},
+                "user.email": {relation: {entityName: "user", refField: "email"}},
+                "user.password": {relation: {entityName: "user", refField: "password"}},
+                "user.nic": {relation: {entityName: "user", refField: "nic"}},
+                "user.sludi": {relation: {entityName: "user", refField: "sludi"}},
+                "user.contactNo": {relation: {entityName: "user", refField: "contactNo", refColumn: "contact_no"}},
+                "user.address": {relation: {entityName: "user", refField: "address"}},
                 "disputedocuments[].id": {relation: {entityName: "disputedocuments", refField: "id"}},
                 "disputedocuments[].docPath": {relation: {entityName: "disputedocuments", refField: "docPath", refColumn: "doc_path"}},
                 "disputedocuments[].uploadedDate": {relation: {entityName: "disputedocuments", refField: "uploadedDate", refColumn: "uploaded_date"}},
@@ -437,6 +464,7 @@ public isolated client class H2Client {
                 disputecomments: {entity: DisputeComment, fieldName: "disputecomments", refTable: "dispute_comments", refColumns: ["disputes_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
                 land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY},
                 legalofficer: {entity: LegalOfficer, fieldName: "legalofficer", refTable: "legal_officer", refColumns: ["id"], joinColumns: ["legal_officer_id"], 'type: psql:ONE_TO_MANY},
+                user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["users_id"], 'type: psql:ONE_TO_MANY},
                 disputedocuments: {entity: DisputeDocument, fieldName: "disputedocuments", refTable: "disputes_document", refColumns: ["disputes_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
                 legalprecedents: {entity: LegalPrecedent, fieldName: "legalprecedents", refTable: "legal_precedents", refColumns: ["disputes_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }

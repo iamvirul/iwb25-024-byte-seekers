@@ -11,6 +11,7 @@ public isolated function parseDisputeMultipartFormData(mime:Entity[]|http:Client
     string details = "";
     int lands = 0;
     int officer = 0;
+    int users = 0;
 
     if bodyParts is mime:Entity[] {
         foreach var part in bodyParts {
@@ -35,6 +36,9 @@ public isolated function parseDisputeMultipartFormData(mime:Entity[]|http:Client
                     "legalOfficerId" => {
                         officer = checkpanic int:fromString(txt);
                     }
+                    "userId" => {
+                        users = checkpanic int:fromString(txt);
+                    }
                 }
             }
         }
@@ -47,7 +51,8 @@ public isolated function parseDisputeMultipartFormData(mime:Entity[]|http:Client
         witnessName: witness,
         disputesDetails: details,
         landsId: lands,
-        legalOfficerId: officer
+        legalOfficerId: officer,
+        userId: users
     };
 }
 

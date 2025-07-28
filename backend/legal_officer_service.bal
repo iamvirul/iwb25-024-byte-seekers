@@ -89,7 +89,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                 }
                 DB:Land land = landResult;
 
-                sql:ParameterizedQuery transferQuery = `lands_id = ${dispute.landsId} ORDER BY transferDate DESC LIMIT 1`;
+                sql:ParameterizedQuery transferQuery = `lands_id = ${dispute.landsId} ORDER BY transfer_date DESC LIMIT 1`;
                 stream<common:LandTransferChain, persist:Error?> transferResult = self.dbClient->/landtransferchains(common:LandTransferChain, transferQuery);
                 common:LandTransferChain? latestTransfer = ();
                 check from var transfer in transferResult

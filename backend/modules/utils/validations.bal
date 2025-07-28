@@ -303,6 +303,10 @@ public isolated function validateDisputeFormData(Common:DisputeForm form) return
         valid = false;
         err["landsId"] = LAND_ID_REQUIRED;
     }
+    if form.userId <= 0 {
+        valid = false;
+        err["userId"] = USER_ID_REQUIRED;
+    }
     if form.legalOfficerId <= 0 {
         valid = false;
         err["legalOfficerId"] = LEGAL_OFFICER_ID_REQUIRED;

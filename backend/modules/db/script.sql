@@ -86,6 +86,8 @@ CREATE TABLE `disputes` (
 	FOREIGN KEY(`lands_id`) REFERENCES `lands`(`id`),
 	`legal_officer_id` INT NOT NULL,
 	FOREIGN KEY(`legal_officer_id`) REFERENCES `legal_officer`(`id`),
+	`users_id` INT NOT NULL,
+	FOREIGN KEY(`users_id`) REFERENCES `users`(`id`),
 	PRIMARY KEY(`id`)
 );
 
@@ -190,3 +192,4 @@ CREATE INDEX `fk_users_has_user_types_users1_idx` ON `users_has_user_types` (`us
 CREATE INDEX `fk_users_has_user_types_user_types1_idx` ON `users_has_user_types` (`user_types_id`);
 CREATE INDEX `fk_disputes_lands1_idx` ON `disputes` (`lands_id`);
 CREATE INDEX `fk_disputes_legal_officer1_idx` ON `disputes` (`legal_officer_id`);
+CREATE INDEX `fk_disputes_users1_idx` ON `disputes` (`users_id`);
