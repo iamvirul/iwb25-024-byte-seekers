@@ -1,10 +1,9 @@
 import backend.common;
 import backend.db as DB;
+import backend.interceptors as Interceptors;
 import backend.mappers as Mapper;
 import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
-import backend.interceptors as Interceptors;
-
 
 import ballerina/http;
 import ballerina/persist;
@@ -210,32 +209,20 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                 response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_PRECEDENT);
                 return response;
             }
-            int[]|persist:Error precedentResult = self.dbClient->/legalprecedents.post([precedentInsert]);
-            if precedentResult is persist:Error {
+            error? publishLegalPrecedentMessage = RabbitMQ:publishLegalPrecedentMessage({legalPrecedent: precedentInsert, legalClauses: requestPrecedent.legalClauses});
+            if publishLegalPrecedentMessage is error {
                 response.statusCode = 500;
-                response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_PRECEDENT);
+                response = Utils:setErrorResponse(response, {"message": Utils:FAILED_TO_QUEUE_PRECEDENT});
                 return response;
             }
-            foreach var clause in requestPrecedent.legalClauses {
-                DB:LegalClauseInsert clauseInsert = {
-                    legalClause: clause,
-                    legalPrecedentsId: precedentResult[0]
-                };
-                int[]|persist:Error clauseResult = self.dbClient->/legalclauses.post([clauseInsert]);
-                if clauseResult is persist:Error {
-                    response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_LEGAL_CLAUSE);
-                    return response;
-                }
-            }
+            response.statusCode = 200;
+            response = Utils:setSuccessResponse(response, {"message": "Precedent added successfully"});
+            return response;
         } else {
             response.statusCode = 404;
             response = Utils:setErrorResponse(response, Utils:INVALID_CASE_ID);
             return response;
         }
-        response.statusCode = 200;
-        response = Utils:setSuccessResponse(response, {"message": "Precedent added successfully"});
-        return response;
     }
 
     resource function get stats/[int legelOfficerId]() returns error|http:Response {
