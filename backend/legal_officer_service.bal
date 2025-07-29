@@ -76,8 +76,44 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                 disputes.push(result);
             };
         check disputeResult.close();
-        response.statusCode = 200; 
+        response.statusCode = 200;
         response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson()});
+        return response;
+    }
+
+    resource function get precedents/[int legalOfficerId]() returns error|http:Response {
+        http:Response response = new;
+        if legalOfficerId <= 0 {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, Utils:INVALID_LEGAL_OFFICER_ID);
+            return response;
+        }
+        common:LegalOfficer|persist:Error legalOfficerResult = self.dbClient->/legalofficers/[legalOfficerId].get(common:LegalOfficer);
+        if legalOfficerResult is persist:Error {
+            if legalOfficerResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, Utils:LEGAL_OFFICER_NOT_FOUND);
+            } else {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LEGAL_OFFICER);
+            }
+            return response;
+        }
+        DB:LegalPrecedentWithRelations[] precedents = [];
+        sql:ParameterizedQuery query = `legalOfficerId = ${legalOfficerId}`;
+        stream<DB:DisputeWithRelations, persist:Error?> disputeResult = self.dbClient->/disputes(DB:DisputeWithRelations, query);
+        check from var result in disputeResult
+            do {
+                stream<DB:LegalPrecedentWithRelations, persist:Error?> precedentResult = self.dbClient->/legalprecedents(DB:LegalPrecedentWithRelations, `disputesId = ${result.id}`);
+                check from var precedent in precedentResult
+                    do {
+                        precedents.push(precedent);
+                    };
+                check precedentResult.close();
+            };
+        check disputeResult.close();
+        response.statusCode = 200;
+        response = Utils:setSuccessResponse(response, {"precedents": precedents.toJson()});
         return response;
     }
 
