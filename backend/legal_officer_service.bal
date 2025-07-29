@@ -84,10 +84,10 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
             };
         check disputeResult.close();
 
-        stream<common:CountResult, persist:Error?> pendingResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legalOfficerId} AND status = 'PENDING'`, common:CountResult);
-        stream<common:CountResult, persist:Error?> rejectedResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legalOfficerId} AND status = 'REJECTED'`, common:CountResult);
-        stream<common:CountResult, persist:Error?> resolvedResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legalOfficerId} AND status = 'RESOLVED'`, common:CountResult);
-        stream<common:CountResult, persist:Error?> lpResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM legal_precedents lp JOIN disputes d ON lp.disputes_id = d.id WHERE d.legal_officer_id = ${legalOfficerId}`, common:CountResult);
+        stream<common:CountResult, persist:Error?> pendingResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legalOfficerId = ${legalOfficerId} AND status = 'PENDING'`, common:CountResult);
+        stream<common:CountResult, persist:Error?> rejectedResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legalOfficerId = ${legalOfficerId} AND status = 'REJECTED'`, common:CountResult);
+        stream<common:CountResult, persist:Error?> resolvedResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legalOfficerId = ${legalOfficerId} AND status = 'RESOLVED'`, common:CountResult);
+        stream<common:CountResult, persist:Error?> lpResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM legal_precedents lp JOIN disputes d ON lp.disputesId = d.id WHERE d.legalOfficerId = ${legalOfficerId}`, common:CountResult);
 
         record {|common:CountResult value;|}? pendingResult = check pendingResultStream.next();
         _ = check pendingResultStream.close();

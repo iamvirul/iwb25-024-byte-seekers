@@ -1,5 +1,6 @@
 import backend.common as Common;
 import backend.db as DB;
+import backend.managers as Managers;
 import backend.utils as Utils;
 
 import ballerina/log;
@@ -41,6 +42,7 @@ service on rabbitmqListener {
 
     private function processDispute(Common:DisputeMessage disputeMessage) returns error? {
         DB:DisputeInsert disputeInsert = disputeMessage.disputeInsert;
+        DB:DisputeDocumentInsert[] docArray =[];
         int[]|persist:Error disputeResult = self.dbClient->/disputes.post([disputeInsert]);
         if disputeResult is persist:Error {
             return error("Failed to insert dispute", disputeResult);
@@ -59,12 +61,22 @@ service on rabbitmqListener {
                 docPath: uploaded,
                 uploadedDate: time:utcNow()
             };
+            docArray.push(disputeDocInsert);
             int[]|persist:Error docResult = self.dbClient->/disputedocuments.post([disputeDocInsert]);
             if docResult is persist:Error {
                 return error("Failed to insert dispute document", docResult);
             }
             docIndex += 1;
         }
+        Common:DisputeSocketAdded disputeSocketAdded = {
+            dispute: disputeInsert,
+            documents: docArray
+        };
+        Common:socketMessage socketNotify = {
+            event: Common:CREATED,
+            message: disputeSocketAdded.toJson()
+        };
+        Managers:legalOfficerConnectionStore.broadcast(socketNotify, disputeInsert.legalOfficerId.toString());
     }
 
     private function shouldRetry(Common:DisputeMessage disputeMessage, error err) returns boolean {

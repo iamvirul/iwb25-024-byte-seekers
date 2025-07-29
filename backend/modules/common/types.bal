@@ -250,3 +250,8 @@ public type statDataLandOfficer record {|
     string rejected_lands;
     string accepted_lands;
 |};
+
+public type DisputeSocketAdded record {|
+    DB:DisputeInsert dispute;
+    DB:DisputeDocumentInsert[] documents;
+|};

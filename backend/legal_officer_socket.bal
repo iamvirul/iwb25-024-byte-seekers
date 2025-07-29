@@ -55,11 +55,10 @@ service class LegalOfficerService {
             "Authorization": header
         };
         http:Client serviceClient = check new ("localhost:9080/legal_officer");
-        string path = "/data/".'join(self.userID);
 
-        anydata|http:ClientError allLand = serviceClient->get(path, serviceHeaders);
+        anydata|http:ClientError allLand = serviceClient->get("/data/" + self.userID, serviceHeaders);
         if allLand is http:ClientError {
-            log:printError("Error fetching all lands: ");
+            log:printError("Error fetching all data: ");
             return;
         }
         check caller->writeMessage(allLand);
