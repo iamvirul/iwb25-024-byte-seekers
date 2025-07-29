@@ -227,6 +227,11 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
             message: updateResult.toJson()
         };
         Managers:legalOfficerConnectionStore.broadcast(socketNotify, updateResult.legalOfficerId.toString());
+        common:socketMessage ownerSocketNotify = {
+            event: common:STATUS_UPDATED,
+            message: updateResult.toJson()
+        };
+        Managers:landOwnerConnectionStore.broadcast(ownerSocketNotify, updateResult.usersId.toString());
         response.statusCode = 200;
         response = Utils:setSuccessResponse(response, {"message": "Dispute status updated successfully"});
         return response;
