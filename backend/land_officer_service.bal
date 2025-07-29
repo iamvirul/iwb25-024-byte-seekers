@@ -339,13 +339,26 @@ service http:InterceptableService /land_officer on landMicroservice {
     FROM lands;`, Common:statDataLandOfficer);
 
         Common:statDataLandOfficer responseStat;
+        DB:LandWithRelations[] lands = [];
 
         check from var statdatas in statdata
             do {
                 responseStat = statdatas;
             };
         check statdata.close();
-        response = Utils:setSuccessResponse(response, responseStat.toJson());
+        stream<DB:LandWithRelations, persist:Error?> landsResult = self.dbClient->/lands(DB:LandWithRelations, ``, `registerDate DESC`);
+        check from var land in landsResult
+            do {
+                lands.push(land);
+            };
+        check landsResult.close();
+
+        response.statusCode = 200;
+        response = Utils:setSuccessResponse(response,
+                {
+                    "stats": responseStat.toJson(),
+                    "lands": lands.toJson()
+                });
         return response;
     };
 
