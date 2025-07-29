@@ -6,7 +6,6 @@ import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/jwt;
 import ballerina/persist;
 import ballerina/regex;
@@ -158,28 +157,14 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
 
     resource function get disputes/[int userId]() returns error|http:Response {
         http:Response response = new;
-
         DB:DisputeWithRelations[] disputes = [];
-        DB:LegalPrecedentWithRelations[][] precedentArrayResponse = [];
         stream<DB:DisputeWithRelations, persist:Error?> streamResult = self.dbClient->/disputes(DB:DisputeWithRelations, `usersId = ${userId}`);
         check from var result in streamResult
             do {
-                DB:LegalPrecedentWithRelations[] precedentArray = [];
-                stream<DB:LegalPrecedentWithRelations, persist:Error?> precedentResult = self.dbClient->/legalprecedents(DB:LegalPrecedentWithRelations, `disputesId = ${result.id}`);
-                check from var precedent in precedentResult
-                    do {
-                        precedentArray.push(precedent);
-                        precedentArrayResponse.push(precedentArray);
-                    };
-                check precedentResult.close();
                 disputes.push(result);
-                
-
             };
         check streamResult.close();
-
-        io:println(streamResult);
-        response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson(), "precedents": precedentArrayResponse.toJson()});
+        response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson()});
         return response;
     }
 }
