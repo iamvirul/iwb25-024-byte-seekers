@@ -15,6 +15,10 @@ public class LegalOfficerConnectionStore {
     }
 
     public function broadcast(Common:socketMessage message, string userId) {
+        boolean hasKey = self.clients.hasKey(userId);
+        if !hasKey {
+            return;
+        }
         websocket:Caller caller = self.clients.get(userId);
         websocket:Error? writeMessage = caller->writeMessage(message);
         if writeMessage is error {
