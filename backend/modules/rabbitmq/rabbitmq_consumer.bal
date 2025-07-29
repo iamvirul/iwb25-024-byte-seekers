@@ -215,6 +215,11 @@ service on rabbitmqListener {
         if disputeCommentResult is persist:Error {
             return error("Failed to insert dispute comment", disputeCommentResult);
         }
+        Common:socketMessage socketNotify = {
+            event: Common:COMMENT_ADDED,
+            message: message.dispute.toJson()
+        };
+        Managers:landOwnerConnectionStore.broadcast(socketNotify, message.userId.toString());
     }
 
     private function shouldRetry(Common:DisputeCommentMessage disputeMessage, error err) returns boolean {

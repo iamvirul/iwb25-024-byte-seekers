@@ -156,7 +156,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                     createdAt: time:utcNow(),
                     disputesId: dispute.id
                 };
-                error? publishDisputeCommentMessage = RabbitMQ:publishDisputeCommentMessage({dispute: disputeComment, retryCount: 0});
+                error? publishDisputeCommentMessage = RabbitMQ:publishDisputeCommentMessage({dispute: disputeComment, retryCount: 0, userId: dispute.usersId});
                 if publishDisputeCommentMessage is error {
                     response.statusCode = 500;
                     response = Utils:setErrorResponse(response, {"message": Utils:FAILED_TO_QUEUE_DISPUTE_COMMENT});
