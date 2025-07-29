@@ -57,7 +57,7 @@ service class statsService {
                 "Authorization": header
             };
         http:Client serviceClient = check new ("localhost:9070/land_officer");
-        anydata|http:ClientError allLand = serviceClient->get("/land/all",serviceHeaders);
+        anydata|http:ClientError allLand = serviceClient->get("/data/stats/all",serviceHeaders);
         if allLand is http:ClientError {
             log:printError("Error fetching all lands: ");
             return;
