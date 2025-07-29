@@ -138,7 +138,8 @@ public enum DISPUTE_ERRORS {
     DISPUTE_NOT_FOUND = "Dispute not found",
     FAILED_TO_FETCH_DISPUTE = "Failed to fetch dispute",
     FAILED_TO_FETCH_DISPUTES = "Failed to fetch disputes",
-    FAILED_TO_UPDATE_DISPUTE_STATUS = "Failed to update dispute status"
+    FAILED_TO_UPDATE_DISPUTE_STATUS = "Failed to update dispute status",
+    LEGAL_PRECEDENT_NOT_FOUND = "Legal precedent not found"
 }
 
 public enum DOCUMENT_ERRORS {

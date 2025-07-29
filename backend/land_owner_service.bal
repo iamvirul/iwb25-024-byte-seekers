@@ -180,5 +180,22 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson()});
         return response;
     }
+
+    resource function get precedents/legal_clauses/[int precedentId]() returns error|http:Response {
+        http:Response response = new;
+        DB:LegalPrecedentWithRelations|persist:Error streamResult = self.dbClient->/legalprecedents/[precedentId](DB:LegalPrecedentWithRelations);
+        if streamResult is persist:Error {
+            if streamResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, Utils:LEGAL_PRECEDENT_NOT_FOUND);
+            } else {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, "Internal server error");
+            }
+            return response;
+        }
+        response = Utils:setSuccessResponse(response, {"precedents": streamResult.toJson()});
+        return response;
+    }
 }
 
