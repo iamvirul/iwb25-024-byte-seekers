@@ -73,7 +73,7 @@ service on rabbitmqListener {
             documents: docArray
         };
         Common:socketMessage socketNotify = {
-            event: Common:CREATED,
+            event: Common:DISPUTE_CREATED,
             message: disputeSocketAdded.toJson()
         };
         Managers:legalOfficerConnectionStore.broadcast(socketNotify, disputeInsert.legalOfficerId.toString());
@@ -277,6 +277,7 @@ service on rabbitmqListener {
     }
 
     private function processLegalPrecedent(Common:LegalPrecedentMessage message) returns error? {
+        DB:LegalClauseInsert[] clauseArray = [];
         int[]|persist:Error precedentResult = self.dbClient->/legalprecedents.post([message.legalPrecedent]);
         if precedentResult is persist:Error {
             return error("Failed to insert legal precedent", precedentResult);
@@ -286,11 +287,21 @@ service on rabbitmqListener {
                 legalClause: clause,
                 legalPrecedentsId: precedentResult[0]
             };
+            clauseArray.push(clauseInsert);
             int[]|persist:Error clauseResult = self.dbClient->/legalclauses.post([clauseInsert]);
             if clauseResult is persist:Error {
                 return error("Failed to insert legal clause", clauseResult);
             }
         }
+        Common:LegalPrecedentAdded legalPrecedentAdded = {
+            precedent: message.legalPrecedent,
+            clauses: clauseArray
+        };
+        Common:socketMessage socketNotify = {
+            event: Common:PRECEDENT_CREATED,
+            message: legalPrecedentAdded.toJson()
+        };
+        Managers:legalOfficerConnectionStore.broadcast(socketNotify, message.legalOfficerId.toString());
     }
 
     private function shouldRetry(Common:LegalPrecedentMessage disputeMessage, error err) returns boolean {

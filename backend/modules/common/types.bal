@@ -5,7 +5,11 @@ import ballerina/time;
 public enum EVENTS {
     CREATED = "Created",
     UPDATED = "Updated",
-    DELETED = "Deleted"
+    DELETED = "Deleted",
+    STATUS_UPDATED = "Status Updated",
+    DISPUTE_CREATED = "Dispute Created",
+    DISPUTE_UPDATED = "Dispute Updated",
+    PRECEDENT_CREATED = "Precedent Created"
 }
 
 public type LoginUser record {
@@ -218,6 +222,7 @@ public type LegalPrecedentMessage record {|
     DB:LegalPrecedentInsert legalPrecedent;
     string[] legalClauses;
     int retryCount = 0;
+    int legalOfficerId;
 |};
 
 public type LegalPrecedent record {|
@@ -254,4 +259,9 @@ public type statDataLandOfficer record {|
 public type DisputeSocketAdded record {|
     DB:DisputeInsert dispute;
     DB:DisputeDocumentInsert[] documents;
+|};
+
+public type LegalPrecedentAdded record {|
+    DB:LegalPrecedentInsert precedent;
+    DB:LegalClauseInsert[] clauses;
 |};

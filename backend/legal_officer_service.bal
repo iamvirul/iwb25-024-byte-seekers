@@ -1,6 +1,7 @@
 import backend.common;
 import backend.db as DB;
 import backend.interceptors as Interceptors;
+import backend.managers as Managers;
 import backend.mappers as Mapper;
 import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
@@ -71,7 +72,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
         DB:DisputeWithRelations[] disputes = [];
         DB:LegalPrecedentWithRelations[] precedents = [];
         sql:ParameterizedQuery query = `legalOfficerId = ${legalOfficerId}`;
-        stream<DB:DisputeWithRelations, persist:Error?> disputeResult = self.dbClient->/disputes(DB:DisputeWithRelations, query);
+        stream<DB:DisputeWithRelations, persist:Error?> disputeResult = self.dbClient->/disputes(DB:DisputeWithRelations, query, `createdAt DESC`);
         check from var result in disputeResult
             do {
                 stream<DB:LegalPrecedentWithRelations, persist:Error?> precedentResult = self.dbClient->/legalprecedents(DB:LegalPrecedentWithRelations, `disputesId = ${result.id}`);
@@ -194,7 +195,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                 response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_PRECEDENT);
                 return response;
             }
-            error? publishLegalPrecedentMessage = RabbitMQ:publishLegalPrecedentMessage({legalPrecedent: precedentInsert, legalClauses: requestPrecedent.legalClauses});
+            error? publishLegalPrecedentMessage = RabbitMQ:publishLegalPrecedentMessage({legalPrecedent: precedentInsert, legalClauses: requestPrecedent.legalClauses,legalOfficerId: dispute.legalOfficerId});
             if publishLegalPrecedentMessage is error {
                 response.statusCode = 500;
                 response = Utils:setErrorResponse(response, {"message": Utils:FAILED_TO_QUEUE_PRECEDENT});
@@ -208,5 +209,26 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
             response = Utils:setErrorResponse(response, Utils:INVALID_CASE_ID);
             return response;
         }
+    }
+
+    resource function put dispute/status/update/[int disputeId]() returns error|http:Response {
+        http:Response response = new;
+        DB:DisputeUpdate disputeUpdate = {
+            status: DB:RESOLVED
+        };
+        DB:Dispute|persist:Error updateResult = self.dbClient->/disputes/[disputeId].put(disputeUpdate);
+        if updateResult is error {
+            response.statusCode = 500;
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_DISPUTE_STATUS);
+            return response;
+        }
+        common:socketMessage socketNotify = {
+            event: common:STATUS_UPDATED,
+            message: updateResult.toJson()
+        };
+        Managers:legalOfficerConnectionStore.broadcast(socketNotify, updateResult.legalOfficerId.toString());
+        response.statusCode = 200;
+        response = Utils:setSuccessResponse(response, {"message": "Dispute status updated successfully"});
+        return response;
     }
 }

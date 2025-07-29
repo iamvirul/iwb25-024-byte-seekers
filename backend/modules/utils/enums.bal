@@ -137,7 +137,8 @@ public enum DISPUTE_ERRORS {
     NO_LANDS_FOUND = "No lands found",
     DISPUTE_NOT_FOUND = "Dispute not found",
     FAILED_TO_FETCH_DISPUTE = "Failed to fetch dispute",
-    FAILED_TO_FETCH_DISPUTES = "Failed to fetch disputes"
+    FAILED_TO_FETCH_DISPUTES = "Failed to fetch disputes",
+    FAILED_TO_UPDATE_DISPUTE_STATUS = "Failed to update dispute status"
 }
 
 public enum DOCUMENT_ERRORS {
