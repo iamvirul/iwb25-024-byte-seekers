@@ -10,7 +10,8 @@ public enum EVENTS {
     DISPUTE_CREATED = "Dispute Created",
     DISPUTE_UPDATED = "Dispute Updated",
     PRECEDENT_CREATED = "Precedent Created",
-    COMMENT_ADDED = "Comment Added"
+    COMMENT_ADDED = "Comment Added",
+    ESTIMATE_TIME_UPDATED = "Estimate Time Updated"
 }
 
 public type LoginUser record {
@@ -225,6 +226,7 @@ public type LegalPrecedentMessage record {|
     string[] legalClauses;
     int retryCount = 0;
     int legalOfficerId;
+    int userId;
 |};
 
 public type LegalPrecedent record {|
