@@ -6,11 +6,11 @@ import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
 
 import ballerina/http;
+// import ballerina/jwt;
+import ballerina/persist;
+// import ballerina/regex;
 import ballerina/sql;
 import ballerina/time;
-import ballerina/jwt;
-import ballerina/persist;
-import ballerina/regex;
 
 listener http:Listener legalOfficerMicroservice = new (9080);
 
@@ -50,24 +50,11 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
         check self.dbClient.close();
     }
 
-    resource function get disputes/[int id](@http:Header string Authorization) returns error|http:Response {
+    resource function get disputes/[int id]() returns error|http:Response {
         http:Response response = new;
         if id <= 0 {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, Utils:INVALID_LEGAL_OFFICER_ID);
-            return response;
-        }
-        string token = regex:replace(Authorization, "Bearer ", "");
-        [jwt:Header, jwt:Payload]|jwt:Error validateToken = Utils:validateToken(token);
-        if validateToken is jwt:Error {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, "Invalid token");
-            return response;
-        }
-        int uid = check validateToken[1].get("uid").cloneWithType(int);
-        if uid != id {
-            response.statusCode = 401;
-            response = Utils:setErrorResponse(response, "Invalid id");
             return response;
         }
         common:LegalOfficer|persist:Error legalOfficerResult = self.dbClient->/legalofficers/[id].get(common:LegalOfficer);
@@ -81,56 +68,16 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
             }
             return response;
         }
-        common:DisputeWithDocs[] disputes = [];
-        DB:DisputeDocument[] tempDocs = [];
-        sql:ParameterizedQuery query = `legal_officer_id = ${id}`;
-        stream<DB:Dispute, persist:Error?> disputeResult = self.dbClient->/disputes(DB:Dispute, query);
-        check from var dispute in disputeResult
+        DB:DisputeWithRelations[] disputes = [];
+        sql:ParameterizedQuery query = `legalOfficerId = ${id}`;
+        stream<DB:DisputeWithRelations, persist:Error?> disputeResult = self.dbClient->/disputes(DB:DisputeWithRelations, query);
+        check from var result in disputeResult
             do {
-                tempDocs = [];
-                sql:ParameterizedQuery docQuery = `disputes_id = ${dispute.id}`;
-                stream<DB:DisputeDocument, persist:Error?> disputeDoc = self.dbClient->/disputedocuments(DB:DisputeDocument, docQuery);
-                check from var disDoc in disputeDoc
-                    do {
-                        tempDocs.push(disDoc);
-                    };
-                check disputeDoc.close();
-
-                DB:Land|persist:Error landResult = self.dbClient->/lands/[dispute.landsId].get(DB:Land);
-                if landResult is persist:Error {
-                    response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LAND);
-                    return response;
-                }
-                DB:Land land = landResult;
-
-                DB:User|persist:Error userResult = self.dbClient->/users/[dispute.usersId](DB:User);
-                if userResult is persist:Error {
-                    if userResult is persist:NotFoundError {
-                        response.statusCode = 404;
-                        response = Utils:setErrorResponse(response, Utils:USER_NOT_FOUND);
-                    } else {
-                        response.statusCode = 500;
-                        response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_USER);
-                    }
-                    return response;
-                }
-
-                disputes.push({
-                    dispute: dispute,
-                    documents: tempDocs,
-                    land: land,
-                    user: userResult.firstName + " " + userResult.lastName
-                });
+                disputes.push(result);
             };
         check disputeResult.close();
-        if disputes.length() == 0 {
-            response.statusCode = 404;
-            response = Utils:setErrorResponse(response, Utils:NO_LANDS_FOUND);
-        } else {
-            response.statusCode = 200;
-            response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson()});
-        }
+        response.statusCode = 200; 
+        response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson()});
         return response;
     }
 
