@@ -328,4 +328,25 @@ service http:InterceptableService /land_officer on landMicroservice {
         response = Utils:setSuccessResponse(response, "Land owner added successfully");
         return response;
     }
+
+    resource function get data/stats/all() returns error|http:Response {
+        http:Response response = new;
+        stream<Common:statDataLandOfficer, persist:Error?> statdata = self.dbClient->queryNativeSQL(`SELECT
+    COUNT(CASE WHEN landStatus = 'PENDING' THEN 1 END) AS pending_lands,
+    COUNT(CASE WHEN registerDate = CURDATE() THEN 1 END) AS registered_today,
+    COUNT(CASE WHEN landStatus = 'REJECTED' THEN 1 END) AS rejected_lands,
+    COUNT(CASE WHEN landStatus = 'VERIFIED' THEN 1 END) AS accepted_lands
+    FROM lands;`, Common:statDataLandOfficer);
+
+        Common:statDataLandOfficer responseStat;
+
+        check from var statdatas in statdata
+            do {
+                responseStat = statdatas;
+            };
+        check statdata.close();
+        response = Utils:setSuccessResponse(response, responseStat.toJson());
+        return response;
+    };
+
 }

@@ -220,8 +220,6 @@ public type LegalPrecedentMessage record {|
     int retryCount = 0;
 |};
 
-
-
 public type LegalPrecedent record {|
     readonly int id;
     int disputesId;
@@ -244,4 +242,11 @@ public type LegalOfficerStats record {|
     int rejected;
     int resolved;
     int legalPrecedents;
+|};
+
+public type statDataLandOfficer record {|
+    string pending_lands;
+    string registered_today;
+    string rejected_lands;
+    string accepted_lands;
 |};
