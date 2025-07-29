@@ -51,6 +51,13 @@ service http:InterceptableService /land_officer on landMicroservice {
     }
 
     private function creatLandOwner(DB:LandOwnerInsert landOwnerInsert) returns error|int {
+        stream<DB:LandOwner, persist:Error?> streamResult = self.dbClient->/landowners(DB:LandOwner, `nic=${landOwnerInsert.nic}`);
+        check from var landOwner in streamResult
+            do {
+                if (landOwner.nic == landOwnerInsert.nic) {
+                    return error(Utils:LAND_OWNER_ALREADY_EXISTS);
+                }
+            };
         transaction {
             int[]|persist:Error landOwnerID = self.dbClient->/landowners.post([landOwnerInsert]);
             if landOwnerID is persist:Error {
@@ -65,7 +72,6 @@ service http:InterceptableService /land_officer on landMicroservice {
                 check commit;
                 return landOwnerID[0];
             }
-
         }
     }
 
@@ -314,8 +320,8 @@ service http:InterceptableService /land_officer on landMicroservice {
         }
         error|int creatLandOwnerResult = self.creatLandOwner(landOwnerInsert);
         if creatLandOwnerResult is error {
-            response.statusCode = 500;
-            response = Utils:setErrorResponse(response, creatLandOwnerResult.message());
+            response.statusCode = 409;
+            response = Utils:setErrorResponse(response, Utils:LAND_OWNER_ALREADY_EXISTS);
             return response;
         }
         response.statusCode = 201;
