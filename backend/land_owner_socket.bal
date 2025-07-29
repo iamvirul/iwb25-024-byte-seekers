@@ -4,6 +4,7 @@ import backend.utils as Utils;
 import ballerina/http;
 // import ballerina/log;
 import ballerina/websocket;
+import ballerina/log;
 
 listener websocket:Listener landOwnerSocketListener = new (9065,
     secureSocket = {
@@ -50,18 +51,18 @@ service class LandOwnerService {
     remote function onOpen(websocket:Caller caller) returns error? {
         Managers:landOwnerConnectionStore.addClient(self.userID, caller);
         check caller->writeMessage(string `Welcome ${self.userID}!`);
-        // string header = check self.req.getHeader("x-service-token");
-        // map<string> serviceHeaders = {
-        //     "Authorization": header
-        // };
-        // http:Client serviceClient = check new ("localhost:9080/legal_officer");
+        string header = check self.req.getHeader("x-service-token");
+        map<string> serviceHeaders = {
+            "Authorization": header
+        };
+        http:Client serviceClient = check new ("localhost:9098/land_owner");
 
-        // anydata|http:ClientError allLand = serviceClient->get("/data/" + self.userID, serviceHeaders);
-        // if allLand is http:ClientError {
-        //     log:printError("Error fetching all data: ");
-        //     return;
-        // }
-        // check caller->writeMessage(allLand);
+        anydata|http:ClientError allLand = serviceClient->get("/disputes/" + self.userID, serviceHeaders);
+        if allLand is http:ClientError {
+            log:printError("Error fetching disputes: ");
+            return;
+        }
+        check caller->writeMessage(allLand);
     }
 
     remote function onClose(websocket:Caller caller) returns error? {
