@@ -5,11 +5,12 @@ import ballerina/http;
 import ballerina/log;
 import ballerina/websocket;
 
-listener websocket:Listener socketListener = new (9091,
+listener websocket:Listener socketListener = new (9060,
     secureSocket = {
         key: {
             certFile: "resources/certificates/sockets/public.crt",
-            keyFile: "resources/certificates/sockets/private.key"
+            keyFile: "resources/certificates/sockets/private.key",
+            keyPassword: ""
         }
     }
 );
@@ -54,7 +55,9 @@ service class LegalOfficerService {
             "Authorization": header
         };
         http:Client serviceClient = check new ("localhost:9080/legal_officer");
-        anydata|http:ClientError allLand = serviceClient->get("/data/" + self.userID, serviceHeaders);
+        string path = "/data/".'join(self.userID);
+
+        anydata|http:ClientError allLand = serviceClient->get(path, serviceHeaders);
         if allLand is http:ClientError {
             log:printError("Error fetching all lands: ");
             return;
