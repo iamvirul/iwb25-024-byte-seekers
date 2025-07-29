@@ -42,7 +42,7 @@ service on rabbitmqListener {
 
     private function processDispute(Common:DisputeMessage disputeMessage) returns error? {
         DB:DisputeInsert disputeInsert = disputeMessage.disputeInsert;
-        DB:DisputeDocumentInsert[] docArray =[];
+        DB:DisputeDocumentInsert[] docArray = [];
         int[]|persist:Error disputeResult = self.dbClient->/disputes.post([disputeInsert]);
         if disputeResult is persist:Error {
             return error("Failed to insert dispute", disputeResult);
