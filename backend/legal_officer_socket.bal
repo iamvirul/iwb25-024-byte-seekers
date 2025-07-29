@@ -1,9 +1,9 @@
+import backend.managers as Managers;
 import backend.utils as Utils;
 
-import ballerina/websocket;
 import ballerina/http;
 import ballerina/log;
-import backend.managers as Managers;
+import ballerina/websocket;
 
 listener websocket:Listener socketListener = new (9091,
     secureSocket = {
@@ -47,25 +47,26 @@ service class LegalOfficerService {
     }
 
     remote function onOpen(websocket:Caller caller) returns error? {
-        Managers:legalOfficerConnectionStore.addClient(self.userID,caller);
+        Managers:legalOfficerConnectionStore.addClient(self.userID, caller);
         check caller->writeMessage(string `Welcome ${self.userID}!`);
         string header = check self.req.getHeader("x-service-token");
         map<string> serviceHeaders = {
-                "Authorization": header
-            };
+            "Authorization": header
+        };
         http:Client serviceClient = check new ("localhost:9080/legal_officer");
-        anydata|http:ClientError allLand = serviceClient->get(`/data/${self.userID}`,serviceHeaders);
+        anydata|http:ClientError allLand = serviceClient->get("/data/" + self.userID, serviceHeaders);
         if allLand is http:ClientError {
             log:printError("Error fetching all lands: ");
             return;
         }
         check caller->writeMessage(allLand);
     }
+
     remote function onClose(websocket:Caller caller) returns error? {
         Managers:connectionStore.removeClient(self.userID);
     }
 
-    remote function onMessage(websocket:Caller caller,string data) returns error? {
+    remote function onMessage(websocket:Caller caller, string data) returns error? {
         check caller->writeMessage("Hello, How are you?" + self.userID);
     }
 }
