@@ -239,3 +239,9 @@ public type socketMessage record {|
     json message;
 |};
 
+public type LegalOfficerStats record {|
+    int pending;
+    int rejected;
+    int resolved;
+    int legalPrecedents;
+|};

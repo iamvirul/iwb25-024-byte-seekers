@@ -50,38 +50,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
         check self.dbClient.close();
     }
 
-    resource function get disputes/[int id]() returns error|http:Response {
-        http:Response response = new;
-        if id <= 0 {
-            response.statusCode = 400;
-            response = Utils:setErrorResponse(response, Utils:INVALID_LEGAL_OFFICER_ID);
-            return response;
-        }
-        common:LegalOfficer|persist:Error legalOfficerResult = self.dbClient->/legalofficers/[id].get(common:LegalOfficer);
-        if legalOfficerResult is persist:Error {
-            if legalOfficerResult is persist:NotFoundError {
-                response.statusCode = 404;
-                response = Utils:setErrorResponse(response, Utils:LEGAL_OFFICER_NOT_FOUND);
-            } else {
-                response.statusCode = 500;
-                response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_LEGAL_OFFICER);
-            }
-            return response;
-        }
-        DB:DisputeWithRelations[] disputes = [];
-        sql:ParameterizedQuery query = `legalOfficerId = ${id}`;
-        stream<DB:DisputeWithRelations, persist:Error?> disputeResult = self.dbClient->/disputes(DB:DisputeWithRelations, query);
-        check from var result in disputeResult
-            do {
-                disputes.push(result);
-            };
-        check disputeResult.close();
-        response.statusCode = 200;
-        response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson()});
-        return response;
-    }
-
-    resource function get precedents/[int legalOfficerId]() returns error|http:Response {
+    resource function get data/[int legalOfficerId]() returns error|http:Response {
         http:Response response = new;
         if legalOfficerId <= 0 {
             response.statusCode = 400;
@@ -99,6 +68,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
             }
             return response;
         }
+        DB:DisputeWithRelations[] disputes = [];
         DB:LegalPrecedentWithRelations[] precedents = [];
         sql:ParameterizedQuery query = `legalOfficerId = ${legalOfficerId}`;
         stream<DB:DisputeWithRelations, persist:Error?> disputeResult = self.dbClient->/disputes(DB:DisputeWithRelations, query);
@@ -110,10 +80,32 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                         precedents.push(precedent);
                     };
                 check precedentResult.close();
+                disputes.push(result);
             };
         check disputeResult.close();
-        response.statusCode = 200;
-        response = Utils:setSuccessResponse(response, {"precedents": precedents.toJson()});
+
+        stream<common:CountResult, persist:Error?> pendingResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legalOfficerId} AND status = 'PENDING'`, common:CountResult);
+        stream<common:CountResult, persist:Error?> rejectedResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legalOfficerId} AND status = 'REJECTED'`, common:CountResult);
+        stream<common:CountResult, persist:Error?> resolvedResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legalOfficerId} AND status = 'RESOLVED'`, common:CountResult);
+        stream<common:CountResult, persist:Error?> lpResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM legal_precedents lp JOIN disputes d ON lp.disputes_id = d.id WHERE d.legal_officer_id = ${legalOfficerId}`, common:CountResult);
+
+        record {|common:CountResult value;|}? pendingResult = check pendingResultStream.next();
+        _ = check pendingResultStream.close();
+        record {|common:CountResult value;|}? rejectedResult = check rejectedResultStream.next();
+        _ = check rejectedResultStream.close();
+        record {|common:CountResult value;|}? resolvedResult = check resolvedResultStream.next();
+        _ = check resolvedResultStream.close();
+        record {|common:CountResult value;|}? lpResult = check lpResultStream.next();
+        _ = check lpResultStream.close();
+
+        if pendingResult is record {|common:CountResult value;|} && rejectedResult is record {|common:CountResult value;|} && resolvedResult is record {|common:CountResult value;|} && lpResult is record {|common:CountResult value;|} {
+            common:LegalOfficerStats stats = {pending: pendingResult.value.total, rejected: rejectedResult.value.total, resolved: resolvedResult.value.total, legalPrecedents: lpResult.value.total};
+            response.statusCode = 200;
+            response = Utils:setSuccessResponse(response, {"precedents": precedents.toJson(), "disputes": disputes.toJson(), "stats": stats.toJson()});
+        } else {
+            response.statusCode = 500;
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_STATS);
+        }
         return response;
     }
 
@@ -216,36 +208,5 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
             response = Utils:setErrorResponse(response, Utils:INVALID_CASE_ID);
             return response;
         }
-    }
-
-    resource function get stats/[int legelOfficerId]() returns error|http:Response {
-        http:Response response = new;
-        stream<common:CountResult, persist:Error?> pendingResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legelOfficerId} AND status = 'PENDING'`, common:CountResult);
-        stream<common:CountResult, persist:Error?> rejectedResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legelOfficerId} AND status = 'REJECTED'`, common:CountResult);
-        stream<common:CountResult, persist:Error?> resolvedResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM disputes WHERE legal_officer_id = ${legelOfficerId} AND status = 'RESOLVED'`, common:CountResult);
-        stream<common:CountResult, persist:Error?> lpResultStream = self.dbClient->queryNativeSQL(`SELECT COUNT(*) AS total FROM legal_precedents lp JOIN disputes d ON lp.disputes_id = d.id WHERE d.legal_officer_id = ${legelOfficerId}`, common:CountResult);
-
-        record {|common:CountResult value;|}? pendingResult = check pendingResultStream.next();
-        _ = check pendingResultStream.close();
-        record {|common:CountResult value;|}? rejectedResult = check rejectedResultStream.next();
-        _ = check rejectedResultStream.close();
-        record {|common:CountResult value;|}? resolvedResult = check resolvedResultStream.next();
-        _ = check resolvedResultStream.close();
-        record {|common:CountResult value;|}? lpResult = check lpResultStream.next();
-        _ = check lpResultStream.close();
-
-        if pendingResult is record {|common:CountResult value;|} && rejectedResult is record {|common:CountResult value;|} && resolvedResult is record {|common:CountResult value;|} && lpResult is record {|common:CountResult value;|} {
-            response.statusCode = 200;
-            response = Utils:setSuccessResponse(response, {
-                                                              "pending": pendingResult.value.total,
-                                                              "rejected": rejectedResult.value.total,
-                                                              "resolved": resolvedResult.value.total,
-                                                              "legalPrecedents": lpResult.value.total
-                                                          });
-        } else {
-            response.statusCode = 500;
-            response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_STATS);
-        }
-        return response;
     }
 }
