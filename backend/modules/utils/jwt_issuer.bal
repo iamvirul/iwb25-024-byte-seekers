@@ -1,12 +1,12 @@
 import ballerina/jwt;
 import ballerina/time;
 
-public function issueToken(string audience, string username) returns string|error {
+public function issueToken(string audience, string username, int userId) returns string|error {
     jwt:IssuerConfig issuerConfig = {
         issuer: "byteseekers",
         audience: audience,
         expTime: 3600,
-        customClaims: { "scp": audience , "sub": username},
+        customClaims: { "scp": audience , "sub": username, "uid":userId},
         signatureConfig: {
             config: {
                 keyFile: "resources/certificates/private.key"

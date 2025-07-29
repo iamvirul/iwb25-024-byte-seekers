@@ -6,9 +6,11 @@ import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
 
 import ballerina/http;
-import ballerina/persist;
 import ballerina/sql;
 import ballerina/time;
+import ballerina/jwt;
+import ballerina/persist;
+import ballerina/regex;
 
 listener http:Listener legalOfficerMicroservice = new (9080);
 
@@ -48,11 +50,24 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
         check self.dbClient.close();
     }
 
-    resource function get disputes/[int id]() returns error|http:Response {
+    resource function get disputes/[int id](@http:Header string Authorization) returns error|http:Response {
         http:Response response = new;
         if id <= 0 {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, Utils:INVALID_LEGAL_OFFICER_ID);
+            return response;
+        }
+        string token = regex:replace(Authorization, "Bearer ", "");
+        [jwt:Header, jwt:Payload]|jwt:Error validateToken = Utils:validateToken(token);
+        if validateToken is jwt:Error {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, "Invalid token");
+            return response;
+        }
+        int uid = check validateToken[1].get("uid").cloneWithType(int);
+        if uid != id {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, "Invalid id");
             return response;
         }
         common:LegalOfficer|persist:Error legalOfficerResult = self.dbClient->/legalofficers/[id].get(common:LegalOfficer);

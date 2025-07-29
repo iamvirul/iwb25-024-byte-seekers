@@ -67,7 +67,7 @@ service /auth on authMicroservice {
                 return response;
             }
             Utils:USER_TYPES userType = check Utils:getUserType(loginUser.user_type);
-            string|error jwt = Utils:issueToken(userType, user.email);
+            string|error jwt = Utils:issueToken(userType, user.email, user.id);
             string|error socketToken = Utils:issueSocketToken(userType, user.email);
             if jwt is string {
                 if socketToken is string {
@@ -78,11 +78,11 @@ service /auth on authMicroservice {
                                 message: "Login successful",
                                 token: jwt,
                                 socketToken: socketToken,
-                                userId:user.id
+                                userId: user.id
                             }
                     );
                     return response;
-                }else {
+                } else {
                     response.statusCode = 500;
                     response = Utils:setErrorResponse(response, "Failed to issue socket token");
                     return response;

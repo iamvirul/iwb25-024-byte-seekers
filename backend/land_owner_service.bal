@@ -155,8 +155,21 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         }
     }
 
-    resource function get disputes/[int userId]() returns error|http:Response {
+    resource function get disputes/[int userId](@http:Header string Authorization) returns error|http:Response {
         http:Response response = new;
+        string token = regex:replace(Authorization, "Bearer ", "");
+        [jwt:Header, jwt:Payload]|jwt:Error validateToken = Utils:validateToken(token);
+        if validateToken is jwt:Error {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, "Invalid token");
+            return response;
+        }
+        int uid = check validateToken[1].get("uid").cloneWithType(int);
+        if uid != userId {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, "Invalid user id");
+            return response;
+        }
         DB:DisputeWithRelations[] disputes = [];
         stream<DB:DisputeWithRelations, persist:Error?> streamResult = self.dbClient->/disputes(DB:DisputeWithRelations, `usersId = ${userId}`);
         check from var result in streamResult
