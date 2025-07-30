@@ -12,6 +12,7 @@ import ballerina/http;
 import ballerina/jwt;
 import ballerina/persist;
 import ballerina/regex;
+import ballerina/sql;
 import ballerina/time;
 
 configurable string merchant_id = ?;
@@ -408,7 +409,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             response = Utils:setErrorResponse(response, validateUpdateProfile.errors);
             return response;
         }
-        
+
         DB:UserUpdate userUpdate = {};
         anydata contact = updateProfile["contact"];
         anydata? address = updateProfile["address"];
@@ -427,6 +428,87 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         response.statusCode = 200;
         response = Utils:setSuccessResponse(response, "Profile updated successfully");
         return response;
+    }
+
+    resource function get stats/[int userId]() returns error|http:Response {
+        http:Response response = new;
+        if userId <= 0 {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, Utils:INVALID_USER_ID);
+            return response;
+        }
+        DB:User|persist:Error userResult = self.dbClient->/users/[userId](DB:User);
+        if userResult is persist:Error {
+            if userResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, "User not found");
+                return response;
+            }
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Failed to fetch user");
+            return response;
+        }
+        stream<DB:LandOwner, persist:Error?> landOwnerResult = self.dbClient->/landowners(DB:LandOwner, `nic=${userResult.nic}`);
+        DB:LandOwner? landOwner = ();
+        var result = check landOwnerResult.next();
+        _ = check landOwnerResult.close();
+        if result is record {|DB:LandOwner value;|} {
+            landOwner = result.value;
+        }
+        if landOwner is DB:LandOwner {
+            sql:ParameterizedQuery query = `
+                                        SELECT 
+                                            lo.id AS ownerId,
+                                            lo.firstName,
+                                            lo.lastName,
+                                            COALESCE(sent.transferCount, 0) AS transfersSent,
+                                            COALESCE(received.receivedCount, 0) AS transfersReceived,
+                                            COALESCE(owned.landCount, 0) AS currentLandsOwned
+
+                                        FROM land_owner lo
+                                        LEFT JOIN (
+                                            SELECT fromLandOwnersId, COUNT(*) AS transferCount
+                                            FROM land_transfer_chain
+                                            GROUP BY fromLandOwnersId
+                                        ) sent ON lo.id = sent.fromLandOwnersId
+
+                                        LEFT JOIN (
+                                            SELECT toLandOwnersId, COUNT(*) AS receivedCount
+                                            FROM land_transfer_chain
+                                            GROUP BY toLandOwnersId
+                                        ) received ON lo.id = received.toLandOwnersId
+
+                                        LEFT JOIN (
+                                            SELECT 
+                                                ltc.toLandOwnersId, COUNT(*) AS landCount
+                                            FROM (
+                                                SELECT landsId, MAX(blockIndex) AS maxBlockIndex
+                                                FROM land_transfer_chain
+                                                GROUP BY landsId
+                                            ) lastTransfers
+                                            JOIN land_transfer_chain ltc
+                                            ON ltc.landsId = lastTransfers.landsId AND ltc.blockIndex = lastTransfers.maxBlockIndex
+                                            GROUP BY ltc.toLandOwnersId
+                                        ) owned ON lo.id = owned.toLandOwnersId
+
+                                        WHERE lo.id = ${landOwner.id}`;
+            stream<common:LandOwnerStats, persist:Error?> quesryResult = self.dbClient->queryNativeSQL(query);
+            record {|common:LandOwnerStats value;|}? statResult = check quesryResult.next();
+            _ = check quesryResult.close();
+            if statResult is record {|common:LandOwnerStats value;|} {
+                response.statusCode = 200;
+                response = Utils:setSuccessResponse(response, {"stats": statResult.value.toJson()});
+                return response;
+            }else{
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, "No stats found");
+                return response;
+            }
+        } else {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "User is not a land owner");
+            return response;
+        }
     }
 }
 

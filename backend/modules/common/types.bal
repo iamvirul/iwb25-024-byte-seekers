@@ -293,3 +293,12 @@ public type UpdatePassword record {|
 public type UpdateProfile record {|
     anydata...;
 |};
+
+public type LandOwnerStats record {|
+    int ownerId;
+    string firstName;
+    string lastName;
+    int transfersSent;
+    int transfersReceived;
+    int currentLandsOwned;
+|};
