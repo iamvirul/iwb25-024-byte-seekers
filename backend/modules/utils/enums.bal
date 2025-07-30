@@ -147,5 +147,9 @@ public enum DOCUMENT_ERRORS {
     DOCUMENTS_REQUIRED = "Documents are required",
     DOCUMENT_SIZE_EXCEEDED = "Document size exceeded",
     INVALID_DOCUMENT_TYPE = "Invalid document type",
-    DOCUMENT_ALREADY_EXISTS = "Document already exists"
+    DOCUMENT_ALREADY_EXISTS = "Document already exists",
+    FAILED_TO_FETCH_DOCUMENT = "Failed to fetch document",
+    LAND_DOCUMENT_NOT_FOUND = "Document not found",
+    FAILED_TO_UPDATE_DOCUMENT = "Failed to update document",
+    DOCUMENT_UPDATED = "Document updated successfully"
 }

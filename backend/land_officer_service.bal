@@ -362,4 +362,28 @@ service http:InterceptableService /land_officer on landMicroservice {
         return response;
     };
 
+    resource function put lands/document/status/[DB:LandDocumentDocStatus status]/[int docID]() returns error|http:Response {
+        http:Response response = new;
+        DB:LandDocumentUpdate|persist:Error landDocument = self.dbClient->/landdocuments/[docID](DB:LandDocumentUpdate);
+        if landDocument is persist:Error {
+            if landDocument is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, Utils:LAND_DOCUMENT_NOT_FOUND);
+                return response;
+            }
+            response.statusCode = 500;
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_DOCUMENT);
+            return response;
+        }
+        DB:LandDocument|persist:Error updateResult = self.dbClient->/landdocuments/[docID].put(landDocument);
+        if updateResult is persist:Error {
+            response.statusCode = 500;
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_DOCUMENT);
+            return response;
+        }
+        response.statusCode = 200;
+        response = Utils:setSuccessResponse(response, Utils:DOCUMENT_UPDATED);
+        return response;
+    }
+
 }
