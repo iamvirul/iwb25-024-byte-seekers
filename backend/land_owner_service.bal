@@ -499,7 +499,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                 response.statusCode = 200;
                 response = Utils:setSuccessResponse(response, {"stats": statResult.value.toJson()});
                 return response;
-            }else{
+            } else {
                 response.statusCode = 404;
                 response = Utils:setErrorResponse(response, "No stats found");
                 return response;
@@ -507,6 +507,43 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         } else {
             response.statusCode = 400;
             response = Utils:setErrorResponse(response, "User is not a land owner");
+            return response;
+        }
+    }
+
+    resource function get stats/disputes/[int userId]() returns error|http:Response {
+        http:Response response = new;
+        if userId <= 0 {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Invalid user ID");
+            return response;
+        }
+        DB:User|persist:Error userResult = self.dbClient->/users/[userId](DB:User);
+        if userResult is persist:Error {
+            if userResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, "User not found");
+                return response;
+            }
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Failed to fetch user");
+            return response;
+        }
+        stream<common:LandOwnerDisputeStats, persist:Error?> pendingResultStream = self.dbClient->queryNativeSQL(`
+        SELECT
+            COUNT(CASE WHEN status = 'PENDING' THEN 1 END) AS pendingCount,
+            COUNT(CASE WHEN status = 'RESOLVED' THEN 1 END) AS resolvedCount
+        FROM disputes
+        WHERE usersId = ${userId}`, common:LandOwnerDisputeStats);
+        record {|common:LandOwnerDisputeStats value;|}? pendingResult = check pendingResultStream.next();
+        _ = check pendingResultStream.close();
+        if pendingResult is record {|common:LandOwnerDisputeStats value;|} {
+            response.statusCode = 200;
+            response = Utils:setSuccessResponse(response, {"stats": pendingResult.value.toJson()});
+            return response;
+        } else {
+            response.statusCode = 404;
+            response = Utils:setErrorResponse(response, "No disputes found");
             return response;
         }
     }

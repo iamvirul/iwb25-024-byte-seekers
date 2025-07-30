@@ -216,6 +216,10 @@ public type CountResult record {
     int total;
 };
 
+public type LandOwnerDisputeStats record {
+    int total;
+};
+
 public type DisputeMessage record {|
     DB:DisputeInsert disputeInsert;
     FileRecord[] documents;
