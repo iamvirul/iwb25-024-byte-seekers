@@ -153,3 +153,28 @@ public enum DOCUMENT_ERRORS {
     FAILED_TO_UPDATE_DOCUMENT = "Failed to update document",
     DOCUMENT_UPDATED = "Document updated successfully"
 }
+
+public enum USER_ERRORS {
+    USER_ALREADY_EXISTS = "User already exists",
+    FAILED_TO_REGISTER_USER = "Failed to register user",
+    USER_NOT_FOUND = "User not found",
+    NO_USERS_FOUND = "No users found",
+    USER_ID_REQUIRED = "User ID is required",
+    INVALID_USER_ID = "Invalid user ID",
+    FAILED_TO_FETCH_USER = "Failed to fetch user",
+    FAILED_TO_UPDATE_USER = "Failed to update user",
+    USER_UPDATED = "User updated successfully",
+    FAILED_TO_UPDATE_USER_STATUS = "Failed to update user status",
+    INVALID_USER_STATUS = "Invalid user status",
+    FAILED_TO_FETCH_STATS = "Failed to fetch stats",
+    FAILED_TO_QUEUE_USER = "Failed to queue user",
+    FAILED_TO_QUEUE_USER_STATUS = "Failed to queue user status",
+    FAILED_TO_QUEUE_USER_PASSWORD = "Failed to queue user password",
+    FAILED_TO_QUEUE_USER_ADDRESS = "Failed to queue user address",
+    FAILED_TO_QUEUE_USER_NIC = "Failed to queue user nic",
+    FAILED_TO_QUEUE_USER_SLUDI = "Failed to queue user sludi",
+    FAILED_TO_QUEUE_USER_CONTACT_NO = "Failed to queue user contact no",
+    FAILED_TO_QUEUE_USER_EMAIL = "Failed to queue user email",
+    FAILED_TO_QUEUE_USER_FNAME = "Failed to queue user fname",
+    FAILED_TO_QUEUE_USER_LNAME = "Failed to queue user lname"
+}

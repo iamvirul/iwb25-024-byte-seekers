@@ -386,4 +386,44 @@ service http:InterceptableService /land_officer on landMicroservice {
         return response;
     }
 
+    resource function get user/landowner/register/[int userID]() returns error|http:Response {
+        http:Response response = new;
+        stream<DB:UserHasUserTypeOptionalized, persist:Error?> streamResult = self.dbClient->/userhasusertypes(DB:UserHasUserTypeOptionalized, `usersId=${userID}`);
+        stream<DB:UserTypeOptionalized, persist:Error?> landOwnerType = self.dbClient->/usertypes(DB:UserTypeOptionalized, `userTypes = ${"land_owner"}`);
+        int? userTypeId;
+        check from var landOwnerTypeResult in landOwnerType
+            do {
+                userTypeId = landOwnerTypeResult.id;
+            };
+        check landOwnerType.close();
+            check from var user in streamResult
+                do {
+                    if user.userTypesId == userTypeId {
+                        response.statusCode = 409;
+                        response = Utils:setErrorResponse(response, Utils:USER_ALREADY_EXISTS);
+                        return response;
+                    } else {
+                        [int, int][]|persist:Error userHasTypesAdded = self.dbClient->/userhasusertypes.post([
+                            {
+                                usersId: userID,
+                                userTypesId: <int>userTypeId
+                            }
+                        ]);
+                        if userHasTypesAdded is persist:Error {
+                            if userHasTypesAdded is persist:AlreadyExistsError {
+                                response.statusCode = 409;
+                                response = Utils:setErrorResponse(response, Utils:USER_ALREADY_EXISTS);
+                                return response;
+                            }
+                        }
+                    }
+                    check streamResult.close();
+                    response.statusCode = 200;
+                    response = Utils:setSuccessResponse(response, Utils:USER_UPDATED);
+                    return response;
+                };
+            response.statusCode = 500;
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_USER_STATUS);
+            return response;
+    }
 }
