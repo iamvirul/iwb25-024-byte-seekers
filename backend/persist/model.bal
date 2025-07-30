@@ -9,15 +9,14 @@ public enum LegalPrecedentCourt {
     DISTRICT_COURT = "DISTRICT_COURT"
 }
 
+public enum DisputeStatus {
+    PENDING = "PENDING",
+    RESOLVED = "RESOLVED"
+}
+
 public enum LandDocumentDocStatus {
     PENDING = "PENDING",
     APPROVED = "APPROVED",
-    REJECTED = "REJECTED"
-}
-
-public enum DisputeStatus {
-    PENDING = "PENDING",
-    RESOLVED = "RESOLVED",
     REJECTED = "REJECTED"
 }
 
@@ -49,17 +48,34 @@ public type LandDocument record {|
 public type LegalPrecedent record {|
     @sql:Generated
     readonly int id;
-    @sql:Index {name: "fk_legal_precedents_disputes1_idx"}
-    int disputesId;
     time:Date year;
     @sql:Varchar {length: 100}
     string headline;
     LegalPrecedentCourt court;
     string decision;
     string summary;
+    @sql:Index {name: "fk_legal_precedents_disputes1_idx"}
+    int disputesId;
     LegalClause[] legalclauses;
     @sql:Relation {keys: ["disputesId"]}
     Dispute dispute;
+|};
+
+@sql:Name {value: "payment_history"}
+public type PaymentHistory record {|
+    @sql:Generated
+    readonly int id;
+    @sql:Decimal {precision: [10, 2]}
+    decimal amount;
+    @sql:Index {name: "fk_payment_history_users1_idx"}
+    int usersId;
+    @sql:Index {name: "fk_payment_history_legal_officer1_idx"}
+    int legalOfficerId;
+    time:Utc createdAt;
+    @sql:Relation {keys: ["legalOfficerId"]}
+    LegalOfficer legalofficer;
+    @sql:Relation {keys: ["usersId"]}
+    User user;
 |};
 
 @sql:Name {value: "users"}
@@ -82,6 +98,7 @@ public type User record {|
     byte[]? address;
     Audit[] audits;
     Dispute[] disputes;
+    PaymentHistory[] paymenthistories;
     UserHasUserType[] userhasusertypes;
 |};
 
@@ -126,18 +143,13 @@ public type LegalOfficer record {|
     @sql:Decimal {precision: [10, 2]}
     decimal? initialCost;
     Dispute[] disputes;
+    PaymentHistory[] paymenthistories;
 |};
 
 @sql:Name {value: "land_transfer_chain"}
 public type LandTransferChain record {|
     @sql:Generated
     readonly int id;
-    @sql:Index {name: "fk_land_transfer_chain_lands1_idx"}
-    int landsId;
-    @sql:Index {name: "fk_land_transfer_chain_land_owners1_idx"}
-    int? fromLandOwnersId;
-    @sql:Index {name: "fk_land_transfer_chain_land_owners2_idx"}
-    int toLandOwnersId;
     time:Civil transferDate;
     @sql:Varchar {length: 100}
     string verifiedBy;
@@ -146,6 +158,12 @@ public type LandTransferChain record {|
     string blockHash;
     @sql:Varchar {length: 128}
     string prevBlockHash;
+    @sql:Index {name: "fk_land_transfer_chain_land_owners1_idx"}
+    int fromLandOwnersId;
+    @sql:Index {name: "fk_land_transfer_chain_land_owners2_idx"}
+    int toLandOwnersId;
+    @sql:Index {name: "fk_land_transfer_chain_lands1_idx"}
+    int landsId;
     @sql:Relation {keys: ["fromLandOwnersId"]}
     LandOwner landowner;
     @sql:Relation {keys: ["toLandOwnersId"]}
@@ -205,8 +223,6 @@ public type Land record {|
 public type Audit record {|
     @sql:Generated
     readonly int id;
-    @sql:Index {name: "fk_audits_users1_idx"}
-    int usersId;
     @sql:Varchar {length: 60}
     string requestPath;
     @sql:Varchar {length: 45}
@@ -217,6 +233,8 @@ public type Audit record {|
     @sql:Varchar {length: 100}
     string requestHost;
     time:Civil requestedTime;
+    @sql:Index {name: "fk_audits_users1_idx"}
+    int usersId;
     @sql:Relation {keys: ["usersId"]}
     User user;
 |};
@@ -225,20 +243,20 @@ public type Audit record {|
 public type DisputeComment record {|
     @sql:Generated
     readonly int id;
-    @sql:Index {name: "fk_dispute_comments_disputes1_idx"}
-    int disputesId;
     string comment;
     time:Utc createdAt;
+    @sql:Index {name: "fk_dispute_comments_disputes1_idx"}
+    int disputesId;
     @sql:Relation {keys: ["disputesId"]}
     Dispute dispute;
 |};
 
 @sql:Name {value: "users_has_user_types"}
 public type UserHasUserType record {|
-    @sql:Index {name: "fk_users_has_user_types_users1_idx"}
-    readonly int usersId;
     @sql:Index {name: "fk_users_has_user_types_user_types1_idx"}
     readonly int userTypesId;
+    @sql:Index {name: "fk_users_has_user_types_users1_idx"}
+    readonly int usersId;
     @sql:Relation {keys: ["userTypesId"]}
     UserType usertype;
     @sql:Relation {keys: ["usersId"]}
@@ -251,17 +269,17 @@ public type Dispute record {|
     readonly int id;
     @sql:Varchar {length: 50}
     string caseId;
-    @sql:Index {name: "fk_disputes_lands1_idx"}
-    int landsId;
     @sql:Varchar {length: 60}
     string witnessName;
     string disputesDetails;
-    @sql:Index {name: "fk_disputes_legal_officer1_idx"}
-    int legalOfficerId;
     @sql:Varchar {length: 45}
     string estimateTime;
     DisputeStatus status;
     time:Utc createdAt;
+    @sql:Index {name: "fk_disputes_lands1_idx"}
+    int landsId;
+    @sql:Index {name: "fk_disputes_legal_officer1_idx"}
+    int legalOfficerId;
     @sql:Index {name: "fk_disputes_users1_idx"}
     int usersId;
     DisputeComment[] disputecomments;

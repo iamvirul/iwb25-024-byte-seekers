@@ -17,6 +17,7 @@ public isolated function setupTestDB() returns persist:Error? {
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_precedents";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "audits";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "disputes";`);
+    _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "payment_history";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_officer";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "user_types";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "users";`);
@@ -79,13 +80,24 @@ CREATE TABLE "legal_officer" (
 	PRIMARY KEY("id")
 );`);
     _ = check h2Client->executeNativeSQL(`
+CREATE TABLE "payment_history" (
+	"id" INT AUTO_INCREMENT,
+	"amount" DECIMAL(10,2) NOT NULL,
+	"createdAt" TIMESTAMP NOT NULL,
+	"legalOfficerId" INT NOT NULL,
+	FOREIGN KEY("legalOfficerId") REFERENCES "legal_officer"("id"),
+	"usersId" INT NOT NULL,
+	FOREIGN KEY("usersId") REFERENCES "users"("id"),
+	PRIMARY KEY("id")
+);`);
+    _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "disputes" (
 	"id" INT AUTO_INCREMENT,
 	"caseId" VARCHAR(50) NOT NULL,
 	"witnessName" VARCHAR(60) NOT NULL,
 	"disputesDetails" VARCHAR(191) NOT NULL,
 	"estimateTime" VARCHAR(45) NOT NULL,
-	"status" VARCHAR(8) CHECK ("status" IN ('PENDING', 'RESOLVED', 'REJECTED')) NOT NULL,
+	"status" VARCHAR(8) CHECK ("status" IN ('PENDING', 'RESOLVED')) NOT NULL,
 	"createdAt" TIMESTAMP NOT NULL,
 	"landsId" INT NOT NULL,
 	FOREIGN KEY("landsId") REFERENCES "lands"("id"),
@@ -180,19 +192,21 @@ CREATE TABLE "users_has_user_types" (
 	FOREIGN KEY("userTypesId") REFERENCES "user_types"("id"),
 	"usersId" INT NOT NULL,
 	FOREIGN KEY("usersId") REFERENCES "users"("id"),
-	PRIMARY KEY("usersId","userTypesId")
+	PRIMARY KEY("userTypesId","usersId")
 );`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_lands_documents_lands1_idx" ON "lands_documents" ("landsId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_legal_precedents_disputes1_idx" ON "legal_precedents" ("disputesId");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_payment_history_users1_idx" ON "payment_history" ("usersId");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_payment_history_legal_officer1_idx" ON "payment_history" ("legalOfficerId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_legal_clauses_legal_precedents1_idx" ON "legal_clauses" ("legalPrecedentsId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_document_disputes1_idx" ON "disputes_document" ("disputesId");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_land_transfer_chain_lands1_idx" ON "land_transfer_chain" ("landsId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_land_transfer_chain_land_owners1_idx" ON "land_transfer_chain" ("fromLandOwnersId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_land_transfer_chain_land_owners2_idx" ON "land_transfer_chain" ("toLandOwnersId");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_land_transfer_chain_lands1_idx" ON "land_transfer_chain" ("landsId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_audits_users1_idx" ON "audits" ("usersId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_dispute_comments_disputes1_idx" ON "dispute_comments" ("disputesId");`);
-    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_users_has_user_types_users1_idx" ON "users_has_user_types" ("usersId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_users_has_user_types_user_types1_idx" ON "users_has_user_types" ("userTypesId");`);
+    _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_users_has_user_types_users1_idx" ON "users_has_user_types" ("usersId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_lands1_idx" ON "disputes" ("landsId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_legal_officer1_idx" ON "disputes" ("legalOfficerId");`);
     _ = check h2Client->executeNativeSQL(`CREATE INDEX "fk_disputes_users1_idx" ON "disputes" ("usersId");`);
@@ -208,6 +222,7 @@ public isolated function cleanupTestDB() returns persist:Error? {
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_precedents";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "audits";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "disputes";`);
+    _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "payment_history";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "legal_officer";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "user_types";`);
     _ = check h2Client->executeNativeSQL(`DROP TABLE IF EXISTS "users";`);

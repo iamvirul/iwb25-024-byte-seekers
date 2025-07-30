@@ -12,15 +12,14 @@ public enum LegalPrecedentCourt {
     DISTRICT_COURT = "DISTRICT_COURT"
 }
 
+public enum DisputeStatus {
+    PENDING = "PENDING",
+    RESOLVED = "RESOLVED"
+}
+
 public enum LandDocumentDocStatus {
     PENDING = "PENDING",
     APPROVED = "APPROVED",
-    REJECTED = "REJECTED"
-}
-
-public enum DisputeStatus {
-    PENDING = "PENDING",
-    RESOLVED = "RESOLVED",
     REJECTED = "REJECTED"
 }
 
@@ -122,6 +121,44 @@ public type LegalPrecedentUpdate record {|
     int disputesId?;
 |};
 
+public type PaymentHistory record {|
+    readonly int id;
+    decimal amount;
+    time:Utc createdAt;
+    int legalOfficerId;
+    int usersId;
+|};
+
+public type PaymentHistoryOptionalized record {|
+    int id?;
+    decimal amount?;
+    time:Utc createdAt?;
+    int legalOfficerId?;
+    int usersId?;
+|};
+
+public type PaymentHistoryWithRelations record {|
+    *PaymentHistoryOptionalized;
+    LegalOfficerOptionalized legalofficer?;
+    UserOptionalized user?;
+|};
+
+public type PaymentHistoryTargetType typedesc<PaymentHistoryWithRelations>;
+
+public type PaymentHistoryInsert record {|
+    decimal amount;
+    time:Utc createdAt;
+    int legalOfficerId;
+    int usersId;
+|};
+
+public type PaymentHistoryUpdate record {|
+    decimal amount?;
+    time:Utc createdAt?;
+    int legalOfficerId?;
+    int usersId?;
+|};
+
 public type User record {|
     readonly int id;
     string userId;
@@ -153,6 +190,7 @@ public type UserWithRelations record {|
     *UserOptionalized;
     AuditOptionalized[] audits?;
     DisputeOptionalized[] disputes?;
+    PaymentHistoryOptionalized[] paymenthistories?;
     UserHasUserTypeOptionalized[] userhasusertypes?;
 |};
 
@@ -264,6 +302,7 @@ public type LegalOfficerOptionalized record {|
 public type LegalOfficerWithRelations record {|
     *LegalOfficerOptionalized;
     DisputeOptionalized[] disputes?;
+    PaymentHistoryOptionalized[] paymenthistories?;
 |};
 
 public type LegalOfficerTargetType typedesc<LegalOfficerWithRelations>;

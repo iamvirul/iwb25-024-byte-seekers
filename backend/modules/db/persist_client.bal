@@ -12,6 +12,7 @@ import ballerinax/persist.sql as psql;
 
 const LAND_DOCUMENT = "landdocuments";
 const LEGAL_PRECEDENT = "legalprecedents";
+const PAYMENT_HISTORY = "paymenthistories";
 const USER = "users";
 const LEGAL_CLAUSE = "legalclauses";
 const DISPUTE_DOCUMENT = "disputedocuments";
@@ -91,6 +92,37 @@ public isolated client class Client {
                 dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputesId"], 'type: psql:ONE_TO_MANY}
             }
         },
+        [PAYMENT_HISTORY]: {
+            entityName: "PaymentHistory",
+            tableName: "payment_history",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                amount: {columnName: "amount"},
+                createdAt: {columnName: "createdAt"},
+                legalOfficerId: {columnName: "legalOfficerId"},
+                usersId: {columnName: "usersId"},
+                "legalofficer.id": {relation: {entityName: "legalofficer", refField: "id"}},
+                "legalofficer.firstName": {relation: {entityName: "legalofficer", refField: "firstName", refColumn: "first_name"}},
+                "legalofficer.lastName": {relation: {entityName: "legalofficer", refField: "lastName", refColumn: "last_name"}},
+                "legalofficer.baslId": {relation: {entityName: "legalofficer", refField: "baslId", refColumn: "BASL_ID"}},
+                "legalofficer.initialCost": {relation: {entityName: "legalofficer", refField: "initialCost", refColumn: "initial_cost"}},
+                "user.id": {relation: {entityName: "user", refField: "id"}},
+                "user.userId": {relation: {entityName: "user", refField: "userId"}},
+                "user.firstName": {relation: {entityName: "user", refField: "firstName"}},
+                "user.lastName": {relation: {entityName: "user", refField: "lastName"}},
+                "user.email": {relation: {entityName: "user", refField: "email"}},
+                "user.password": {relation: {entityName: "user", refField: "password"}},
+                "user.nic": {relation: {entityName: "user", refField: "nic"}},
+                "user.sludi": {relation: {entityName: "user", refField: "sludi"}},
+                "user.contactNo": {relation: {entityName: "user", refField: "contactNo"}},
+                "user.address": {relation: {entityName: "user", refField: "address"}}
+            },
+            keyFields: ["id"],
+            joinMetadata: {
+                legalofficer: {entity: LegalOfficer, fieldName: "legalofficer", refTable: "legal_officer", refColumns: ["id"], joinColumns: ["legalOfficerId"], 'type: psql:ONE_TO_MANY},
+                user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["usersId"], 'type: psql:ONE_TO_MANY}
+            }
+        },
         [USER]: {
             entityName: "User",
             tableName: "users",
@@ -123,6 +155,11 @@ public isolated client class Client {
                 "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId"}},
                 "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId"}},
                 "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId"}},
+                "paymenthistories[].id": {relation: {entityName: "paymenthistories", refField: "id"}},
+                "paymenthistories[].amount": {relation: {entityName: "paymenthistories", refField: "amount"}},
+                "paymenthistories[].createdAt": {relation: {entityName: "paymenthistories", refField: "createdAt"}},
+                "paymenthistories[].legalOfficerId": {relation: {entityName: "paymenthistories", refField: "legalOfficerId"}},
+                "paymenthistories[].usersId": {relation: {entityName: "paymenthistories", refField: "usersId"}},
                 "userhasusertypes[].userTypesId": {relation: {entityName: "userhasusertypes", refField: "userTypesId"}},
                 "userhasusertypes[].usersId": {relation: {entityName: "userhasusertypes", refField: "usersId"}}
             },
@@ -130,6 +167,7 @@ public isolated client class Client {
             joinMetadata: {
                 audits: {entity: Audit, fieldName: "audits", refTable: "audits", refColumns: ["usersId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
                 disputes: {entity: Dispute, fieldName: "disputes", refTable: "disputes", refColumns: ["usersId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                paymenthistories: {entity: PaymentHistory, fieldName: "paymenthistories", refTable: "payment_history", refColumns: ["usersId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
                 userhasusertypes: {entity: UserHasUserType, fieldName: "userhasusertypes", refTable: "users_has_user_types", refColumns: ["usersId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
@@ -191,10 +229,18 @@ public isolated client class Client {
                 "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt"}},
                 "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId"}},
                 "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId"}},
-                "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId"}}
+                "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId"}},
+                "paymenthistories[].id": {relation: {entityName: "paymenthistories", refField: "id"}},
+                "paymenthistories[].amount": {relation: {entityName: "paymenthistories", refField: "amount"}},
+                "paymenthistories[].createdAt": {relation: {entityName: "paymenthistories", refField: "createdAt"}},
+                "paymenthistories[].legalOfficerId": {relation: {entityName: "paymenthistories", refField: "legalOfficerId"}},
+                "paymenthistories[].usersId": {relation: {entityName: "paymenthistories", refField: "usersId"}}
             },
             keyFields: ["id"],
-            joinMetadata: {disputes: {entity: Dispute, fieldName: "disputes", refTable: "disputes", refColumns: ["legalOfficerId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
+            joinMetadata: {
+                disputes: {entity: Dispute, fieldName: "disputes", refTable: "disputes", refColumns: ["legalOfficerId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                paymenthistories: {entity: PaymentHistory, fieldName: "paymenthistories", refTable: "payment_history", refColumns: ["legalOfficerId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+            }
         },
         [LAND_TRANSFER_CHAIN]: {
             entityName: "LandTransferChain",
@@ -396,7 +442,7 @@ public isolated client class Client {
                 "user.contactNo": {relation: {entityName: "user", refField: "contactNo"}},
                 "user.address": {relation: {entityName: "user", refField: "address"}}
             },
-            keyFields: ["usersId", "userTypesId"],
+            keyFields: ["userTypesId", "usersId"],
             joinMetadata: {
                 usertype: {entity: UserType, fieldName: "usertype", refTable: "user_types", refColumns: ["id"], joinColumns: ["userTypesId"], 'type: psql:ONE_TO_MANY},
                 user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["usersId"], 'type: psql:ONE_TO_MANY}
@@ -492,6 +538,7 @@ public isolated client class Client {
         self.persistClients = {
             [LAND_DOCUMENT]: check new (dbClient, self.metadata.get(LAND_DOCUMENT), psql:MYSQL_SPECIFICS),
             [LEGAL_PRECEDENT]: check new (dbClient, self.metadata.get(LEGAL_PRECEDENT), psql:MYSQL_SPECIFICS),
+            [PAYMENT_HISTORY]: check new (dbClient, self.metadata.get(PAYMENT_HISTORY), psql:MYSQL_SPECIFICS),
             [USER]: check new (dbClient, self.metadata.get(USER), psql:MYSQL_SPECIFICS),
             [LEGAL_CLAUSE]: check new (dbClient, self.metadata.get(LEGAL_CLAUSE), psql:MYSQL_SPECIFICS),
             [DISPUTE_DOCUMENT]: check new (dbClient, self.metadata.get(DISPUTE_DOCUMENT), psql:MYSQL_SPECIFICS),
@@ -582,6 +629,46 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(LEGAL_PRECEDENT);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get paymenthistories(PaymentHistoryTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get paymenthistories/[int id](PaymentHistoryTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post paymenthistories(PaymentHistoryInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(PAYMENT_HISTORY);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put paymenthistories/[int id](PaymentHistoryUpdate value) returns PaymentHistory|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(PAYMENT_HISTORY);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/paymenthistories/[id].get();
+    }
+
+    isolated resource function delete paymenthistories/[int id]() returns PaymentHistory|persist:Error {
+        PaymentHistory result = check self->/paymenthistories/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(PAYMENT_HISTORY);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;
@@ -952,7 +1039,7 @@ public isolated client class Client {
         name: "query"
     } external;
 
-    isolated resource function get userhasusertypes/[int usersId]/[int userTypesId](UserHasUserTypeTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+    isolated resource function get userhasusertypes/[int userTypesId]/[int usersId](UserHasUserTypeTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
         'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
         name: "queryOne"
     } external;
@@ -964,25 +1051,25 @@ public isolated client class Client {
         }
         _ = check sqlClient.runBatchInsertQuery(data);
         return from UserHasUserTypeInsert inserted in data
-            select [inserted.usersId, inserted.userTypesId];
+            select [inserted.userTypesId, inserted.usersId];
     }
 
-    isolated resource function put userhasusertypes/[int usersId]/[int userTypesId](UserHasUserTypeUpdate value) returns UserHasUserType|persist:Error {
+    isolated resource function put userhasusertypes/[int userTypesId]/[int usersId](UserHasUserTypeUpdate value) returns UserHasUserType|persist:Error {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(USER_HAS_USER_TYPE);
         }
-        _ = check sqlClient.runUpdateQuery({"usersId": usersId, "userTypesId": userTypesId}, value);
-        return self->/userhasusertypes/[usersId]/[userTypesId].get();
+        _ = check sqlClient.runUpdateQuery({"userTypesId": userTypesId, "usersId": usersId}, value);
+        return self->/userhasusertypes/[userTypesId]/[usersId].get();
     }
 
-    isolated resource function delete userhasusertypes/[int usersId]/[int userTypesId]() returns UserHasUserType|persist:Error {
-        UserHasUserType result = check self->/userhasusertypes/[usersId]/[userTypesId].get();
+    isolated resource function delete userhasusertypes/[int userTypesId]/[int usersId]() returns UserHasUserType|persist:Error {
+        UserHasUserType result = check self->/userhasusertypes/[userTypesId]/[usersId].get();
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(USER_HAS_USER_TYPE);
         }
-        _ = check sqlClient.runDeleteQuery({"usersId": usersId, "userTypesId": userTypesId});
+        _ = check sqlClient.runDeleteQuery({"userTypesId": userTypesId, "usersId": usersId});
         return result;
     }
 
