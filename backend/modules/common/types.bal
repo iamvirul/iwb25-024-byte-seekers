@@ -282,3 +282,8 @@ public type LegalPrecedentAdded record {|
     DB:LegalPrecedentInsert precedent;
     DB:LegalClauseInsert[] clauses;
 |};
+
+public type UpdatePassword record {|
+    string oldPassword;
+    string newPassword;
+|};

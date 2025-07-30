@@ -416,14 +416,14 @@ public function validateLandOwnerInsert(DB:LandOwnerInsert landOwner) returns Co
     if landOwner.firstName == "" {
         errorFlag = true;
         errorMsg["firstName"] = "First name is required";
-    }else if landOwner.firstName.length() > 45 {
+    } else if landOwner.firstName.length() > 45 {
         errorFlag = true;
         errorMsg["firstName"] = "First name should not exceed 45 characters";
     }
     if landOwner.lastName == "" {
         errorFlag = true;
         errorMsg["lastName"] = "Last name is required";
-    }else if landOwner.lastName.length() > 45 {
+    } else if landOwner.lastName.length() > 45 {
         errorFlag = true;
         errorMsg["lastName"] = "Last name should not exceed 45 characters";
     }
@@ -437,6 +437,26 @@ public function validateLandOwnerInsert(DB:LandOwnerInsert landOwner) returns Co
     if landOwner.address == "" {
         errorFlag = true;
         errorMsg["address"] = "Address is required";
+    }
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
+public function validateUpdatePassword(Common:UpdatePassword password) returns Common:ValidationResult {
+    boolean errorFlag = false;
+    map<string> errorMsg = {};
+    if password.oldPassword == "" {
+        errorFlag = true;
+        errorMsg["oldPassword"] = "Old password is required";
+    }
+    if password.newPassword == "" {
+        errorFlag = true;
+        errorMsg["newPassword"] = "New password is required";
+    } else if !regex:matches(password.newPassword, PASSWORD_REGEX) {
+        errorFlag = true;
+        errorMsg["newPassword"] = PASSWORD_LENGTH;
     }
     return {
         isValid: !errorFlag,

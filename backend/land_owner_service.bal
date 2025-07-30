@@ -6,6 +6,7 @@ import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
 
 import ballerina/constraint;
+import ballerina/crypto;
 import ballerina/http;
 import ballerina/jwt;
 import ballerina/persist;
@@ -305,6 +306,11 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             response = Utils:setErrorResponse(response, "Invalid legal officer id");
             return response;
         }
+        if orderId is "" {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "OrderId is required");
+            return response;
+        }
         decimal|error validated = constraint:validate(amount);
         if validated is error {
             response.statusCode = 400;
@@ -342,6 +348,47 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         }
         response.statusCode = 200;
         response = Utils:setSuccessResponse(response, {"message": "Payment successful"});
+        return response;
+    }
+
+    resource function put password/update/[int userId](common:UpdatePassword updatePassword) returns error|http:Response {
+        http:Response response = new;
+        if userId <= 0 {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, Utils:INVALID_USER_ID);
+            return response;
+        }
+        common:ValidationResult validateUpdatePassword = Utils:validateUpdatePassword(updatePassword);
+        if !validateUpdatePassword.isValid {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, validateUpdatePassword.errors);
+            return response;
+        }
+        DB:User|persist:Error unionResult = self.dbClient->/users/[userId](DB:User);
+        if unionResult is persist:Error {
+            if unionResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, Utils:USER_NOT_FOUND);
+            }
+            return response;
+        }
+        if crypto:verifyArgon2(updatePassword.oldPassword, unionResult.password) is false {
+            response.statusCode = 401;
+            response = Utils:setErrorResponse(response, "Old password is incorrect");
+            return response;
+        }
+        string hashed_password = check crypto:hashArgon2(updatePassword.newPassword);
+        DB:UserUpdate userUpdate = {
+            password: hashed_password
+        };
+        DB:User|persist:Error updatedResult = self.dbClient->/users/[userId].put(userUpdate);
+        if updatedResult is persist:Error {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Failed to update password");
+            return response;
+        }
+        response.statusCode = 200;
+        response = Utils:setSuccessResponse(response, "Password updated successfully");
         return response;
     }
 }
