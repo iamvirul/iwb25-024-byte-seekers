@@ -35,6 +35,19 @@ public type User record {|
     string user_type;
 |};
 
+public type UserResponse record {|
+    int id;
+    string userId;
+    string firstName;
+    string lastName;
+    string email;
+    string password;
+    string nic;
+    string sludi;
+    string contactNo;
+    string address;
+|};
+
 public type RequestUser record {|
     string first_name;
     string last_name;

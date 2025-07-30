@@ -203,8 +203,53 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         return response;
     }
 
-    // resource function get profile/[int userId]() returns error|http:Response {
-    // }
+    resource function get profile/[int userId]() returns error|http:Response {
+        http:Response response = new;
+        DB:User|persist:Error userResult = self.dbClient->/users/[userId](DB:User);
+        if userResult is persist:Error {
+            if userResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, Utils:USER_NOT_FOUND);
+            }
+            return response;
+        }
+        byte[]? addressResult = userResult.address;
+        byte[]? sludiResult = userResult.sludi;
+        string address = "";
+        string sludi = "";
+        if addressResult is () {
+            address = "";
+        } else {
+            address = check Utils:decryptData(addressResult);
+        }
+        if sludiResult is () {
+            sludi = "";
+        } else {
+            sludi = check Utils:decryptData(sludiResult);
+        }
+        common:UserResponse user = {
+            id: userResult.id,
+            userId: userResult.userId,
+            firstName: userResult.firstName,
+            lastName: userResult.lastName,
+            email: userResult.email,
+            contactNo: check Utils:decryptData(userResult.contactNo),
+            address: address,
+            nic: check Utils:decryptData(userResult.nic),
+            sludi: sludi,
+            password: ""
+        };
+        DB:PaymentHistory[] payments = [];
+        stream<DB:PaymentHistory, persist:Error?> paymentResult = self.dbClient->/paymenthistories(DB:PaymentHistory, `usersId = ${userId}`);
+        check from var payment in paymentResult
+            do {
+                payments.push(payment);
+            };
+        check paymentResult.close();
+
+        response = Utils:setSuccessResponse(response, {"user": user.toJson(), "payments": payments.toJson()});
+        return response;
+    }
 
     resource function get checkout/[int userId](PositiveDecimal amount, string barslId) returns error|http:Response {
         http:Response response = new;
