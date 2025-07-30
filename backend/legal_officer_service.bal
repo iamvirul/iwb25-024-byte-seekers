@@ -7,11 +7,17 @@ import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
 
 import ballerina/http;
+import ballerina/log;
 // import ballerina/jwt;
 import ballerina/persist;
 // import ballerina/regex;
 import ballerina/sql;
 import ballerina/time;
+import ballerina/url;
+
+configurable string sms_lenz_user_id = ?;
+configurable string sms_lenz_api_key = ?;
+configurable string sms_lenz_sender_id = ?;
 
 listener http:Listener legalOfficerMicroservice = new (9080);
 
@@ -156,7 +162,15 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                     createdAt: time:utcNow(),
                     disputesId: dispute.id
                 };
-                error? publishDisputeCommentMessage = RabbitMQ:publishDisputeCommentMessage({dispute: disputeComment, retryCount: 0, userId: dispute.usersId});
+                DB:User|persist:Error userResult = self.dbClient->/users/[dispute.usersId](DB:User);
+                if userResult is persist:Error {
+                    if userResult is persist:NotFoundError {
+                        response.statusCode = 404;
+                        response = Utils:setErrorResponse(response, Utils:USER_NOT_FOUND);
+                    }
+                    return response;
+                }
+                error? publishDisputeCommentMessage = RabbitMQ:publishDisputeCommentMessage({dispute: disputeComment, retryCount: 0, userId: dispute.usersId, contact: check Utils:decryptData(userResult.contactNo), caseId: dispute.caseId});
                 if publishDisputeCommentMessage is error {
                     response.statusCode = 500;
                     response = Utils:setErrorResponse(response, {"message": Utils:FAILED_TO_QUEUE_DISPUTE_COMMENT});
@@ -195,7 +209,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                 response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_PRECEDENT);
                 return response;
             }
-            error? publishLegalPrecedentMessage = RabbitMQ:publishLegalPrecedentMessage({legalPrecedent: precedentInsert, legalClauses: requestPrecedent.legalClauses,legalOfficerId: dispute.legalOfficerId, userId: dispute.usersId});
+            error? publishLegalPrecedentMessage = RabbitMQ:publishLegalPrecedentMessage({legalPrecedent: precedentInsert, legalClauses: requestPrecedent.legalClauses, legalOfficerId: dispute.legalOfficerId, userId: dispute.usersId});
             if publishLegalPrecedentMessage is error {
                 response.statusCode = 500;
                 response = Utils:setErrorResponse(response, {"message": Utils:FAILED_TO_QUEUE_PRECEDENT});
@@ -212,7 +226,26 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
     }
 
     resource function put dispute/status/update/[int disputeId]() returns error|http:Response {
+        string caseId = "";
+        string contactNo = "";
         http:Response response = new;
+        DB:Dispute|persist:Error disputeResult = self.dbClient->/disputes/[disputeId](DB:Dispute);
+        if disputeResult is persist:Error {
+            if disputeResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, Utils:DISPUTE_NOT_FOUND);
+            } else {
+                response.statusCode = 500;
+                response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_DISPUTE);
+            }
+            return response;
+        }
+        DB:User|persist:Error userResult = self.dbClient->/users/[disputeResult.usersId](DB:User);
+        if userResult is persist:Error {
+            response.statusCode = 500;
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_USER);
+            return response;
+        }
         DB:DisputeUpdate disputeUpdate = {
             status: DB:RESOLVED
         };
@@ -231,7 +264,24 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
             event: common:STATUS_UPDATED,
             message: updateResult.toJson()
         };
+        caseId = updateResult.caseId;
+        contactNo = check Utils:decryptData(userResult.contactNo);
         Managers:landOwnerConnectionStore.broadcast(ownerSocketNotify, updateResult.usersId.toString());
+
+        worker smsWorker returns error? {
+            http:Client apiClient = check new ("https://smslenz.lk/api/send-sms");
+            string messageText = string `Dispute status update to RESOLVED for case ID: ${caseId}`;
+            string encodedMessage = check url:encode(messageText, "UTF-8");
+            string contact = contactNo;
+            string query = string `?user_id=${sms_lenz_user_id}&api_key=${sms_lenz_api_key}&sender_id=${sms_lenz_sender_id}&contact=${contact}&message=${encodedMessage}`;
+
+            json|error apiResponse = apiClient->get(query);
+            if apiResponse is error {
+                log:printError("Error sending message", apiResponse);
+            }
+            log:printInfo("Message sent successfuly");
+        }
+
         response.statusCode = 200;
         response = Utils:setSuccessResponse(response, {"message": "Dispute status updated successfully"});
         return response;
