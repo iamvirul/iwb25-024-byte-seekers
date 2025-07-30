@@ -13,6 +13,9 @@ import ballerina/persist;
 import ballerina/regex;
 import ballerina/time;
 
+configurable string merchantId = ?;
+configurable string merchantSecret = ?;
+
 listener http:Listener landOwnerMicroservice = new (9098);
 
 @constraint:Number {minValueExclusive: 0}
@@ -254,9 +257,6 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
 
     resource function get checkout/[int userId](PositiveDecimal amount, string barslId) returns error|http:Response {
         http:Response response = new;
-
-        string merchantId = "1231449";
-        string merchantSecret = "MTQ3Mzg0OTM4MDI5MjQzMDQ5MDI4MzM1OTcwNzI0MDExNTYxODE3";
 
         decimal rawAmount = amount;
         decimal|error validated = constraint:validate(rawAmount);
