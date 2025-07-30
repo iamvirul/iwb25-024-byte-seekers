@@ -289,3 +289,7 @@ public type UpdatePassword record {|
     string oldPassword;
     string newPassword;
 |};
+
+public type UpdateProfile record {|
+    anydata...;
+|};

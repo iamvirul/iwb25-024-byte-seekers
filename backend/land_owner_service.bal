@@ -7,6 +7,7 @@ import backend.utils as Utils;
 
 import ballerina/constraint;
 import ballerina/crypto;
+import ballerina/data.jsondata;
 import ballerina/http;
 import ballerina/jwt;
 import ballerina/persist;
@@ -389,6 +390,42 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         }
         response.statusCode = 200;
         response = Utils:setSuccessResponse(response, "Password updated successfully");
+        return response;
+    }
+
+    resource function put profile/update/[int userId](http:Request req) returns error|http:Response {
+        http:Response response = new;
+        if userId <= 0 {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, Utils:INVALID_USER_ID);
+            return response;
+        }
+        json jsonBody = check req.getJsonPayload();
+        common:UpdateProfile updateProfile = check jsondata:parseAsType(jsonBody);
+        common:ValidationResult validateUpdateProfile = Utils:validateUpdateProfile(updateProfile);
+        if !validateUpdateProfile.isValid {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, validateUpdateProfile.errors);
+            return response;
+        }
+        
+        DB:UserUpdate userUpdate = {};
+        anydata contact = updateProfile["contact"];
+        anydata? address = updateProfile["address"];
+        if contact is string {
+            userUpdate.contactNo = check Utils:encryptData(contact);
+        }
+        if address is string {
+            userUpdate.address = check Utils:encryptData(address);
+        }
+        DB:User|persist:Error updateResult = self.dbClient->/users/[userId].put(userUpdate);
+        if updateResult is persist:Error {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Failed to update profile");
+            return response;
+        }
+        response.statusCode = 200;
+        response = Utils:setSuccessResponse(response, "Profile updated successfully");
         return response;
     }
 }

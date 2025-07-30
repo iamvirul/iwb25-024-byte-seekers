@@ -3,7 +3,7 @@ public enum REGEXS {
     PASSWORD_REGEX = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$",
     DATETIME_REGEX = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$",
     NIC_REGEX = "^(?:\\d{9}[VXvx]|\\d{12})$",
-    MOBILE_REGEX = "^(?:\\+94|94|0)7[0-8]\\d{7}$"
+    MOBILE_REGEX = "^[0]{1}[7]{1}[01245678]{1}[0-9]{7}$"
 }
 
 public enum USER_STATUS {

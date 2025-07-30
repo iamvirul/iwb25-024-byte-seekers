@@ -463,3 +463,32 @@ public function validateUpdatePassword(Common:UpdatePassword password) returns C
         errors: errorMsg
     };
 }
+
+public function validateUpdateProfile(Common:UpdateProfile updateProfile) returns Common:ValidationResult {
+    boolean errorFlag = false;
+    map<string> errorMsg = {};
+
+    anydata contact = updateProfile["contact"];
+    anydata? address = updateProfile["address"];
+    if contact is string {
+        if contact.length() == 0 {
+            errorFlag = true;
+            errorMsg["contact"] = "Contact is required";
+        } else if !regex:matches(contact, MOBILE_REGEX) {
+            errorFlag = true;
+            errorMsg["contact"] = "Invalid contact number";
+        }
+    }
+    if address is string {
+        if address.length() == 0 {
+            errorFlag = true;
+            errorMsg["address"] = "Address is required";
+        }
+    }
+
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
