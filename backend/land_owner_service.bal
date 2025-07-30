@@ -13,8 +13,8 @@ import ballerina/persist;
 import ballerina/regex;
 import ballerina/time;
 
-configurable string merchantId = ?;
-configurable string merchantSecret = ?;
+configurable string merchant_id = ?;
+configurable string merchant_secret = ?;
 
 listener http:Listener landOwnerMicroservice = new (9098);
 
@@ -277,9 +277,9 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         string orderId = Utils:getOrderId();
         decimal rounded = decimal:round(amount, 2);
         string amountStr = rounded.toString();
-        string generatedHash = Utils:generatePayHereHash(merchantId, orderId, amount, "LKR", merchantSecret);
+        string generatedHash = Utils:generatePayHereHash(merchant_id, orderId, amount, "LKR", merchant_secret);
         map<json> data = {
-            "merchant_id": merchantId,
+            "merchant_id": merchant_id,
             "first_name": user.firstName,
             "last_name": user.lastName,
             "email": user.email,
