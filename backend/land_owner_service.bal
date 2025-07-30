@@ -10,6 +10,7 @@ import ballerina/http;
 import ballerina/jwt;
 import ballerina/persist;
 import ballerina/regex;
+import ballerina/time;
 
 listener http:Listener landOwnerMicroservice = new (9098);
 
@@ -249,6 +250,53 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         };
         response.statusCode = 200;
         response = Utils:setSuccessResponse(response, {"data": data});
+        return response;
+    }
+
+    resource function post payment/[int userId](int legalOfficerId, decimal amount, string orderId) returns error|http:Response {
+        http:Response response = new;
+        if legalOfficerId <= 0 {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Invalid legal officer id");
+            return response;
+        }
+        decimal|error validated = constraint:validate(amount);
+        if validated is error {
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Invalid amount: must be a positive decimal");
+            return response;
+        }
+        DB:User|persist:Error unionResult = self.dbClient->/users/[userId](DB:User);
+        if unionResult is persist:Error {
+            if unionResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, Utils:USER_NOT_FOUND);
+            }
+            return response;
+        }
+        DB:LegalOfficer|persist:Error result = self.dbClient->/legalofficers/[legalOfficerId](DB:LegalOfficer);
+        if result is persist:Error {
+            if result is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, Utils:LEGAL_OFFICER_NOT_FOUND);
+            }
+            return response;
+        }
+        DB:PaymentHistoryInsert paymentHistoryInsert = {
+            referanceNo: orderId,
+            amount: amount,
+            createdAt: time:utcNow(),
+            legalOfficerId: legalOfficerId,
+            usersId: userId
+        };
+        int[]|persist:Error paymentHistory = self.dbClient->/paymenthistories.post([paymentHistoryInsert]);
+        if paymentHistory is persist:Error {
+            response.statusCode = 500;
+            response = Utils:setErrorResponse(response, "Internal server error");
+            return response;
+        }
+        response.statusCode = 200;
+        response = Utils:setSuccessResponse(response, {"message": "Payment successful"});
         return response;
     }
 }
