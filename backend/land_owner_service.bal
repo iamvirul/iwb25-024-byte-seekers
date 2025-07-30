@@ -537,9 +537,32 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         WHERE usersId = ${userId}`, common:LandOwnerDisputeStats);
         record {|common:LandOwnerDisputeStats value;|}? pendingResult = check pendingResultStream.next();
         _ = check pendingResultStream.close();
+
+        sql:ParameterizedQuery landQuery = `SELECT l.*
+                                        FROM lands l
+                                        JOIN (
+                                            SELECT ltc.landsId, ltc.toLandOwnersId
+                                            FROM land_transfer_chain ltc
+                                            JOIN (
+                                                SELECT landsId, MAX(blockIndex) AS maxBlockIndex
+                                                FROM land_transfer_chain
+                                                GROUP BY landsId
+                                            ) AS lastTransfers
+                                            ON ltc.landsId = lastTransfers.landsId AND ltc.blockIndex = lastTransfers.maxBlockIndex
+                                            WHERE ltc.toLandOwnersId = ${userId}
+                                        ) AS ownedLands
+                                        ON l.id = ownedLands.landsId;`;
+        DB:Land[] lands = [];
+        stream<DB:Land, persist:Error?> landResultStream = self.dbClient->queryNativeSQL(landQuery, DB:Land);
+        check from var land in landResultStream
+            do {
+                lands.push(land);
+            };
+        _ = check landResultStream.close();
+
         if pendingResult is record {|common:LandOwnerDisputeStats value;|} {
             response.statusCode = 200;
-            response = Utils:setSuccessResponse(response, {"stats": pendingResult.value.toJson()});
+            response = Utils:setSuccessResponse(response, {"stats": pendingResult.value.toJson(), "lands": lands.toJson()});
             return response;
         } else {
             response.statusCode = 404;
@@ -547,5 +570,6 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             return response;
         }
     }
+
 }
 
