@@ -13,13 +13,13 @@ Content-Type: application/json
   "user_type": 4
 }
 
-HTTP/1.1 201  - Created
+HTTP/1.1 502  - Bad Gateway
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 23:02:29 +0530
+date: Wed, 30 Jul 2025 20:34:42 +0530
 content-encoding: gzip
-content-length: 79
+content-length: 199
 ###
 POST http://localhost:9091/auth/users/login
 Content-Type: application/json
@@ -27,16 +27,16 @@ Content-Type: application/json
 {
   "email": "kamalperera@gmail.com",
   "password": "Hiru2005@",
-  "user_type": 2
+  "user_type": 4
 }
 
 HTTP/1.1 200  - OK
 content-type: application/json
 connection: close
 server: ballerina
-date: Wed, 30 Jul 2025 17:29:52 +0530
+date: Wed, 30 Jul 2025 21:59:15 +0530
 content-encoding: gzip
-content-length: 816
+content-length: 817
 ###
 POST http://localhost:9095/land_officer/land/register
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzU3NzEwLCAibmJmIjoxNzUzMzU0MTEwLCAiaWF0IjoxNzUzMzU0MTEwfQ.cwpAOVn31X74lc_440Qk1EMxgfkCIrP_lQx7-4JBTo31ca_VcGdxfyTSHGtXvGY95hkqCDveO2VnpHNtJpVGlSCpo7ZgFVyDnwum-EePyO4dzEN0jnMfO-h1PZUGKnm9zZFirL-CfyHb4UMqD1Pvgru8aXk4VvGPKhZmP-_Klhne7fCbK9NJfYomfLTqk6-kuOo4NuXkx5llJspyfJgONK_oj_aqOxk0QCtgnIrBS__ZlqMXiQ-_nxQMzAcOsbp0u3LYP3V9HRAQ7a5_FpLIz3stobCHfdQUPavRR6RNz58b_iangMtWEyT_ecED7rCp3HcpJ_5ndHVnuINtcAczRA
@@ -111,7 +111,6 @@ Content-Type: application/json
 ###
 GET http://localhost:9070/land_officer/user/landowner/register/2
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJzdWIiOiJrYW1hbHBlcmVyYUBnbWFpbC5jb20iLCAiYXVkIjoiTEFORF9PRkZJQ0VSIiwgImV4cCI6MTc1Mzg3OTE2MiwgIm5iZiI6MTc1Mzg3NTU2MiwgImlhdCI6MTc1Mzg3NTU2MiwgInNjcCI6IkxBTkRfT0ZGSUNFUiIsICJ1aWQiOjJ9.XzwjkX2DKrRJOwV2KXegDgkc40tTi7XExpfKetJzqe9RXtDyBe0O9bH6YKZWDSwiJ5Ia82sxdY53OSECa1qPmlO5Jp-J9w-y_bvROliuCCVWeoF29_rqeUmLAWVB_sM0pFqikgffRpegGliu4gIwk3EmV7a-EBzCgCyrBqP0OFdX5WEoAsJEEzxAU2c2aEixTr3s9RLuuCsvDSXXYhK4Ww2FPztOh8QmCcs8U5jb-QhNTJskjQtW-C7M0xX-w-QEV3bXyBh63noVqdAkmA6FmtcgnwSPzZYyguZW_pklVHyoABB9qokrzWKs0ZHRuVSvfpFUWoENP3-kEPIj2JBjVQ
-
 
 HTTP/1.1 200  - OK
 content-type: application/json

@@ -3,10 +3,16 @@ import backend.db as DB;
 import backend.managers as Managers;
 import backend.utils as Utils;
 
+import ballerina/http;
 import ballerina/log;
 import ballerina/persist;
 import ballerina/time;
+import ballerina/url;
 import ballerinax/rabbitmq;
+
+configurable string sms_lenz_user_id = ?;
+configurable string sms_lenz_api_key = ?;
+configurable string sms_lenz_sender_id = ?;
 
 listener rabbitmq:Listener rabbitmqListener = check new (rabbitmq:DEFAULT_HOST, rabbitmq:DEFAULT_PORT);
 
@@ -225,6 +231,17 @@ service on rabbitmqListener {
             message: message.dispute.toJson()
         };
         Managers:landOwnerConnectionStore.broadcast(socketNotify, message.userId.toString());
+        http:Client apiClient = check new ("https://smslenz.lk/api/send-sms");
+        string messageText = string `Comment added for ${message.caseId}.\n${message.dispute.comment}`;
+        string encodedMessage = check url:encode(messageText, "UTF-8");
+
+        string query = string `?user_id=${sms_lenz_user_id}&api_key=${sms_lenz_api_key}&sender_id=${sms_lenz_sender_id}&contact=${message.contact}&message=${encodedMessage}`;
+
+        json|error response = apiClient->get(query);
+        if response is error {
+            return error("Failed to send SMS", response);
+        }
+        log:printInfo("Message sent successfuly");
     }
 
     private function shouldRetry(Common:DisputeCommentMessage disputeMessage, error err) returns boolean {

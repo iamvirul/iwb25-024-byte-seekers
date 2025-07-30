@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.12.4"
+distribution-version = "2201.12.7"
 
 [[package]]
 org = "ballerina"
@@ -360,6 +360,9 @@ version = "2.6.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
+modules = [
+	{org = "ballerina", packageName = "url", moduleName = "url"}
+]
 
 [[package]]
 org = "ballerina"
@@ -536,6 +539,7 @@ dependencies = [
 	{org = "ballerina", name = "regex"},
 	{org = "ballerina", name = "sql"},
 	{org = "ballerina", name = "time"},
+	{org = "ballerina", name = "url"},
 	{org = "ballerina", name = "uuid"},
 	{org = "ballerina", name = "websocket"},
 	{org = "ballerinai", name = "observe"},

@@ -232,6 +232,8 @@ public type DisputeCommentMessage record {|
     DB:DisputeCommentInsert dispute;
     int retryCount = 0;
     int userId;
+    string contact;
+    string caseId;
 |};
 
 public type LegalPrecedentMessage record {|
