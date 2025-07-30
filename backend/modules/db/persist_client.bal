@@ -97,6 +97,7 @@ public isolated client class Client {
             tableName: "payment_history",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
+                referanceNo: {columnName: "referanceNo"},
                 amount: {columnName: "amount"},
                 createdAt: {columnName: "createdAt"},
                 legalOfficerId: {columnName: "legalOfficerId"},
@@ -156,6 +157,7 @@ public isolated client class Client {
                 "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId"}},
                 "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId"}},
                 "paymenthistories[].id": {relation: {entityName: "paymenthistories", refField: "id"}},
+                "paymenthistories[].referanceNo": {relation: {entityName: "paymenthistories", refField: "referanceNo"}},
                 "paymenthistories[].amount": {relation: {entityName: "paymenthistories", refField: "amount"}},
                 "paymenthistories[].createdAt": {relation: {entityName: "paymenthistories", refField: "createdAt"}},
                 "paymenthistories[].legalOfficerId": {relation: {entityName: "paymenthistories", refField: "legalOfficerId"}},
@@ -231,6 +233,7 @@ public isolated client class Client {
                 "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId"}},
                 "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId"}},
                 "paymenthistories[].id": {relation: {entityName: "paymenthistories", refField: "id"}},
+                "paymenthistories[].referanceNo": {relation: {entityName: "paymenthistories", refField: "referanceNo"}},
                 "paymenthistories[].amount": {relation: {entityName: "paymenthistories", refField: "amount"}},
                 "paymenthistories[].createdAt": {relation: {entityName: "paymenthistories", refField: "createdAt"}},
                 "paymenthistories[].legalOfficerId": {relation: {entityName: "paymenthistories", refField: "legalOfficerId"}},

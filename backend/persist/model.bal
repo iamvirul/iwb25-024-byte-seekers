@@ -65,6 +65,8 @@ public type LegalPrecedent record {|
 public type PaymentHistory record {|
     @sql:Generated
     readonly int id;
+    @sql:Varchar {length: 45}
+    string referanceNo;
     @sql:Decimal {precision: [10, 2]}
     decimal amount;
     @sql:Index {name: "fk_payment_history_users1_idx"}

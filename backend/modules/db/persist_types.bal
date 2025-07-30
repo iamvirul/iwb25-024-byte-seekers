@@ -123,6 +123,7 @@ public type LegalPrecedentUpdate record {|
 
 public type PaymentHistory record {|
     readonly int id;
+    string referanceNo;
     decimal amount;
     time:Utc createdAt;
     int legalOfficerId;
@@ -131,6 +132,7 @@ public type PaymentHistory record {|
 
 public type PaymentHistoryOptionalized record {|
     int id?;
+    string referanceNo?;
     decimal amount?;
     time:Utc createdAt?;
     int legalOfficerId?;
@@ -146,6 +148,7 @@ public type PaymentHistoryWithRelations record {|
 public type PaymentHistoryTargetType typedesc<PaymentHistoryWithRelations>;
 
 public type PaymentHistoryInsert record {|
+    string referanceNo;
     decimal amount;
     time:Utc createdAt;
     int legalOfficerId;
@@ -153,6 +156,7 @@ public type PaymentHistoryInsert record {|
 |};
 
 public type PaymentHistoryUpdate record {|
+    string referanceNo?;
     decimal amount?;
     time:Utc createdAt?;
     int legalOfficerId?;

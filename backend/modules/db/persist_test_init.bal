@@ -82,6 +82,7 @@ CREATE TABLE "legal_officer" (
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "payment_history" (
 	"id" INT AUTO_INCREMENT,
+	"referanceNo" VARCHAR(45) NOT NULL,
 	"amount" DECIMAL(10,2) NOT NULL,
 	"createdAt" TIMESTAMP NOT NULL,
 	"legalOfficerId" INT NOT NULL,
