@@ -2,33 +2,33 @@ import React from 'react';
 import { CheckCircle, Users, Award, Shield } from 'lucide-react';
 
 interface RoleOption {
-  value: string;
+  value: number;
   label: string;
   description: string;
   icon: React.ComponentType<any>;
 }
 
 interface RoleSelectorProps {
-  value: string;
+  value: number;
   onChange: (value: string) => void;
 }
 
 const RoleSelector: React.FC<RoleSelectorProps> = ({ value, onChange }) => {
   const roleOptions: RoleOption[] = [
     { 
-      value: 'citizen', 
+      value: 1, 
       label: 'සාමාන්‍ය පුරවැසියා',
       description: 'ඉඩම් හිමියන් සහ සාමාන්‍ය පරිශීලකයන්',
       icon: Users
     },
     { 
-      value: 'land_officer', 
+      value: 2, 
       label: 'ඉඩම් නිලධාරියා',
       description: 'ඉඩම් ලියාපදිංචි කිරීම් සහ සත්‍යාපන',
       icon: Award
     },
     { 
-      value: 'legal_official', 
+      value: 3, 
       label: 'නීති නිලධාරියා',
       description: 'ගැටළු නිරාකරණය සහ නීතිමය කටයුතු',
       icon: Shield

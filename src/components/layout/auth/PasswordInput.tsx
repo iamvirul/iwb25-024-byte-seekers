@@ -27,7 +27,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
         </div>
         <input
           type={showPassword ? 'text' : 'password'}
-          className={`block w-full pl-12 pr-12 py-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+          className={`block w-full pl-12 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
             error 
               ? 'border-red-300 bg-red-50' 
               : 'border-gray-200 bg-gray-50/50 hover:bg-white/80'

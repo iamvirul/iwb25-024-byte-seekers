@@ -1,64 +1,66 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { motion } from 'framer-motion';
-import { 
-  Mail, 
-  LogIn, 
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { motion } from "framer-motion";
+import {
+  Mail,
+  LogIn,
   Shield,
   Zap,
   Globe,
   ArrowRight,
-  XCircle
-} from 'lucide-react';
+  XCircle,
+} from "lucide-react";
 
-import AuthLayout from '../components/layout/auth/AuthLayout';
-import BrandSection from '../components/layout/auth/BrandSectionProps';
-import FormCard from '../components/layout/auth/FormCard';
-import FormInput from '../components/layout/auth/FormInput';
-import PasswordInput from '../components/layout/auth/PasswordInput';
+import AuthLayout from "../components/layout/auth/AuthLayout";
+import BrandSection from "../components/layout/auth/BrandSectionProps";
+import FormCard from "../components/layout/auth/FormCard";
+import FormInput from "../components/layout/auth/FormInput";
+import PasswordInput from "../components/layout/auth/PasswordInput";
+import RoleSelector from "../components/layout/auth/RoleSelector";
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
+    role: 1,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
-    setError('');
+    setError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const success = await login(formData.email, formData.password,2);
+      const success = await login(formData.email, formData.password, formData.role);
       if (success) {
-        navigate('/dashboard');
+        navigate("/dashboard");
       } else {
-        setError('වලංගු නොවන ඊමේල් හෝ මුරපදය');
+        setError("වලංගු නොවන ඊමේල් හෝ මුරපදය");
       }
     } catch (err) {
-      setError('පුරනය වීමේදී දෝෂයක් ඇතිවිය');
+      setError("පුරනය වීමේදී දෝෂයක් ඇතිවිය");
     } finally {
       setIsLoading(false);
     }
   };
 
   const features = [
-    { icon: Shield, text: '100% ආරක්ෂිත', color: 'text-green-600' },
-    { icon: Zap, text: 'ක්ෂණික ප්‍රවේශය', color: 'text-blue-600' },
-    { icon: Globe, text: '24/7 සේවාව', color: 'text-purple-600' }
+    { icon: Shield, text: "100% ආරක්ෂිත", color: "text-green-600" },
+    { icon: Zap, text: "ක්ෂණික ප්‍රවේශය", color: "text-blue-600" },
+    { icon: Globe, text: "24/7 සේවාව", color: "text-purple-600" },
   ];
 
   return (
@@ -88,7 +90,7 @@ const Login = () => {
               )}
 
               {/* Login Form */}
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-2">
                 <FormInput
                   id="email"
                   name="email"
@@ -119,22 +121,34 @@ const Login = () => {
                       type="checkbox"
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
                     />
-                    <label htmlFor="remember-me" className="ml-3 block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="remember-me"
+                      className="ml-3 block text-sm font-medium text-gray-700"
+                    >
                       මතක තබන්න
                     </label>
                   </div>
 
                   <div className="text-sm">
-                    <a href="#" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors duration-200">
+                    <a
+                      href="#"
+                      className="font-semibold text-blue-600 hover:text-blue-500 transition-colors duration-200"
+                    >
                       මුරපදය අමතකයි?
                     </a>
                   </div>
                 </div>
+                 <RoleSelector
+                  value={formData.role}
+                  onChange={(value) =>
+                    setFormData({ ...formData, role: parseInt(value) })
+                  }
+                />
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="group relative w-full flex justify-center items-center py-4 px-6 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="group relative w-full flex justify-center items-center py-3 px-6 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   {isLoading ? (
                     <div className="flex items-center">
@@ -151,18 +165,17 @@ const Login = () => {
               </form>
 
               {/* Register Link */}
-              <div className="text-center mt-8">
+              <div className="text-center mt-6">
                 <p className="text-sm text-gray-600">
-                  ගිණුමක් නැද්ද?{' '}
-                  <Link 
-                    to="/register" 
+                  ගිණුමක් නැද්ද?{" "}
+                  <Link
+                    to="/register"
                     className="font-semibold text-blue-600 hover:text-blue-500 transition-colors duration-200"
                   >
                     ලියාපදිංචි වන්න
                   </Link>
                 </p>
               </div>
-
             </FormCard>
           </div>
         </div>
