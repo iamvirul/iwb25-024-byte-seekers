@@ -12,6 +12,7 @@ import ballerinax/persist.sql as psql;
 
 const LAND_DOCUMENT = "landdocuments";
 const LEGAL_PRECEDENT = "legalprecedents";
+const PAYMENT_HISTORY = "paymenthistories";
 const USER = "users";
 const LEGAL_CLAUSE = "legalclauses";
 const DISPUTE_DOCUMENT = "disputedocuments";
@@ -38,27 +39,27 @@ public isolated client class H2Client {
             tableName: "lands_documents",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                docPath: {columnName: "doc_path"},
-                docSize: {columnName: "doc_size"},
-                docType: {columnName: "doc_type"},
-                uploadedDate: {columnName: "uploaded_date"},
-                docStatus: {columnName: "doc_status"},
-                landsId: {columnName: "lands_id"},
+                docPath: {columnName: "docPath"},
+                docSize: {columnName: "docSize"},
+                docType: {columnName: "docType"},
+                uploadedDate: {columnName: "uploadedDate"},
+                docStatus: {columnName: "docStatus"},
+                landsId: {columnName: "landsId"},
                 "land.id": {relation: {entityName: "land", refField: "id"}},
-                "land.landId": {relation: {entityName: "land", refField: "landId", refColumn: "land_id"}},
-                "land.landName": {relation: {entityName: "land", refField: "landName", refColumn: "land_name"}},
-                "land.landPlace": {relation: {entityName: "land", refField: "landPlace", refColumn: "land_place"}},
-                "land.landLat": {relation: {entityName: "land", refField: "landLat", refColumn: "land_lat"}},
-                "land.landLang": {relation: {entityName: "land", refField: "landLang", refColumn: "land_lang"}},
-                "land.landSize": {relation: {entityName: "land", refField: "landSize", refColumn: "land_size"}},
-                "land.landValue": {relation: {entityName: "land", refField: "landValue", refColumn: "land_value"}},
-                "land.landType": {relation: {entityName: "land", refField: "landType", refColumn: "land_type"}},
-                "land.registerDate": {relation: {entityName: "land", refField: "registerDate", refColumn: "register_date"}},
-                "land.landStatus": {relation: {entityName: "land", refField: "landStatus", refColumn: "land_status"}},
+                "land.landId": {relation: {entityName: "land", refField: "landId"}},
+                "land.landName": {relation: {entityName: "land", refField: "landName"}},
+                "land.landPlace": {relation: {entityName: "land", refField: "landPlace"}},
+                "land.landLat": {relation: {entityName: "land", refField: "landLat"}},
+                "land.landLang": {relation: {entityName: "land", refField: "landLang"}},
+                "land.landSize": {relation: {entityName: "land", refField: "landSize"}},
+                "land.landValue": {relation: {entityName: "land", refField: "landValue"}},
+                "land.landType": {relation: {entityName: "land", refField: "landType"}},
+                "land.registerDate": {relation: {entityName: "land", refField: "registerDate"}},
+                "land.landStatus": {relation: {entityName: "land", refField: "landStatus"}},
                 "land.priority": {relation: {entityName: "land", refField: "priority"}}
             },
             keyFields: ["id"],
-            joinMetadata: {land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY}}
+            joinMetadata: {land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["landsId"], 'type: psql:ONE_TO_MANY}}
         },
         [LEGAL_PRECEDENT]: {
             entityName: "LegalPrecedent",
@@ -70,24 +71,57 @@ public isolated client class H2Client {
                 court: {columnName: "court"},
                 decision: {columnName: "decision"},
                 summary: {columnName: "summary"},
-                disputesId: {columnName: "disputes_id"},
+                disputesId: {columnName: "disputesId"},
                 "legalclauses[].id": {relation: {entityName: "legalclauses", refField: "id"}},
-                "legalclauses[].legalClause": {relation: {entityName: "legalclauses", refField: "legalClause", refColumn: "legal_clause"}},
-                "legalclauses[].legalPrecedentsId": {relation: {entityName: "legalclauses", refField: "legalPrecedentsId", refColumn: "legal_precedents_id"}},
+                "legalclauses[].legalClause": {relation: {entityName: "legalclauses", refField: "legalClause"}},
+                "legalclauses[].legalPrecedentsId": {relation: {entityName: "legalclauses", refField: "legalPrecedentsId"}},
                 "dispute.id": {relation: {entityName: "dispute", refField: "id"}},
-                "dispute.caseId": {relation: {entityName: "dispute", refField: "caseId", refColumn: "case_id"}},
-                "dispute.witnessName": {relation: {entityName: "dispute", refField: "witnessName", refColumn: "witness_name"}},
-                "dispute.disputesDetails": {relation: {entityName: "dispute", refField: "disputesDetails", refColumn: "disputes_details"}},
-                "dispute.estimateTime": {relation: {entityName: "dispute", refField: "estimateTime", refColumn: "estimate_time"}},
+                "dispute.caseId": {relation: {entityName: "dispute", refField: "caseId"}},
+                "dispute.witnessName": {relation: {entityName: "dispute", refField: "witnessName"}},
+                "dispute.disputesDetails": {relation: {entityName: "dispute", refField: "disputesDetails"}},
+                "dispute.estimateTime": {relation: {entityName: "dispute", refField: "estimateTime"}},
                 "dispute.status": {relation: {entityName: "dispute", refField: "status"}},
-                "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt", refColumn: "created_at"}},
-                "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId", refColumn: "lands_id"}},
-                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
+                "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt"}},
+                "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId"}},
+                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId"}},
+                "dispute.usersId": {relation: {entityName: "dispute", refField: "usersId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
-                legalclauses: {entity: LegalClause, fieldName: "legalclauses", refTable: "legal_clauses", refColumns: ["legal_precedents_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
-                dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputes_id"], 'type: psql:ONE_TO_MANY}
+                legalclauses: {entity: LegalClause, fieldName: "legalclauses", refTable: "legal_clauses", refColumns: ["legalPrecedentsId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputesId"], 'type: psql:ONE_TO_MANY}
+            }
+        },
+        [PAYMENT_HISTORY]: {
+            entityName: "PaymentHistory",
+            tableName: "payment_history",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                referanceNo: {columnName: "referanceNo"},
+                amount: {columnName: "amount"},
+                createdAt: {columnName: "createdAt"},
+                legalOfficerId: {columnName: "legalOfficerId"},
+                usersId: {columnName: "usersId"},
+                "legalofficer.id": {relation: {entityName: "legalofficer", refField: "id"}},
+                "legalofficer.firstName": {relation: {entityName: "legalofficer", refField: "firstName", refColumn: "first_name"}},
+                "legalofficer.lastName": {relation: {entityName: "legalofficer", refField: "lastName", refColumn: "last_name"}},
+                "legalofficer.baslId": {relation: {entityName: "legalofficer", refField: "baslId", refColumn: "BASL_ID"}},
+                "legalofficer.initialCost": {relation: {entityName: "legalofficer", refField: "initialCost", refColumn: "initial_cost"}},
+                "user.id": {relation: {entityName: "user", refField: "id"}},
+                "user.userId": {relation: {entityName: "user", refField: "userId"}},
+                "user.firstName": {relation: {entityName: "user", refField: "firstName"}},
+                "user.lastName": {relation: {entityName: "user", refField: "lastName"}},
+                "user.email": {relation: {entityName: "user", refField: "email"}},
+                "user.password": {relation: {entityName: "user", refField: "password"}},
+                "user.nic": {relation: {entityName: "user", refField: "nic"}},
+                "user.sludi": {relation: {entityName: "user", refField: "sludi"}},
+                "user.contactNo": {relation: {entityName: "user", refField: "contactNo"}},
+                "user.address": {relation: {entityName: "user", refField: "address"}}
+            },
+            keyFields: ["id"],
+            joinMetadata: {
+                legalofficer: {entity: LegalOfficer, fieldName: "legalofficer", refTable: "legal_officer", refColumns: ["id"], joinColumns: ["legalOfficerId"], 'type: psql:ONE_TO_MANY},
+                user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["usersId"], 'type: psql:ONE_TO_MANY}
             }
         },
         [USER]: {
@@ -95,30 +129,48 @@ public isolated client class H2Client {
             tableName: "users",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                userId: {columnName: "user_id"},
-                firstName: {columnName: "first_name"},
-                lastName: {columnName: "last_name"},
+                userId: {columnName: "userId"},
+                firstName: {columnName: "firstName"},
+                lastName: {columnName: "lastName"},
                 email: {columnName: "email"},
                 password: {columnName: "password"},
                 nic: {columnName: "nic"},
                 sludi: {columnName: "sludi"},
-                contactNo: {columnName: "contact_no"},
+                contactNo: {columnName: "contactNo"},
                 address: {columnName: "address"},
                 "audits[].id": {relation: {entityName: "audits", refField: "id"}},
-                "audits[].requestPath": {relation: {entityName: "audits", refField: "requestPath", refColumn: "request_path"}},
-                "audits[].requestMethod": {relation: {entityName: "audits", refField: "requestMethod", refColumn: "request_method"}},
-                "audits[].userAgent": {relation: {entityName: "audits", refField: "userAgent", refColumn: "user_agent"}},
-                "audits[].requestPayload": {relation: {entityName: "audits", refField: "requestPayload", refColumn: "request_payload"}},
-                "audits[].requestHost": {relation: {entityName: "audits", refField: "requestHost", refColumn: "request_host"}},
-                "audits[].requestedTime": {relation: {entityName: "audits", refField: "requestedTime", refColumn: "requested_time"}},
-                "audits[].usersId": {relation: {entityName: "audits", refField: "usersId", refColumn: "users_id"}},
-                "userhasusertypes[].userTypesId": {relation: {entityName: "userhasusertypes", refField: "userTypesId", refColumn: "user_types_id"}},
-                "userhasusertypes[].usersId": {relation: {entityName: "userhasusertypes", refField: "usersId", refColumn: "users_id"}}
+                "audits[].requestPath": {relation: {entityName: "audits", refField: "requestPath"}},
+                "audits[].requestMethod": {relation: {entityName: "audits", refField: "requestMethod"}},
+                "audits[].userAgent": {relation: {entityName: "audits", refField: "userAgent"}},
+                "audits[].requestPayload": {relation: {entityName: "audits", refField: "requestPayload"}},
+                "audits[].requestHost": {relation: {entityName: "audits", refField: "requestHost"}},
+                "audits[].requestedTime": {relation: {entityName: "audits", refField: "requestedTime"}},
+                "audits[].usersId": {relation: {entityName: "audits", refField: "usersId"}},
+                "disputes[].id": {relation: {entityName: "disputes", refField: "id"}},
+                "disputes[].caseId": {relation: {entityName: "disputes", refField: "caseId"}},
+                "disputes[].witnessName": {relation: {entityName: "disputes", refField: "witnessName"}},
+                "disputes[].disputesDetails": {relation: {entityName: "disputes", refField: "disputesDetails"}},
+                "disputes[].estimateTime": {relation: {entityName: "disputes", refField: "estimateTime"}},
+                "disputes[].status": {relation: {entityName: "disputes", refField: "status"}},
+                "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt"}},
+                "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId"}},
+                "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId"}},
+                "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId"}},
+                "paymenthistories[].id": {relation: {entityName: "paymenthistories", refField: "id"}},
+                "paymenthistories[].referanceNo": {relation: {entityName: "paymenthistories", refField: "referanceNo"}},
+                "paymenthistories[].amount": {relation: {entityName: "paymenthistories", refField: "amount"}},
+                "paymenthistories[].createdAt": {relation: {entityName: "paymenthistories", refField: "createdAt"}},
+                "paymenthistories[].legalOfficerId": {relation: {entityName: "paymenthistories", refField: "legalOfficerId"}},
+                "paymenthistories[].usersId": {relation: {entityName: "paymenthistories", refField: "usersId"}},
+                "userhasusertypes[].userTypesId": {relation: {entityName: "userhasusertypes", refField: "userTypesId"}},
+                "userhasusertypes[].usersId": {relation: {entityName: "userhasusertypes", refField: "usersId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
-                audits: {entity: Audit, fieldName: "audits", refTable: "audits", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
-                userhasusertypes: {entity: UserHasUserType, fieldName: "userhasusertypes", refTable: "users_has_user_types", refColumns: ["users_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+                audits: {entity: Audit, fieldName: "audits", refTable: "audits", refColumns: ["usersId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                disputes: {entity: Dispute, fieldName: "disputes", refTable: "disputes", refColumns: ["usersId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                paymenthistories: {entity: PaymentHistory, fieldName: "paymenthistories", refTable: "payment_history", refColumns: ["usersId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                userhasusertypes: {entity: UserHasUserType, fieldName: "userhasusertypes", refTable: "users_has_user_types", refColumns: ["usersId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
         [LEGAL_CLAUSE]: {
@@ -126,39 +178,40 @@ public isolated client class H2Client {
             tableName: "legal_clauses",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                legalClause: {columnName: "legal_clause"},
-                legalPrecedentsId: {columnName: "legal_precedents_id"},
+                legalClause: {columnName: "legalClause"},
+                legalPrecedentsId: {columnName: "legalPrecedentsId"},
                 "legalprecedent.id": {relation: {entityName: "legalprecedent", refField: "id"}},
                 "legalprecedent.year": {relation: {entityName: "legalprecedent", refField: "year"}},
                 "legalprecedent.headline": {relation: {entityName: "legalprecedent", refField: "headline"}},
                 "legalprecedent.court": {relation: {entityName: "legalprecedent", refField: "court"}},
                 "legalprecedent.decision": {relation: {entityName: "legalprecedent", refField: "decision"}},
                 "legalprecedent.summary": {relation: {entityName: "legalprecedent", refField: "summary"}},
-                "legalprecedent.disputesId": {relation: {entityName: "legalprecedent", refField: "disputesId", refColumn: "disputes_id"}}
+                "legalprecedent.disputesId": {relation: {entityName: "legalprecedent", refField: "disputesId"}}
             },
             keyFields: ["id"],
-            joinMetadata: {legalprecedent: {entity: LegalPrecedent, fieldName: "legalprecedent", refTable: "legal_precedents", refColumns: ["id"], joinColumns: ["legal_precedents_id"], 'type: psql:ONE_TO_MANY}}
+            joinMetadata: {legalprecedent: {entity: LegalPrecedent, fieldName: "legalprecedent", refTable: "legal_precedents", refColumns: ["id"], joinColumns: ["legalPrecedentsId"], 'type: psql:ONE_TO_MANY}}
         },
         [DISPUTE_DOCUMENT]: {
             entityName: "DisputeDocument",
             tableName: "disputes_document",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                docPath: {columnName: "doc_path"},
-                uploadedDate: {columnName: "uploaded_date"},
-                disputesId: {columnName: "disputes_id"},
+                docPath: {columnName: "docPath"},
+                uploadedDate: {columnName: "uploadedDate"},
+                disputesId: {columnName: "disputesId"},
                 "dispute.id": {relation: {entityName: "dispute", refField: "id"}},
-                "dispute.caseId": {relation: {entityName: "dispute", refField: "caseId", refColumn: "case_id"}},
-                "dispute.witnessName": {relation: {entityName: "dispute", refField: "witnessName", refColumn: "witness_name"}},
-                "dispute.disputesDetails": {relation: {entityName: "dispute", refField: "disputesDetails", refColumn: "disputes_details"}},
-                "dispute.estimateTime": {relation: {entityName: "dispute", refField: "estimateTime", refColumn: "estimate_time"}},
+                "dispute.caseId": {relation: {entityName: "dispute", refField: "caseId"}},
+                "dispute.witnessName": {relation: {entityName: "dispute", refField: "witnessName"}},
+                "dispute.disputesDetails": {relation: {entityName: "dispute", refField: "disputesDetails"}},
+                "dispute.estimateTime": {relation: {entityName: "dispute", refField: "estimateTime"}},
                 "dispute.status": {relation: {entityName: "dispute", refField: "status"}},
-                "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt", refColumn: "created_at"}},
-                "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId", refColumn: "lands_id"}},
-                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
+                "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt"}},
+                "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId"}},
+                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId"}},
+                "dispute.usersId": {relation: {entityName: "dispute", refField: "usersId"}}
             },
             keyFields: ["id"],
-            joinMetadata: {dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputes_id"], 'type: psql:ONE_TO_MANY}}
+            joinMetadata: {dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputesId"], 'type: psql:ONE_TO_MANY}}
         },
         [LEGAL_OFFICER]: {
             entityName: "LegalOfficer",
@@ -170,63 +223,73 @@ public isolated client class H2Client {
                 baslId: {columnName: "BASL_ID"},
                 initialCost: {columnName: "initial_cost"},
                 "disputes[].id": {relation: {entityName: "disputes", refField: "id"}},
-                "disputes[].caseId": {relation: {entityName: "disputes", refField: "caseId", refColumn: "case_id"}},
-                "disputes[].witnessName": {relation: {entityName: "disputes", refField: "witnessName", refColumn: "witness_name"}},
-                "disputes[].disputesDetails": {relation: {entityName: "disputes", refField: "disputesDetails", refColumn: "disputes_details"}},
-                "disputes[].estimateTime": {relation: {entityName: "disputes", refField: "estimateTime", refColumn: "estimate_time"}},
+                "disputes[].caseId": {relation: {entityName: "disputes", refField: "caseId"}},
+                "disputes[].witnessName": {relation: {entityName: "disputes", refField: "witnessName"}},
+                "disputes[].disputesDetails": {relation: {entityName: "disputes", refField: "disputesDetails"}},
+                "disputes[].estimateTime": {relation: {entityName: "disputes", refField: "estimateTime"}},
                 "disputes[].status": {relation: {entityName: "disputes", refField: "status"}},
-                "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt", refColumn: "created_at"}},
-                "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId", refColumn: "lands_id"}},
-                "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
+                "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt"}},
+                "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId"}},
+                "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId"}},
+                "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId"}},
+                "paymenthistories[].id": {relation: {entityName: "paymenthistories", refField: "id"}},
+                "paymenthistories[].referanceNo": {relation: {entityName: "paymenthistories", refField: "referanceNo"}},
+                "paymenthistories[].amount": {relation: {entityName: "paymenthistories", refField: "amount"}},
+                "paymenthistories[].createdAt": {relation: {entityName: "paymenthistories", refField: "createdAt"}},
+                "paymenthistories[].legalOfficerId": {relation: {entityName: "paymenthistories", refField: "legalOfficerId"}},
+                "paymenthistories[].usersId": {relation: {entityName: "paymenthistories", refField: "usersId"}}
             },
             keyFields: ["id"],
-            joinMetadata: {disputes: {entity: Dispute, fieldName: "disputes", refTable: "disputes", refColumns: ["legal_officer_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
+            joinMetadata: {
+                disputes: {entity: Dispute, fieldName: "disputes", refTable: "disputes", refColumns: ["legalOfficerId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                paymenthistories: {entity: PaymentHistory, fieldName: "paymenthistories", refTable: "payment_history", refColumns: ["legalOfficerId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+            }
         },
         [LAND_TRANSFER_CHAIN]: {
             entityName: "LandTransferChain",
             tableName: "land_transfer_chain",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                transferDate: {columnName: "transfer_date"},
-                verifiedBy: {columnName: "verified_by"},
-                blockIndex: {columnName: "block_index"},
-                blockHash: {columnName: "block_hash"},
-                prevBlockHash: {columnName: "prev_block_hash"},
-                fromLandOwnersId: {columnName: "from_land_owners_id"},
-                toLandOwnersId: {columnName: "to_land_owners_id"},
-                landsId: {columnName: "lands_id"},
+                transferDate: {columnName: "transferDate"},
+                verifiedBy: {columnName: "verifiedBy"},
+                blockIndex: {columnName: "blockIndex"},
+                blockHash: {columnName: "blockHash"},
+                prevBlockHash: {columnName: "prevBlockHash"},
+                fromLandOwnersId: {columnName: "fromLandOwnersId"},
+                toLandOwnersId: {columnName: "toLandOwnersId"},
+                landsId: {columnName: "landsId"},
                 "landowner.id": {relation: {entityName: "landowner", refField: "id"}},
-                "landowner.ownerId": {relation: {entityName: "landowner", refField: "ownerId", refColumn: "owner_id"}},
-                "landowner.firstName": {relation: {entityName: "landowner", refField: "firstName", refColumn: "first_name"}},
-                "landowner.lastName": {relation: {entityName: "landowner", refField: "lastName", refColumn: "last_name"}},
+                "landowner.ownerId": {relation: {entityName: "landowner", refField: "ownerId"}},
+                "landowner.firstName": {relation: {entityName: "landowner", refField: "firstName"}},
+                "landowner.lastName": {relation: {entityName: "landowner", refField: "lastName"}},
                 "landowner.nic": {relation: {entityName: "landowner", refField: "nic"}},
                 "landowner.address": {relation: {entityName: "landowner", refField: "address"}},
-                "landowner.contactNo": {relation: {entityName: "landowner", refField: "contactNo", refColumn: "contact_no"}},
+                "landowner.contactNo": {relation: {entityName: "landowner", refField: "contactNo"}},
                 "landowner1.id": {relation: {entityName: "landowner1", refField: "id"}},
-                "landowner1.ownerId": {relation: {entityName: "landowner1", refField: "ownerId", refColumn: "owner_id"}},
-                "landowner1.firstName": {relation: {entityName: "landowner1", refField: "firstName", refColumn: "first_name"}},
-                "landowner1.lastName": {relation: {entityName: "landowner1", refField: "lastName", refColumn: "last_name"}},
+                "landowner1.ownerId": {relation: {entityName: "landowner1", refField: "ownerId"}},
+                "landowner1.firstName": {relation: {entityName: "landowner1", refField: "firstName"}},
+                "landowner1.lastName": {relation: {entityName: "landowner1", refField: "lastName"}},
                 "landowner1.nic": {relation: {entityName: "landowner1", refField: "nic"}},
                 "landowner1.address": {relation: {entityName: "landowner1", refField: "address"}},
-                "landowner1.contactNo": {relation: {entityName: "landowner1", refField: "contactNo", refColumn: "contact_no"}},
+                "landowner1.contactNo": {relation: {entityName: "landowner1", refField: "contactNo"}},
                 "land.id": {relation: {entityName: "land", refField: "id"}},
-                "land.landId": {relation: {entityName: "land", refField: "landId", refColumn: "land_id"}},
-                "land.landName": {relation: {entityName: "land", refField: "landName", refColumn: "land_name"}},
-                "land.landPlace": {relation: {entityName: "land", refField: "landPlace", refColumn: "land_place"}},
-                "land.landLat": {relation: {entityName: "land", refField: "landLat", refColumn: "land_lat"}},
-                "land.landLang": {relation: {entityName: "land", refField: "landLang", refColumn: "land_lang"}},
-                "land.landSize": {relation: {entityName: "land", refField: "landSize", refColumn: "land_size"}},
-                "land.landValue": {relation: {entityName: "land", refField: "landValue", refColumn: "land_value"}},
-                "land.landType": {relation: {entityName: "land", refField: "landType", refColumn: "land_type"}},
-                "land.registerDate": {relation: {entityName: "land", refField: "registerDate", refColumn: "register_date"}},
-                "land.landStatus": {relation: {entityName: "land", refField: "landStatus", refColumn: "land_status"}},
+                "land.landId": {relation: {entityName: "land", refField: "landId"}},
+                "land.landName": {relation: {entityName: "land", refField: "landName"}},
+                "land.landPlace": {relation: {entityName: "land", refField: "landPlace"}},
+                "land.landLat": {relation: {entityName: "land", refField: "landLat"}},
+                "land.landLang": {relation: {entityName: "land", refField: "landLang"}},
+                "land.landSize": {relation: {entityName: "land", refField: "landSize"}},
+                "land.landValue": {relation: {entityName: "land", refField: "landValue"}},
+                "land.landType": {relation: {entityName: "land", refField: "landType"}},
+                "land.registerDate": {relation: {entityName: "land", refField: "registerDate"}},
+                "land.landStatus": {relation: {entityName: "land", refField: "landStatus"}},
                 "land.priority": {relation: {entityName: "land", refField: "priority"}}
             },
             keyFields: ["id"],
             joinMetadata: {
-                landowner: {entity: LandOwner, fieldName: "landowner", refTable: "land_owner", refColumns: ["id"], joinColumns: ["from_land_owners_id"], 'type: psql:ONE_TO_MANY},
-                landowner1: {entity: LandOwner, fieldName: "landowner1", refTable: "land_owner", refColumns: ["id"], joinColumns: ["to_land_owners_id"], 'type: psql:ONE_TO_MANY},
-                land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY}
+                landowner: {entity: LandOwner, fieldName: "landowner", refTable: "land_owner", refColumns: ["id"], joinColumns: ["fromLandOwnersId"], 'type: psql:ONE_TO_MANY},
+                landowner1: {entity: LandOwner, fieldName: "landowner1", refTable: "land_owner", refColumns: ["id"], joinColumns: ["toLandOwnersId"], 'type: psql:ONE_TO_MANY},
+                land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["landsId"], 'type: psql:ONE_TO_MANY}
             }
         },
         [LAND_OWNER]: {
@@ -234,35 +297,35 @@ public isolated client class H2Client {
             tableName: "land_owner",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                ownerId: {columnName: "owner_id"},
-                firstName: {columnName: "first_name"},
-                lastName: {columnName: "last_name"},
+                ownerId: {columnName: "ownerId"},
+                firstName: {columnName: "firstName"},
+                lastName: {columnName: "lastName"},
                 nic: {columnName: "nic"},
                 address: {columnName: "address"},
-                contactNo: {columnName: "contact_no"},
+                contactNo: {columnName: "contactNo"},
                 "landtransferchains[].id": {relation: {entityName: "landtransferchains", refField: "id"}},
-                "landtransferchains[].transferDate": {relation: {entityName: "landtransferchains", refField: "transferDate", refColumn: "transfer_date"}},
-                "landtransferchains[].verifiedBy": {relation: {entityName: "landtransferchains", refField: "verifiedBy", refColumn: "verified_by"}},
-                "landtransferchains[].blockIndex": {relation: {entityName: "landtransferchains", refField: "blockIndex", refColumn: "block_index"}},
-                "landtransferchains[].blockHash": {relation: {entityName: "landtransferchains", refField: "blockHash", refColumn: "block_hash"}},
-                "landtransferchains[].prevBlockHash": {relation: {entityName: "landtransferchains", refField: "prevBlockHash", refColumn: "prev_block_hash"}},
-                "landtransferchains[].fromLandOwnersId": {relation: {entityName: "landtransferchains", refField: "fromLandOwnersId", refColumn: "from_land_owners_id"}},
-                "landtransferchains[].toLandOwnersId": {relation: {entityName: "landtransferchains", refField: "toLandOwnersId", refColumn: "to_land_owners_id"}},
-                "landtransferchains[].landsId": {relation: {entityName: "landtransferchains", refField: "landsId", refColumn: "lands_id"}},
+                "landtransferchains[].transferDate": {relation: {entityName: "landtransferchains", refField: "transferDate"}},
+                "landtransferchains[].verifiedBy": {relation: {entityName: "landtransferchains", refField: "verifiedBy"}},
+                "landtransferchains[].blockIndex": {relation: {entityName: "landtransferchains", refField: "blockIndex"}},
+                "landtransferchains[].blockHash": {relation: {entityName: "landtransferchains", refField: "blockHash"}},
+                "landtransferchains[].prevBlockHash": {relation: {entityName: "landtransferchains", refField: "prevBlockHash"}},
+                "landtransferchains[].fromLandOwnersId": {relation: {entityName: "landtransferchains", refField: "fromLandOwnersId"}},
+                "landtransferchains[].toLandOwnersId": {relation: {entityName: "landtransferchains", refField: "toLandOwnersId"}},
+                "landtransferchains[].landsId": {relation: {entityName: "landtransferchains", refField: "landsId"}},
                 "landtransferchains1[].id": {relation: {entityName: "landtransferchains1", refField: "id"}},
-                "landtransferchains1[].transferDate": {relation: {entityName: "landtransferchains1", refField: "transferDate", refColumn: "transfer_date"}},
-                "landtransferchains1[].verifiedBy": {relation: {entityName: "landtransferchains1", refField: "verifiedBy", refColumn: "verified_by"}},
-                "landtransferchains1[].blockIndex": {relation: {entityName: "landtransferchains1", refField: "blockIndex", refColumn: "block_index"}},
-                "landtransferchains1[].blockHash": {relation: {entityName: "landtransferchains1", refField: "blockHash", refColumn: "block_hash"}},
-                "landtransferchains1[].prevBlockHash": {relation: {entityName: "landtransferchains1", refField: "prevBlockHash", refColumn: "prev_block_hash"}},
-                "landtransferchains1[].fromLandOwnersId": {relation: {entityName: "landtransferchains1", refField: "fromLandOwnersId", refColumn: "from_land_owners_id"}},
-                "landtransferchains1[].toLandOwnersId": {relation: {entityName: "landtransferchains1", refField: "toLandOwnersId", refColumn: "to_land_owners_id"}},
-                "landtransferchains1[].landsId": {relation: {entityName: "landtransferchains1", refField: "landsId", refColumn: "lands_id"}}
+                "landtransferchains1[].transferDate": {relation: {entityName: "landtransferchains1", refField: "transferDate"}},
+                "landtransferchains1[].verifiedBy": {relation: {entityName: "landtransferchains1", refField: "verifiedBy"}},
+                "landtransferchains1[].blockIndex": {relation: {entityName: "landtransferchains1", refField: "blockIndex"}},
+                "landtransferchains1[].blockHash": {relation: {entityName: "landtransferchains1", refField: "blockHash"}},
+                "landtransferchains1[].prevBlockHash": {relation: {entityName: "landtransferchains1", refField: "prevBlockHash"}},
+                "landtransferchains1[].fromLandOwnersId": {relation: {entityName: "landtransferchains1", refField: "fromLandOwnersId"}},
+                "landtransferchains1[].toLandOwnersId": {relation: {entityName: "landtransferchains1", refField: "toLandOwnersId"}},
+                "landtransferchains1[].landsId": {relation: {entityName: "landtransferchains1", refField: "landsId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
-                landtransferchains: {entity: LandTransferChain, fieldName: "landtransferchains", refTable: "land_transfer_chain", refColumns: ["from_land_owners_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
-                landtransferchains1: {entity: LandTransferChain, fieldName: "landtransferchains1", refTable: "land_transfer_chain", refColumns: ["to_land_owners_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+                landtransferchains: {entity: LandTransferChain, fieldName: "landtransferchains", refTable: "land_transfer_chain", refColumns: ["fromLandOwnersId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                landtransferchains1: {entity: LandTransferChain, fieldName: "landtransferchains1", refTable: "land_transfer_chain", refColumns: ["toLandOwnersId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
         [LAND]: {
@@ -270,48 +333,49 @@ public isolated client class H2Client {
             tableName: "lands",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                landId: {columnName: "land_id"},
-                landName: {columnName: "land_name"},
-                landPlace: {columnName: "land_place"},
-                landLat: {columnName: "land_lat"},
-                landLang: {columnName: "land_lang"},
-                landSize: {columnName: "land_size"},
-                landValue: {columnName: "land_value"},
-                landType: {columnName: "land_type"},
-                registerDate: {columnName: "register_date"},
-                landStatus: {columnName: "land_status"},
+                landId: {columnName: "landId"},
+                landName: {columnName: "landName"},
+                landPlace: {columnName: "landPlace"},
+                landLat: {columnName: "landLat"},
+                landLang: {columnName: "landLang"},
+                landSize: {columnName: "landSize"},
+                landValue: {columnName: "landValue"},
+                landType: {columnName: "landType"},
+                registerDate: {columnName: "registerDate"},
+                landStatus: {columnName: "landStatus"},
                 priority: {columnName: "priority"},
                 "disputes[].id": {relation: {entityName: "disputes", refField: "id"}},
-                "disputes[].caseId": {relation: {entityName: "disputes", refField: "caseId", refColumn: "case_id"}},
-                "disputes[].witnessName": {relation: {entityName: "disputes", refField: "witnessName", refColumn: "witness_name"}},
-                "disputes[].disputesDetails": {relation: {entityName: "disputes", refField: "disputesDetails", refColumn: "disputes_details"}},
-                "disputes[].estimateTime": {relation: {entityName: "disputes", refField: "estimateTime", refColumn: "estimate_time"}},
+                "disputes[].caseId": {relation: {entityName: "disputes", refField: "caseId"}},
+                "disputes[].witnessName": {relation: {entityName: "disputes", refField: "witnessName"}},
+                "disputes[].disputesDetails": {relation: {entityName: "disputes", refField: "disputesDetails"}},
+                "disputes[].estimateTime": {relation: {entityName: "disputes", refField: "estimateTime"}},
                 "disputes[].status": {relation: {entityName: "disputes", refField: "status"}},
-                "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt", refColumn: "created_at"}},
-                "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId", refColumn: "lands_id"}},
-                "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId", refColumn: "legal_officer_id"}},
+                "disputes[].createdAt": {relation: {entityName: "disputes", refField: "createdAt"}},
+                "disputes[].landsId": {relation: {entityName: "disputes", refField: "landsId"}},
+                "disputes[].legalOfficerId": {relation: {entityName: "disputes", refField: "legalOfficerId"}},
+                "disputes[].usersId": {relation: {entityName: "disputes", refField: "usersId"}},
                 "landtransferchains[].id": {relation: {entityName: "landtransferchains", refField: "id"}},
-                "landtransferchains[].transferDate": {relation: {entityName: "landtransferchains", refField: "transferDate", refColumn: "transfer_date"}},
-                "landtransferchains[].verifiedBy": {relation: {entityName: "landtransferchains", refField: "verifiedBy", refColumn: "verified_by"}},
-                "landtransferchains[].blockIndex": {relation: {entityName: "landtransferchains", refField: "blockIndex", refColumn: "block_index"}},
-                "landtransferchains[].blockHash": {relation: {entityName: "landtransferchains", refField: "blockHash", refColumn: "block_hash"}},
-                "landtransferchains[].prevBlockHash": {relation: {entityName: "landtransferchains", refField: "prevBlockHash", refColumn: "prev_block_hash"}},
-                "landtransferchains[].fromLandOwnersId": {relation: {entityName: "landtransferchains", refField: "fromLandOwnersId", refColumn: "from_land_owners_id"}},
-                "landtransferchains[].toLandOwnersId": {relation: {entityName: "landtransferchains", refField: "toLandOwnersId", refColumn: "to_land_owners_id"}},
-                "landtransferchains[].landsId": {relation: {entityName: "landtransferchains", refField: "landsId", refColumn: "lands_id"}},
+                "landtransferchains[].transferDate": {relation: {entityName: "landtransferchains", refField: "transferDate"}},
+                "landtransferchains[].verifiedBy": {relation: {entityName: "landtransferchains", refField: "verifiedBy"}},
+                "landtransferchains[].blockIndex": {relation: {entityName: "landtransferchains", refField: "blockIndex"}},
+                "landtransferchains[].blockHash": {relation: {entityName: "landtransferchains", refField: "blockHash"}},
+                "landtransferchains[].prevBlockHash": {relation: {entityName: "landtransferchains", refField: "prevBlockHash"}},
+                "landtransferchains[].fromLandOwnersId": {relation: {entityName: "landtransferchains", refField: "fromLandOwnersId"}},
+                "landtransferchains[].toLandOwnersId": {relation: {entityName: "landtransferchains", refField: "toLandOwnersId"}},
+                "landtransferchains[].landsId": {relation: {entityName: "landtransferchains", refField: "landsId"}},
                 "landdocuments[].id": {relation: {entityName: "landdocuments", refField: "id"}},
-                "landdocuments[].docPath": {relation: {entityName: "landdocuments", refField: "docPath", refColumn: "doc_path"}},
-                "landdocuments[].docSize": {relation: {entityName: "landdocuments", refField: "docSize", refColumn: "doc_size"}},
-                "landdocuments[].docType": {relation: {entityName: "landdocuments", refField: "docType", refColumn: "doc_type"}},
-                "landdocuments[].uploadedDate": {relation: {entityName: "landdocuments", refField: "uploadedDate", refColumn: "uploaded_date"}},
-                "landdocuments[].docStatus": {relation: {entityName: "landdocuments", refField: "docStatus", refColumn: "doc_status"}},
-                "landdocuments[].landsId": {relation: {entityName: "landdocuments", refField: "landsId", refColumn: "lands_id"}}
+                "landdocuments[].docPath": {relation: {entityName: "landdocuments", refField: "docPath"}},
+                "landdocuments[].docSize": {relation: {entityName: "landdocuments", refField: "docSize"}},
+                "landdocuments[].docType": {relation: {entityName: "landdocuments", refField: "docType"}},
+                "landdocuments[].uploadedDate": {relation: {entityName: "landdocuments", refField: "uploadedDate"}},
+                "landdocuments[].docStatus": {relation: {entityName: "landdocuments", refField: "docStatus"}},
+                "landdocuments[].landsId": {relation: {entityName: "landdocuments", refField: "landsId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
-                disputes: {entity: Dispute, fieldName: "disputes", refTable: "disputes", refColumns: ["lands_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
-                landtransferchains: {entity: LandTransferChain, fieldName: "landtransferchains", refTable: "land_transfer_chain", refColumns: ["lands_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
-                landdocuments: {entity: LandDocument, fieldName: "landdocuments", refTable: "lands_documents", refColumns: ["lands_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+                disputes: {entity: Dispute, fieldName: "disputes", refTable: "disputes", refColumns: ["landsId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                landtransferchains: {entity: LandTransferChain, fieldName: "landtransferchains", refTable: "land_transfer_chain", refColumns: ["landsId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                landdocuments: {entity: LandDocument, fieldName: "landdocuments", refTable: "lands_documents", refColumns: ["landsId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
         [AUDIT]: {
@@ -319,26 +383,26 @@ public isolated client class H2Client {
             tableName: "audits",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                requestPath: {columnName: "request_path"},
-                requestMethod: {columnName: "request_method"},
-                userAgent: {columnName: "user_agent"},
-                requestPayload: {columnName: "request_payload"},
-                requestHost: {columnName: "request_host"},
-                requestedTime: {columnName: "requested_time"},
-                usersId: {columnName: "users_id"},
+                requestPath: {columnName: "requestPath"},
+                requestMethod: {columnName: "requestMethod"},
+                userAgent: {columnName: "userAgent"},
+                requestPayload: {columnName: "requestPayload"},
+                requestHost: {columnName: "requestHost"},
+                requestedTime: {columnName: "requestedTime"},
+                usersId: {columnName: "usersId"},
                 "user.id": {relation: {entityName: "user", refField: "id"}},
-                "user.userId": {relation: {entityName: "user", refField: "userId", refColumn: "user_id"}},
-                "user.firstName": {relation: {entityName: "user", refField: "firstName", refColumn: "first_name"}},
-                "user.lastName": {relation: {entityName: "user", refField: "lastName", refColumn: "last_name"}},
+                "user.userId": {relation: {entityName: "user", refField: "userId"}},
+                "user.firstName": {relation: {entityName: "user", refField: "firstName"}},
+                "user.lastName": {relation: {entityName: "user", refField: "lastName"}},
                 "user.email": {relation: {entityName: "user", refField: "email"}},
                 "user.password": {relation: {entityName: "user", refField: "password"}},
                 "user.nic": {relation: {entityName: "user", refField: "nic"}},
                 "user.sludi": {relation: {entityName: "user", refField: "sludi"}},
-                "user.contactNo": {relation: {entityName: "user", refField: "contactNo", refColumn: "contact_no"}},
+                "user.contactNo": {relation: {entityName: "user", refField: "contactNo"}},
                 "user.address": {relation: {entityName: "user", refField: "address"}}
             },
             keyFields: ["id"],
-            joinMetadata: {user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["users_id"], 'type: psql:ONE_TO_MANY}}
+            joinMetadata: {user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["usersId"], 'type: psql:ONE_TO_MANY}}
         },
         [DISPUTE_COMMENT]: {
             entityName: "DisputeComment",
@@ -346,44 +410,45 @@ public isolated client class H2Client {
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
                 comment: {columnName: "comment"},
-                createdAt: {columnName: "created_at"},
-                disputesId: {columnName: "disputes_id"},
+                createdAt: {columnName: "createdAt"},
+                disputesId: {columnName: "disputesId"},
                 "dispute.id": {relation: {entityName: "dispute", refField: "id"}},
-                "dispute.caseId": {relation: {entityName: "dispute", refField: "caseId", refColumn: "case_id"}},
-                "dispute.witnessName": {relation: {entityName: "dispute", refField: "witnessName", refColumn: "witness_name"}},
-                "dispute.disputesDetails": {relation: {entityName: "dispute", refField: "disputesDetails", refColumn: "disputes_details"}},
-                "dispute.estimateTime": {relation: {entityName: "dispute", refField: "estimateTime", refColumn: "estimate_time"}},
+                "dispute.caseId": {relation: {entityName: "dispute", refField: "caseId"}},
+                "dispute.witnessName": {relation: {entityName: "dispute", refField: "witnessName"}},
+                "dispute.disputesDetails": {relation: {entityName: "dispute", refField: "disputesDetails"}},
+                "dispute.estimateTime": {relation: {entityName: "dispute", refField: "estimateTime"}},
                 "dispute.status": {relation: {entityName: "dispute", refField: "status"}},
-                "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt", refColumn: "created_at"}},
-                "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId", refColumn: "lands_id"}},
-                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId", refColumn: "legal_officer_id"}}
+                "dispute.createdAt": {relation: {entityName: "dispute", refField: "createdAt"}},
+                "dispute.landsId": {relation: {entityName: "dispute", refField: "landsId"}},
+                "dispute.legalOfficerId": {relation: {entityName: "dispute", refField: "legalOfficerId"}},
+                "dispute.usersId": {relation: {entityName: "dispute", refField: "usersId"}}
             },
             keyFields: ["id"],
-            joinMetadata: {dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputes_id"], 'type: psql:ONE_TO_MANY}}
+            joinMetadata: {dispute: {entity: Dispute, fieldName: "dispute", refTable: "disputes", refColumns: ["id"], joinColumns: ["disputesId"], 'type: psql:ONE_TO_MANY}}
         },
         [USER_HAS_USER_TYPE]: {
             entityName: "UserHasUserType",
             tableName: "users_has_user_types",
             fieldMetadata: {
-                userTypesId: {columnName: "user_types_id"},
-                usersId: {columnName: "users_id"},
+                userTypesId: {columnName: "userTypesId"},
+                usersId: {columnName: "usersId"},
                 "usertype.id": {relation: {entityName: "usertype", refField: "id"}},
-                "usertype.userTypes": {relation: {entityName: "usertype", refField: "userTypes", refColumn: "user_types"}},
+                "usertype.userTypes": {relation: {entityName: "usertype", refField: "userTypes"}},
                 "user.id": {relation: {entityName: "user", refField: "id"}},
-                "user.userId": {relation: {entityName: "user", refField: "userId", refColumn: "user_id"}},
-                "user.firstName": {relation: {entityName: "user", refField: "firstName", refColumn: "first_name"}},
-                "user.lastName": {relation: {entityName: "user", refField: "lastName", refColumn: "last_name"}},
+                "user.userId": {relation: {entityName: "user", refField: "userId"}},
+                "user.firstName": {relation: {entityName: "user", refField: "firstName"}},
+                "user.lastName": {relation: {entityName: "user", refField: "lastName"}},
                 "user.email": {relation: {entityName: "user", refField: "email"}},
                 "user.password": {relation: {entityName: "user", refField: "password"}},
                 "user.nic": {relation: {entityName: "user", refField: "nic"}},
                 "user.sludi": {relation: {entityName: "user", refField: "sludi"}},
-                "user.contactNo": {relation: {entityName: "user", refField: "contactNo", refColumn: "contact_no"}},
+                "user.contactNo": {relation: {entityName: "user", refField: "contactNo"}},
                 "user.address": {relation: {entityName: "user", refField: "address"}}
             },
-            keyFields: ["usersId", "userTypesId"],
+            keyFields: ["userTypesId", "usersId"],
             joinMetadata: {
-                usertype: {entity: UserType, fieldName: "usertype", refTable: "user_types", refColumns: ["id"], joinColumns: ["user_types_id"], 'type: psql:ONE_TO_MANY},
-                user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["users_id"], 'type: psql:ONE_TO_MANY}
+                usertype: {entity: UserType, fieldName: "usertype", refTable: "user_types", refColumns: ["id"], joinColumns: ["userTypesId"], 'type: psql:ONE_TO_MANY},
+                user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["usersId"], 'type: psql:ONE_TO_MANY}
             }
         },
         [DISPUTE]: {
@@ -391,54 +456,66 @@ public isolated client class H2Client {
             tableName: "disputes",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                caseId: {columnName: "case_id"},
-                witnessName: {columnName: "witness_name"},
-                disputesDetails: {columnName: "disputes_details"},
-                estimateTime: {columnName: "estimate_time"},
+                caseId: {columnName: "caseId"},
+                witnessName: {columnName: "witnessName"},
+                disputesDetails: {columnName: "disputesDetails"},
+                estimateTime: {columnName: "estimateTime"},
                 status: {columnName: "status"},
-                createdAt: {columnName: "created_at"},
-                landsId: {columnName: "lands_id"},
-                legalOfficerId: {columnName: "legal_officer_id"},
+                createdAt: {columnName: "createdAt"},
+                landsId: {columnName: "landsId"},
+                legalOfficerId: {columnName: "legalOfficerId"},
+                usersId: {columnName: "usersId"},
                 "disputecomments[].id": {relation: {entityName: "disputecomments", refField: "id"}},
                 "disputecomments[].comment": {relation: {entityName: "disputecomments", refField: "comment"}},
-                "disputecomments[].createdAt": {relation: {entityName: "disputecomments", refField: "createdAt", refColumn: "created_at"}},
-                "disputecomments[].disputesId": {relation: {entityName: "disputecomments", refField: "disputesId", refColumn: "disputes_id"}},
+                "disputecomments[].createdAt": {relation: {entityName: "disputecomments", refField: "createdAt"}},
+                "disputecomments[].disputesId": {relation: {entityName: "disputecomments", refField: "disputesId"}},
                 "land.id": {relation: {entityName: "land", refField: "id"}},
-                "land.landId": {relation: {entityName: "land", refField: "landId", refColumn: "land_id"}},
-                "land.landName": {relation: {entityName: "land", refField: "landName", refColumn: "land_name"}},
-                "land.landPlace": {relation: {entityName: "land", refField: "landPlace", refColumn: "land_place"}},
-                "land.landLat": {relation: {entityName: "land", refField: "landLat", refColumn: "land_lat"}},
-                "land.landLang": {relation: {entityName: "land", refField: "landLang", refColumn: "land_lang"}},
-                "land.landSize": {relation: {entityName: "land", refField: "landSize", refColumn: "land_size"}},
-                "land.landValue": {relation: {entityName: "land", refField: "landValue", refColumn: "land_value"}},
-                "land.landType": {relation: {entityName: "land", refField: "landType", refColumn: "land_type"}},
-                "land.registerDate": {relation: {entityName: "land", refField: "registerDate", refColumn: "register_date"}},
-                "land.landStatus": {relation: {entityName: "land", refField: "landStatus", refColumn: "land_status"}},
+                "land.landId": {relation: {entityName: "land", refField: "landId"}},
+                "land.landName": {relation: {entityName: "land", refField: "landName"}},
+                "land.landPlace": {relation: {entityName: "land", refField: "landPlace"}},
+                "land.landLat": {relation: {entityName: "land", refField: "landLat"}},
+                "land.landLang": {relation: {entityName: "land", refField: "landLang"}},
+                "land.landSize": {relation: {entityName: "land", refField: "landSize"}},
+                "land.landValue": {relation: {entityName: "land", refField: "landValue"}},
+                "land.landType": {relation: {entityName: "land", refField: "landType"}},
+                "land.registerDate": {relation: {entityName: "land", refField: "registerDate"}},
+                "land.landStatus": {relation: {entityName: "land", refField: "landStatus"}},
                 "land.priority": {relation: {entityName: "land", refField: "priority"}},
                 "legalofficer.id": {relation: {entityName: "legalofficer", refField: "id"}},
                 "legalofficer.firstName": {relation: {entityName: "legalofficer", refField: "firstName", refColumn: "first_name"}},
                 "legalofficer.lastName": {relation: {entityName: "legalofficer", refField: "lastName", refColumn: "last_name"}},
                 "legalofficer.baslId": {relation: {entityName: "legalofficer", refField: "baslId", refColumn: "BASL_ID"}},
                 "legalofficer.initialCost": {relation: {entityName: "legalofficer", refField: "initialCost", refColumn: "initial_cost"}},
+                "user.id": {relation: {entityName: "user", refField: "id"}},
+                "user.userId": {relation: {entityName: "user", refField: "userId"}},
+                "user.firstName": {relation: {entityName: "user", refField: "firstName"}},
+                "user.lastName": {relation: {entityName: "user", refField: "lastName"}},
+                "user.email": {relation: {entityName: "user", refField: "email"}},
+                "user.password": {relation: {entityName: "user", refField: "password"}},
+                "user.nic": {relation: {entityName: "user", refField: "nic"}},
+                "user.sludi": {relation: {entityName: "user", refField: "sludi"}},
+                "user.contactNo": {relation: {entityName: "user", refField: "contactNo"}},
+                "user.address": {relation: {entityName: "user", refField: "address"}},
                 "disputedocuments[].id": {relation: {entityName: "disputedocuments", refField: "id"}},
-                "disputedocuments[].docPath": {relation: {entityName: "disputedocuments", refField: "docPath", refColumn: "doc_path"}},
-                "disputedocuments[].uploadedDate": {relation: {entityName: "disputedocuments", refField: "uploadedDate", refColumn: "uploaded_date"}},
-                "disputedocuments[].disputesId": {relation: {entityName: "disputedocuments", refField: "disputesId", refColumn: "disputes_id"}},
+                "disputedocuments[].docPath": {relation: {entityName: "disputedocuments", refField: "docPath"}},
+                "disputedocuments[].uploadedDate": {relation: {entityName: "disputedocuments", refField: "uploadedDate"}},
+                "disputedocuments[].disputesId": {relation: {entityName: "disputedocuments", refField: "disputesId"}},
                 "legalprecedents[].id": {relation: {entityName: "legalprecedents", refField: "id"}},
                 "legalprecedents[].year": {relation: {entityName: "legalprecedents", refField: "year"}},
                 "legalprecedents[].headline": {relation: {entityName: "legalprecedents", refField: "headline"}},
                 "legalprecedents[].court": {relation: {entityName: "legalprecedents", refField: "court"}},
                 "legalprecedents[].decision": {relation: {entityName: "legalprecedents", refField: "decision"}},
                 "legalprecedents[].summary": {relation: {entityName: "legalprecedents", refField: "summary"}},
-                "legalprecedents[].disputesId": {relation: {entityName: "legalprecedents", refField: "disputesId", refColumn: "disputes_id"}}
+                "legalprecedents[].disputesId": {relation: {entityName: "legalprecedents", refField: "disputesId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
-                disputecomments: {entity: DisputeComment, fieldName: "disputecomments", refTable: "dispute_comments", refColumns: ["disputes_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
-                land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["lands_id"], 'type: psql:ONE_TO_MANY},
-                legalofficer: {entity: LegalOfficer, fieldName: "legalofficer", refTable: "legal_officer", refColumns: ["id"], joinColumns: ["legal_officer_id"], 'type: psql:ONE_TO_MANY},
-                disputedocuments: {entity: DisputeDocument, fieldName: "disputedocuments", refTable: "disputes_document", refColumns: ["disputes_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
-                legalprecedents: {entity: LegalPrecedent, fieldName: "legalprecedents", refTable: "legal_precedents", refColumns: ["disputes_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+                disputecomments: {entity: DisputeComment, fieldName: "disputecomments", refTable: "dispute_comments", refColumns: ["disputesId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                land: {entity: Land, fieldName: "land", refTable: "lands", refColumns: ["id"], joinColumns: ["landsId"], 'type: psql:ONE_TO_MANY},
+                legalofficer: {entity: LegalOfficer, fieldName: "legalofficer", refTable: "legal_officer", refColumns: ["id"], joinColumns: ["legalOfficerId"], 'type: psql:ONE_TO_MANY},
+                user: {entity: User, fieldName: "user", refTable: "users", refColumns: ["id"], joinColumns: ["usersId"], 'type: psql:ONE_TO_MANY},
+                disputedocuments: {entity: DisputeDocument, fieldName: "disputedocuments", refTable: "disputes_document", refColumns: ["disputesId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                legalprecedents: {entity: LegalPrecedent, fieldName: "legalprecedents", refTable: "legal_precedents", refColumns: ["disputesId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
         [USER_TYPE]: {
@@ -446,12 +523,12 @@ public isolated client class H2Client {
             tableName: "user_types",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                userTypes: {columnName: "user_types"},
-                "userhasusertypes[].userTypesId": {relation: {entityName: "userhasusertypes", refField: "userTypesId", refColumn: "user_types_id"}},
-                "userhasusertypes[].usersId": {relation: {entityName: "userhasusertypes", refField: "usersId", refColumn: "users_id"}}
+                userTypes: {columnName: "userTypes"},
+                "userhasusertypes[].userTypesId": {relation: {entityName: "userhasusertypes", refField: "userTypesId"}},
+                "userhasusertypes[].usersId": {relation: {entityName: "userhasusertypes", refField: "usersId"}}
             },
             keyFields: ["id"],
-            joinMetadata: {userhasusertypes: {entity: UserHasUserType, fieldName: "userhasusertypes", refTable: "users_has_user_types", refColumns: ["user_types_id"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
+            joinMetadata: {userhasusertypes: {entity: UserHasUserType, fieldName: "userhasusertypes", refTable: "users_has_user_types", refColumns: ["userTypesId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
         }
     };
 
@@ -464,6 +541,7 @@ public isolated client class H2Client {
         self.persistClients = {
             [LAND_DOCUMENT]: check new (dbClient, self.metadata.get(LAND_DOCUMENT), psql:H2_SPECIFICS),
             [LEGAL_PRECEDENT]: check new (dbClient, self.metadata.get(LEGAL_PRECEDENT), psql:H2_SPECIFICS),
+            [PAYMENT_HISTORY]: check new (dbClient, self.metadata.get(PAYMENT_HISTORY), psql:H2_SPECIFICS),
             [USER]: check new (dbClient, self.metadata.get(USER), psql:H2_SPECIFICS),
             [LEGAL_CLAUSE]: check new (dbClient, self.metadata.get(LEGAL_CLAUSE), psql:H2_SPECIFICS),
             [DISPUTE_DOCUMENT]: check new (dbClient, self.metadata.get(DISPUTE_DOCUMENT), psql:H2_SPECIFICS),
@@ -554,6 +632,46 @@ public isolated client class H2Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(LEGAL_PRECEDENT);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get paymenthistories(PaymentHistoryTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.H2Processor",
+        name: "query"
+    } external;
+
+    isolated resource function get paymenthistories/[int id](PaymentHistoryTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.H2Processor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post paymenthistories(PaymentHistoryInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(PAYMENT_HISTORY);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put paymenthistories/[int id](PaymentHistoryUpdate value) returns PaymentHistory|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(PAYMENT_HISTORY);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/paymenthistories/[id].get();
+    }
+
+    isolated resource function delete paymenthistories/[int id]() returns PaymentHistory|persist:Error {
+        PaymentHistory result = check self->/paymenthistories/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(PAYMENT_HISTORY);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;
@@ -924,7 +1042,7 @@ public isolated client class H2Client {
         name: "query"
     } external;
 
-    isolated resource function get userhasusertypes/[int usersId]/[int userTypesId](UserHasUserTypeTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+    isolated resource function get userhasusertypes/[int userTypesId]/[int usersId](UserHasUserTypeTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
         'class: "io.ballerina.stdlib.persist.sql.datastore.H2Processor",
         name: "queryOne"
     } external;
@@ -936,25 +1054,25 @@ public isolated client class H2Client {
         }
         _ = check sqlClient.runBatchInsertQuery(data);
         return from UserHasUserTypeInsert inserted in data
-            select [inserted.usersId, inserted.userTypesId];
+            select [inserted.userTypesId, inserted.usersId];
     }
 
-    isolated resource function put userhasusertypes/[int usersId]/[int userTypesId](UserHasUserTypeUpdate value) returns UserHasUserType|persist:Error {
+    isolated resource function put userhasusertypes/[int userTypesId]/[int usersId](UserHasUserTypeUpdate value) returns UserHasUserType|persist:Error {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(USER_HAS_USER_TYPE);
         }
-        _ = check sqlClient.runUpdateQuery({"usersId": usersId, "userTypesId": userTypesId}, value);
-        return self->/userhasusertypes/[usersId]/[userTypesId].get();
+        _ = check sqlClient.runUpdateQuery({"userTypesId": userTypesId, "usersId": usersId}, value);
+        return self->/userhasusertypes/[userTypesId]/[usersId].get();
     }
 
-    isolated resource function delete userhasusertypes/[int usersId]/[int userTypesId]() returns UserHasUserType|persist:Error {
-        UserHasUserType result = check self->/userhasusertypes/[usersId]/[userTypesId].get();
+    isolated resource function delete userhasusertypes/[int userTypesId]/[int usersId]() returns UserHasUserType|persist:Error {
+        UserHasUserType result = check self->/userhasusertypes/[userTypesId]/[usersId].get();
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(USER_HAS_USER_TYPE);
         }
-        _ = check sqlClient.runDeleteQuery({"usersId": usersId, "userTypesId": userTypesId});
+        _ = check sqlClient.runDeleteQuery({"userTypesId": userTypesId, "usersId": usersId});
         return result;
     }
 

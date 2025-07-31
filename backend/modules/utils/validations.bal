@@ -169,7 +169,7 @@ public function validateLoginUser(Common:LoginUser user) returns Common:Validati
     };
 }
 
-public function validateLandInsert(DB:LandInsert landInsert) returns Common:ValidationResult {
+public function validateLandInsert(Common:LandCreate landInsert) returns Common:ValidationResult {
     map<string> errorMsg = {};
     boolean errorFlag = false;
     if landInsert.landName == "" {
@@ -209,6 +209,13 @@ public function validateLandInsert(DB:LandInsert landInsert) returns Common:Vali
     if landInsert.priority < 0 {
         errorFlag = true;
         errorMsg["priority"] = PRIORITY_INVALID;
+    }
+    if landInsert.from_owner is DB:LandOwnerInsert {
+        Common:ValidationResult validateLandOwnerInsertResult = validateLandOwnerInsert(<DB:LandOwnerInsert>landInsert.from_owner);
+        if !validateLandOwnerInsertResult.isValid{
+            errorFlag = true;
+            errorMsg = validateLandOwnerInsertResult.errors;
+        }
     }
 
     return {
@@ -302,6 +309,10 @@ public isolated function validateDisputeFormData(Common:DisputeForm form) return
     if form.landsId <= 0 {
         valid = false;
         err["landsId"] = LAND_ID_REQUIRED;
+    }
+    if form.userId <= 0 {
+        valid = false;
+        err["userId"] = USER_ID_REQUIRED;
     }
     if form.legalOfficerId <= 0 {
         valid = false;
@@ -405,3 +416,86 @@ public function validateLegalPrecedent(Common:RequestPrecedent precedent) return
         errors: errorMsg
     };
 }
+
+public function validateLandOwnerInsert(DB:LandOwnerInsert landOwner) returns Common:ValidationResult {
+    boolean errorFlag = false;
+    map<string> errorMsg = {};
+    if landOwner.firstName == "" {
+        errorFlag = true;
+        errorMsg["firstName"] = "First name is required";
+    } else if landOwner.firstName.length() > 45 {
+        errorFlag = true;
+        errorMsg["firstName"] = "First name should not exceed 45 characters";
+    }
+    if landOwner.lastName == "" {
+        errorFlag = true;
+        errorMsg["lastName"] = "Last name is required";
+    } else if landOwner.lastName.length() > 45 {
+        errorFlag = true;
+        errorMsg["lastName"] = "Last name should not exceed 45 characters";
+    }
+    if landOwner.nic == "" {
+        errorFlag = true;
+        errorMsg["nic"] = NIC_REQUIRED;
+    } else if !regex:matches(landOwner.nic, NIC_REGEX) {
+        errorFlag = true;
+        errorMsg["nic"] = NIC_INVALID_FORMAT;
+    }
+    if landOwner.address == "" {
+        errorFlag = true;
+        errorMsg["address"] = "Address is required";
+    }
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
+public function validateUpdatePassword(Common:UpdatePassword password) returns Common:ValidationResult {
+    boolean errorFlag = false;
+    map<string> errorMsg = {};
+    if password.oldPassword == "" {
+        errorFlag = true;
+        errorMsg["oldPassword"] = "Old password is required";
+    }
+    if password.newPassword == "" {
+        errorFlag = true;
+        errorMsg["newPassword"] = "New password is required";
+    } else if !regex:matches(password.newPassword, PASSWORD_REGEX) {
+        errorFlag = true;
+        errorMsg["newPassword"] = PASSWORD_LENGTH;
+    }
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+
+public function validateUpdateProfile(Common:UpdateProfile updateProfile) returns Common:ValidationResult {
+    boolean errorFlag = false;
+    map<string> errorMsg = {};
+
+    anydata contact = updateProfile["contact"];
+    anydata? address = updateProfile["address"];
+    if contact is string {
+        if contact.length() == 0 {
+            errorFlag = true;
+            errorMsg["contact"] = "Contact is required";
+        } else if !regex:matches(contact, MOBILE_REGEX) {
+            errorFlag = true;
+            errorMsg["contact"] = "Invalid contact number";
+        }
+    }
+    if address is string {
+        if address.length() == 0 {
+            errorFlag = true;
+            errorMsg["address"] = "Address is required";
+        }
+    }
+
+    return {
+        isValid: !errorFlag,
+        errors: errorMsg
+    };
+}
+

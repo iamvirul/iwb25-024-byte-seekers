@@ -11,7 +11,7 @@ import (
 
 func CalculateHash(block models.Block) string {
 	blockData, _ := json.Marshal(block.LandTransfer)
-	record := fmt.Sprintf("%d%s%s%s", block.Index, block.Timestamp, string(blockData), block.PrevHash)
+	record := fmt.Sprintf("%d%s%s", block.Index, string(blockData), block.PrevHash)
 	h := sha256.New()
 	h.Write([]byte(record))
 	return fmt.Sprintf("%x", h.Sum(nil))

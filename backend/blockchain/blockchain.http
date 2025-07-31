@@ -4,14 +4,14 @@ X-API-Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJCeXRlU2Vla2VycyIsIm5h
 
 {
   "LandID": 2,
-  "FromOwnerID": 4 ,
-  "ToOwnerID": 5,
+  "FromOwnerID": 3 ,
+  "ToOwnerID": 4,
   "TransferDate": "2025-07-23T10:00:00Z",
   "VerifiedBy": "land_officer_203"
 }
 
 HTTP/1.1 200  - OK
-date: Thu, 24 Jul 2025 06:12:59 GMT
-content-length: 264
+date: Thu, 31 Jul 2025 15:09:17 GMT
+content-length: 327
 content-type: text/plain; charset=utf-8
 connection: close

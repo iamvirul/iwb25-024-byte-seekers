@@ -29,3 +29,12 @@ public function publishDisputeCommentMessage(Common:DisputeCommentMessage commen
     }
     log:printInfo(`Dispute comment queued for processing: ${commentMessage.dispute.disputesId}`);
 }
+
+public function publishLegalPrecedentMessage(Common:LegalPrecedentMessage legalPrecedent) returns error? {
+    rabbitmq:Error? result = rabbitmqClient->publishMessage({content: legalPrecedent, routingKey: disputePrecedentQueueName});
+    if result is rabbitmq:Error {
+        log:printError("Failed to publish legal precedent message to queue", result);
+        return error("Failed to queue legal precedent processing");
+    }
+    log:printInfo(`Legal precedent queued for processing: ${legalPrecedent.legalPrecedent.disputesId}`);
+}

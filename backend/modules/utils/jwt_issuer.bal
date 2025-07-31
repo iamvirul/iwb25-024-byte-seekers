@@ -1,7 +1,25 @@
 import ballerina/jwt;
 import ballerina/time;
 
-public function issueToken(string audience, string username) returns string|error {
+public function issueToken(string audience, string username, int userId) returns string|error {
+    jwt:IssuerConfig issuerConfig = {
+        issuer: "byteseekers",
+        audience: audience,
+        expTime: 3600,
+        customClaims: { "scp": audience , "sub": username, "uid":userId},
+        signatureConfig: {
+            config: {
+                keyFile: "resources/certificates/private.key"
+            }
+        }
+    };
+
+    string jwt = check jwt:issue(issuerConfig);
+
+    return jwt;
+}
+
+public function issueSocketToken(string audience, string username) returns string|error {
     jwt:IssuerConfig issuerConfig = {
         issuer: "byteseekers",
         audience: audience,
@@ -9,7 +27,7 @@ public function issueToken(string audience, string username) returns string|erro
         customClaims: { "scp": audience , "sub": username},
         signatureConfig: {
             config: {
-                keyFile: "resources/certificates/private.key"
+                keyFile: "resources/certificates/sockets/private.key"
             }
         }
     };
