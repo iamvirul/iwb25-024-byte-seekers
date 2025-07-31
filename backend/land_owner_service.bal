@@ -188,7 +188,21 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                 disputes.push(result);
             };
         check streamResult.close();
-        response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson()});
+        sql:ParameterizedQuery query = `SELECT 
+                            d.usersId,
+                            COUNT(DISTINCT d.id) AS total_disputes,
+                            COUNT(DISTINCT CASE WHEN d.status = 'PENDING' THEN d.id END) AS pending_disputes,
+                            COUNT(DISTINCT CASE WHEN d.status = 'RESOLVED' THEN d.id END) AS resolved_disputes,
+                            COUNT(dc.id) AS total_comments
+                        FROM disputes d
+                        LEFT JOIN dispute_comments dc ON dc.disputesId = d.id
+                        WHERE d.usersId = ${userId}
+                        GROUP BY d.usersId; `;
+        stream<common:DisputeStats, persist:Error?> disputeStatsResult = self.dbClient->queryNativeSQL(query, common:DisputeStats);
+        record {|common:DisputeStats value;|}? statResult = check disputeStatsResult.next();
+        _ = check disputeStatsResult.close();
+
+        response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson(),"stats": statResult.toJson()});
         return response;
     }
 

@@ -2,9 +2,9 @@ import backend.managers as Managers;
 import backend.utils as Utils;
 
 import ballerina/http;
+import ballerina/log;
 // import ballerina/log;
 import ballerina/websocket;
-import ballerina/log;
 
 listener websocket:Listener landOwnerSocketListener = new (9065,
     secureSocket = {
@@ -33,19 +33,21 @@ listener websocket:Listener landOwnerSocketListener = new (9065,
 }
 service /stats on landOwnerSocketListener {
 
-    resource function get [string userID](http:Request req) returns websocket:Service {
-        return new LandOwnerService(userID, req);
+    resource function get [string path]/[string userID](http:Request req) returns websocket:Service {
+        return new LandOwnerService(userID, path, req);
     }
 }
 
 service class LandOwnerService {
     *websocket:Service;
     private final string userID;
+    private final string path;
     private final http:Request req;
 
-    function init(string userID, http:Request req) {
+    function init(string userID, string path, http:Request req) {
         self.userID = userID;
         self.req = req;
+        self.path = path;
     }
 
     remote function onOpen(websocket:Caller caller) returns error? {
@@ -56,13 +58,20 @@ service class LandOwnerService {
             "Authorization": header
         };
         http:Client serviceClient = check new ("localhost:9098/land_owner");
-
-        anydata|http:ClientError allLand = serviceClient->get("/disputes/" + self.userID, serviceHeaders);
-        if allLand is http:ClientError {
+        anydata|http:ClientError response = ();
+        match self.path {
+            "dashboard" => {
+                response = serviceClient->get("/stats/" + self.userID, serviceHeaders);
+            }
+            "disputes" => {
+                response = serviceClient->get("/disputes/" + self.userID, serviceHeaders);
+            }
+        }
+        if response is http:ClientError {
             log:printError("Error fetching disputes: ");
             return;
         }
-        check caller->writeMessage(allLand);
+        check caller->writeMessage(response);
     }
 
     remote function onClose(websocket:Caller caller) returns error? {

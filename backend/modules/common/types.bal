@@ -217,7 +217,8 @@ public type CountResult record {
 };
 
 public type LandOwnerDisputeStats record {
-    int total;
+    int pendingCount;
+    int resolvedCount;
 };
 
 public type DisputeMessage record {|
@@ -305,4 +306,12 @@ public type LandOwnerStats record {|
     int transfersSent;
     int transfersReceived;
     int currentLandsOwned;
+|};
+
+public type DisputeStats record {|
+    int usersId;
+    int total_disputes;
+    int pending_disputes;
+    int resolved_disputes;
+    int total_comments;
 |};
