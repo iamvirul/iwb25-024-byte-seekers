@@ -113,31 +113,6 @@ const Login = () => {
                   required
                 />
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <input
-                      id="remember-me"
-                      name="remember-me"
-                      type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
-                    />
-                    <label
-                      htmlFor="remember-me"
-                      className="ml-3 block text-sm font-medium text-gray-700"
-                    >
-                      මතක තබන්න
-                    </label>
-                  </div>
-
-                  <div className="text-sm">
-                    <a
-                      href="#"
-                      className="font-semibold text-blue-600 hover:text-blue-500 transition-colors duration-200"
-                    >
-                      මුරපදය අමතකයි?
-                    </a>
-                  </div>
-                </div>
                  <RoleSelector
                   value={formData.role}
                   onChange={(value) =>
