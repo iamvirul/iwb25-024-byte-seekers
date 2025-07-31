@@ -4,8 +4,6 @@ import backend.utils as Utils;
 
 import ballerina/crypto;
 import ballerina/http;
-import ballerina/io;
-import ballerina/jwt;
 import ballerina/persist;
 import ballerina/uuid;
 
@@ -67,6 +65,20 @@ service /auth on authMicroservice {
                 return response;
             }
             Utils:USER_TYPES userType = check Utils:getUserType(loginUser.user_type);
+            int userTypeId = loginUser.user_type;
+            DB:LegalOfficer? legalOfficer = ();
+            if userTypeId == 4 {
+                stream<DB:LegalOfficer, persist:Error?> legalOfficerResult = self.dbClient->/legalofficers(DB:LegalOfficer, `first_name=${user.firstName} AND last_name=${user.lastName}`);
+                check from var lo in legalOfficerResult
+                    do {
+                        legalOfficer = lo;
+                    };
+                check legalOfficerResult.close();
+            }
+            int legalOfficerId = 0;
+            if legalOfficer is DB:LegalOfficer {
+                legalOfficerId = legalOfficer.id;
+            }
             string|error jwt = Utils:issueToken(userType, user.email, user.id);
             string|error socketToken = Utils:issueSocketToken(userType, user.email);
             if jwt is string {
@@ -79,10 +91,11 @@ service /auth on authMicroservice {
                                 token: jwt,
                                 socketToken: socketToken,
                                 userId: user.id,
-                                nic:check Utils:decryptData(user.nic),
-                                sludi:check Utils:decryptData(user.sludi),
+                                nic: check Utils:decryptData(user.nic),
+                                sludi: check Utils:decryptData(user.sludi),
                                 email: user.email,
-                                userType: loginUser.user_type
+                                userType: userType,
+                                legalOfficerId: legalOfficerId
                             }
                     );
                     return response;
@@ -202,20 +215,4 @@ service /auth on authMicroservice {
         }
     }
 
-    resource function get validate/[string token]() returns json|error {
-        string jwt = token;
-
-        jwt:ValidatorConfig validatorConfig = {
-            issuer: "byteseekers",
-            audience: Utils:LAND_OWNER,
-            clockSkew: 60,
-            signatureConfig: {
-                certFile: "resources/certificates/public.crt"
-            }
-        };
-
-        jwt:Payload result = check jwt:validate(jwt, validatorConfig);
-
-        io:println("Token is valid: ", result);
-    }
 }
