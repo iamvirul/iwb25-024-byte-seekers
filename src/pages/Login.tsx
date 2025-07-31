@@ -46,7 +46,13 @@ const Login = () => {
     try {
       const success = await login(formData.email, formData.password, formData.role);
       if (success) {
-        navigate("/dashboard");
+        if (formData.role === 1) {
+          navigate("/dashboard");
+        } else if (formData.role === 2) {
+          navigate("/land-officer");
+        } else if (formData.role === 3) {
+          navigate("/legal-officer");
+        }
       } else {
         setError("වලංගු නොවන ඊමේල් හෝ මුරපදය");
       }
