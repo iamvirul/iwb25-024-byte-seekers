@@ -37,7 +37,7 @@ func InitDB() {
 }
 
 func getLastBlockTx(tx *sql.Tx, landID int) (lastIndex int, lastHash string, err error) {
-	query := `SELECT block_index, block_hash FROM land_transfer_chain WHERE lands_id = ? ORDER BY block_index DESC LIMIT 1`
+	query := `SELECT blockIndex, blockHash FROM land_transfer_chain WHERE landsId = ? ORDER BY blockIndex DESC LIMIT 1`
 	row := tx.QueryRow(query, landID)
 
 	err = row.Scan(&lastIndex, &lastHash)
@@ -81,8 +81,8 @@ func InsertBlock(b models.Block) (err error) {
 	b.PrevHash = lastHash
 
 	query := `INSERT INTO land_transfer_chain (
-		transfer_date, verified_by, block_index, block_hash, prev_block_hash,
-		from_land_owners_id, to_land_owners_id, lands_id
+		transferDate, verifiedBy, blockIndex, blockHash, prevBlockHash,
+		fromLandOwnersId, toLandOwnersId, landsId
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
 	var fromOwner interface{}

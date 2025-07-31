@@ -12,6 +12,7 @@ public const string disputeQueueName = "DISPUTE_QUEUE";
 public const string deadLetterQueueName = "DISPUTE_DLQ";
 public const string estimateTimeQueueName = "DISPUTE_ESTIMATE_TIME_EXCHANGE_QUEUE";
 public const string disputeCommentQueueName = "DISPUTE_COMMENT_EXCHANGE_QUEUE";
+public const string disputePrecedentQueueName = "DISPUTE_LEGAL_PRECEDENT_EXCHANGE";
 
 public final rabbitmq:Client rabbitmqClient = check new (
     rabbitmq:DEFAULT_HOST,

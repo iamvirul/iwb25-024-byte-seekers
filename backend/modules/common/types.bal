@@ -2,6 +2,18 @@ import backend.db as DB;
 
 import ballerina/time;
 
+public enum EVENTS {
+    CREATED = "Created",
+    UPDATED = "Updated",
+    DELETED = "Deleted",
+    STATUS_UPDATED = "Status Updated",
+    DISPUTE_CREATED = "Dispute Created",
+    DISPUTE_UPDATED = "Dispute Updated",
+    PRECEDENT_CREATED = "Precedent Created",
+    COMMENT_ADDED = "Comment Added",
+    ESTIMATE_TIME_UPDATED = "Estimate Time Updated"
+}
+
 public type LoginUser record {
     string email;
     string password;
@@ -10,18 +22,30 @@ public type LoginUser record {
 
 public type User record {|
     int id;
-    string first_name;
-    string last_name;
-    string user_id;
+    string firstName;
+    string lastName;
+    string userId;
     string email;
     byte[] nic;
     byte[] sludi;
     byte[] contactNo;
     byte[]? address;
     string password;
-    string contact_no;
     string user_status;
     string user_type;
+|};
+
+public type UserResponse record {|
+    int id;
+    string userId;
+    string firstName;
+    string lastName;
+    string email;
+    string password;
+    string nic;
+    string sludi;
+    string contactNo;
+    string address;
 |};
 
 public type RequestUser record {|
@@ -42,8 +66,8 @@ public type ValidationResult record {|
 |};
 
 public type UserHasTypes record {|
-    int users_id;
-    int user_types_id;
+    int usersId;
+    int userTypesId;
 |};
 
 public type Land record {|
@@ -124,13 +148,34 @@ public type DisputeForm record {
     string disputesDetails;
     int landsId;
     int legalOfficerId;
+    int userId;
 };
 
 public type DisputeWithDocs record {|
     DB:Dispute dispute;
     DB:DisputeDocument?[] documents;
     DB:Land land;
-    DB:LandOwner? currentOwner;
+    string user;
+|};
+
+public type UserDisputesWithDocs record {|
+    DB:Dispute dispute;
+    DB:DisputeDocument?[] documents;
+    DB:Land land;
+    string user;
+    DB:DisputeComment[] comments;
+    LegalPrecedentWithLegalClauses[] legalPrecedent;
+|};
+
+public type LegalPrecedentWithLegalClauses record {|
+    int? id;
+    time:Date? year;
+    string? headline;
+    DB:LegalPrecedentCourt? court;
+    string? decision;
+    string? summary;
+    int? disputesId;
+    DB:LegalClauseOptionalized[]? legalClauses;
 |};
 
 public type Dispute record {|
@@ -171,6 +216,11 @@ public type CountResult record {
     int total;
 };
 
+public type LandOwnerDisputeStats record {
+    int pendingCount;
+    int resolvedCount;
+};
+
 public type DisputeMessage record {|
     DB:DisputeInsert disputeInsert;
     FileRecord[] documents;
@@ -186,4 +236,82 @@ public type DisputeEstimateTimeMessage record {|
 public type DisputeCommentMessage record {|
     DB:DisputeCommentInsert dispute;
     int retryCount = 0;
+    int userId;
+    string contact;
+    string caseId;
+|};
+
+public type LegalPrecedentMessage record {|
+    DB:LegalPrecedentInsert legalPrecedent;
+    string[] legalClauses;
+    int retryCount = 0;
+    int legalOfficerId;
+    int userId;
+|};
+
+public type LegalPrecedent record {|
+    readonly int id;
+    int disputesId;
+    time:Date year;
+    string headline;
+    DB:LegalPrecedentCourt court;
+    string decision;
+    string summary;
+    DB:LegalClause[] legalclauses;
+    Dispute dispute;
+|};
+
+public type socketMessage record {|
+    EVENTS event;
+    json message;
+|};
+
+public type LegalOfficerStats record {|
+    int pending;
+    int rejected;
+    int resolved;
+    int legalPrecedents;
+|};
+
+public type statDataLandOfficer record {|
+    string pending_lands;
+    string registered_today;
+    string rejected_lands;
+    string accepted_lands;
+|};
+
+public type DisputeSocketAdded record {|
+    DB:DisputeInsert dispute;
+    DB:DisputeDocumentInsert[] documents;
+|};
+
+public type LegalPrecedentAdded record {|
+    DB:LegalPrecedentInsert precedent;
+    DB:LegalClauseInsert[] clauses;
+|};
+
+public type UpdatePassword record {|
+    string oldPassword;
+    string newPassword;
+|};
+
+public type UpdateProfile record {|
+    anydata...;
+|};
+
+public type LandOwnerStats record {|
+    int ownerId;
+    string firstName;
+    string lastName;
+    int transfersSent;
+    int transfersReceived;
+    int currentLandsOwned;
+|};
+
+public type DisputeStats record {|
+    int usersId;
+    int total_disputes;
+    int pending_disputes;
+    int resolved_disputes;
+    int total_comments;
 |};

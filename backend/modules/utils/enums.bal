@@ -3,7 +3,7 @@ public enum REGEXS {
     PASSWORD_REGEX = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$",
     DATETIME_REGEX = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$",
     NIC_REGEX = "^(?:\\d{9}[VXvx]|\\d{12})$",
-    MOBILE_REGEX = "^(?:\\+94|94|0)7[0-8]\\d{7}$"
+    MOBILE_REGEX = "^[0]{1}[7]{1}[01245678]{1}[0-9]{7}$"
 }
 
 public enum USER_STATUS {
@@ -128,7 +128,18 @@ public enum DISPUTE_ERRORS {
     FAILED_TO_FETCH_STATS = "Failed to fetch stats",
     FAILED_TO_QUEUE_DISPUTE = "Failed to queue dispute",
     FAILED_TO_QUEUE_DISPUTE_ESTIMATE_TIME = "Failed to queue dispute estimate time",
-    FAILED_TO_QUEUE_DISPUTE_COMMENT = "Failed to queue dispute comment"
+    FAILED_TO_QUEUE_DISPUTE_COMMENT = "Failed to queue dispute comment",
+    FAILED_TO_QUEUE_PRECEDENT = "Failed to queue precedent",
+    USER_ID_REQUIRED = "User ID is required",
+    FAILED_TO_FETCH_USER = "Failed to fetch user",
+    INVALID_USER_ID = "Invalid user ID",
+    NO_DISPUTES_FOUND = "No disputes found",
+    NO_LANDS_FOUND = "No lands found",
+    DISPUTE_NOT_FOUND = "Dispute not found",
+    FAILED_TO_FETCH_DISPUTE = "Failed to fetch dispute",
+    FAILED_TO_FETCH_DISPUTES = "Failed to fetch disputes",
+    FAILED_TO_UPDATE_DISPUTE_STATUS = "Failed to update dispute status",
+    LEGAL_PRECEDENT_NOT_FOUND = "Legal precedent not found"
 }
 
 public enum DOCUMENT_ERRORS {
@@ -136,5 +147,34 @@ public enum DOCUMENT_ERRORS {
     DOCUMENTS_REQUIRED = "Documents are required",
     DOCUMENT_SIZE_EXCEEDED = "Document size exceeded",
     INVALID_DOCUMENT_TYPE = "Invalid document type",
-    DOCUMENT_ALREADY_EXISTS = "Document already exists"
+    DOCUMENT_ALREADY_EXISTS = "Document already exists",
+    FAILED_TO_FETCH_DOCUMENT = "Failed to fetch document",
+    LAND_DOCUMENT_NOT_FOUND = "Document not found",
+    FAILED_TO_UPDATE_DOCUMENT = "Failed to update document",
+    DOCUMENT_UPDATED = "Document updated successfully"
+}
+
+public enum USER_ERRORS {
+    USER_ALREADY_EXISTS = "User already exists",
+    FAILED_TO_REGISTER_USER = "Failed to register user",
+    USER_NOT_FOUND = "User not found",
+    NO_USERS_FOUND = "No users found",
+    USER_ID_REQUIRED = "User ID is required",
+    INVALID_USER_ID = "Invalid user ID",
+    FAILED_TO_FETCH_USER = "Failed to fetch user",
+    FAILED_TO_UPDATE_USER = "Failed to update user",
+    USER_UPDATED = "User updated successfully",
+    FAILED_TO_UPDATE_USER_STATUS = "Failed to update user status",
+    INVALID_USER_STATUS = "Invalid user status",
+    FAILED_TO_FETCH_STATS = "Failed to fetch stats",
+    FAILED_TO_QUEUE_USER = "Failed to queue user",
+    FAILED_TO_QUEUE_USER_STATUS = "Failed to queue user status",
+    FAILED_TO_QUEUE_USER_PASSWORD = "Failed to queue user password",
+    FAILED_TO_QUEUE_USER_ADDRESS = "Failed to queue user address",
+    FAILED_TO_QUEUE_USER_NIC = "Failed to queue user nic",
+    FAILED_TO_QUEUE_USER_SLUDI = "Failed to queue user sludi",
+    FAILED_TO_QUEUE_USER_CONTACT_NO = "Failed to queue user contact no",
+    FAILED_TO_QUEUE_USER_EMAIL = "Failed to queue user email",
+    FAILED_TO_QUEUE_USER_FNAME = "Failed to queue user fname",
+    FAILED_TO_QUEUE_USER_LNAME = "Failed to queue user lname"
 }

@@ -13,30 +13,30 @@ Content-Type: application/json
   "user_type": 4
 }
 
-HTTP/1.1 201  - Created
+HTTP/1.1 502  - Bad Gateway
 content-type: application/json
 connection: close
 server: ballerina
-date: Thu, 24 Jul 2025 23:02:29 +0530
+date: Wed, 30 Jul 2025 20:34:42 +0530
 content-encoding: gzip
-content-length: 79
+content-length: 199
 ###
 POST http://localhost:9091/auth/users/login
 Content-Type: application/json
 
 {
-  "email": "hiranyagunawardhane@gmail.com",
+  "email": "kamalperera@gmail.com",
   "password": "Hiru2005@",
-  "user_type": 3
+  "user_type": 2
 }
 
 HTTP/1.1 200  - OK
 content-type: application/json
 connection: close
 server: ballerina
-date: Mon, 28 Jul 2025 02:59:57 +0530
+date: Thu, 31 Jul 2025 00:56:43 +0530
 content-encoding: gzip
-content-length: 533
+content-length: 814
 ###
 POST http://localhost:9095/land_officer/land/register
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzU3NzEwLCAibmJmIjoxNzUzMzU0MTEwLCAiaWF0IjoxNzUzMzU0MTEwfQ.cwpAOVn31X74lc_440Qk1EMxgfkCIrP_lQx7-4JBTo31ca_VcGdxfyTSHGtXvGY95hkqCDveO2VnpHNtJpVGlSCpo7ZgFVyDnwum-EePyO4dzEN0jnMfO-h1PZUGKnm9zZFirL-CfyHb4UMqD1Pvgru8aXk4VvGPKhZmP-_Klhne7fCbK9NJfYomfLTqk6-kuOo4NuXkx5llJspyfJgONK_oj_aqOxk0QCtgnIrBS__ZlqMXiQ-_nxQMzAcOsbp0u3LYP3V9HRAQ7a5_FpLIz3stobCHfdQUPavRR6RNz58b_iangMtWEyT_ecED7rCp3HcpJ_5ndHVnuINtcAczRA
@@ -92,6 +92,31 @@ content-type: application/json
 connection: close
 server: ballerina
 date: Sat, 26 Jul 2025 20:29:39 +0530
+content-encoding: gzip
+content-length: 76
+###
+POST http://localhost:9070/land_officer/land/landowner/add
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJzdWIiOiJoaXJhbnlhZ3VuYXdhcmRoYW5lQGdtYWlsLmNvbSIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzNzYwMzcyLCAibmJmIjoxNzUzNzU2NzcyLCAiaWF0IjoxNzUzNzU2NzcyLCAic2NwIjoiTEFORF9PRkZJQ0VSIn0.AoX-Tep6bwk1mLsX1iGJYNskIIRtyXRf-NIQgmlx2SMgF4Xyd384dbQrvVCLqBhv8T7fDxxShykMV6HxAnwRoL4_X8xYwQoB62amftpbJ5_K8aBGfGv8vyqBPrGG18qsaFGFFQ2ROZ0jDZ0HzDSXBYUdRKpqJdXPMezv_MA3XRtwKo8350G4O8Q-VKjZ7CJbjfwlc64RXnQpZztReLBW0dk7f475JyVdq9ucIUM_N2qJPBLP-Z9cOJZG12X5zpWEJfPCzvCyerAAATxzAAwL9eHkiIpUe8gRyFm68o_o5zIEuwKQG7Ck3d9d6Eu6fT-n4LmCBlXP-8nHqZ4XA7V3RQ
+Content-Type: application/json
+
+
+{
+  "ownerId": "owner123",
+  "firstName": "Virul",
+  "lastName": "nirmala",
+  "nic": "200528100634",
+  "address": "107",
+  "contactNo": "0"
+}
+###
+GET http://localhost:9070/land_officer/user/landowner/register/2
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJzdWIiOiJrYW1hbHBlcmVyYUBnbWFpbC5jb20iLCAiYXVkIjoiTEFORF9PRkZJQ0VSIiwgImV4cCI6MTc1Mzg3OTE2MiwgIm5iZiI6MTc1Mzg3NTU2MiwgImlhdCI6MTc1Mzg3NTU2MiwgInNjcCI6IkxBTkRfT0ZGSUNFUiIsICJ1aWQiOjJ9.XzwjkX2DKrRJOwV2KXegDgkc40tTi7XExpfKetJzqe9RXtDyBe0O9bH6YKZWDSwiJ5Ia82sxdY53OSECa1qPmlO5Jp-J9w-y_bvROliuCCVWeoF29_rqeUmLAWVB_sM0pFqikgffRpegGliu4gIwk3EmV7a-EBzCgCyrBqP0OFdX5WEoAsJEEzxAU2c2aEixTr3s9RLuuCsvDSXXYhK4Ww2FPztOh8QmCcs8U5jb-QhNTJskjQtW-C7M0xX-w-QEV3bXyBh63noVqdAkmA6FmtcgnwSPzZYyguZW_pklVHyoABB9qokrzWKs0ZHRuVSvfpFUWoENP3-kEPIj2JBjVQ
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Wed, 30 Jul 2025 17:34:18 +0530
 content-encoding: gzip
 content-length: 76
 ###

@@ -31,7 +31,17 @@ public service class RequestInterceptor {
             }
 
             int userId = check int:fromString(textPayload);
-            json jsonPayload = check req.getJsonPayload();
+            json jsonPayload = {};
+            if req.method == http:POST || req.method == http:PUT || req.method == http:PATCH {
+                if req.getContentType().startsWith("multipart/form-data") {
+                    jsonPayload = {"content:": "multipart/form-data"};
+                } else if req.getContentType().startsWith("application/json") {
+                    jsonPayload = check req.getJsonPayload();
+                }else{
+                    jsonPayload = {"content:": "No content type found"};
+                }
+            }
+
             string host = check req.getHeader("Host");
             time:Utc utcNow = time:utcNow();
             time:Civil civilNow = time:utcToCivil(utcNow);
@@ -46,7 +56,7 @@ public service class RequestInterceptor {
             };
             anydata|http:ClientError unionResult = auditClient->/audit/log.post(auditInsert);
             if unionResult is http:ClientError {
-                log:printError("Error inserting audit log: ");
+                log:printError("Error inserting audit log: " + unionResult.message());
                 return ctx.next();
             }
         }
