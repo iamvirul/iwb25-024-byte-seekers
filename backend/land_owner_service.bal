@@ -495,50 +495,17 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             stream<common:LandOwnerStats, persist:Error?> quesryResult = self.dbClient->queryNativeSQL(query);
             record {|common:LandOwnerStats value;|}? statResult = check quesryResult.next();
             _ = check quesryResult.close();
-            if statResult is record {|common:LandOwnerStats value;|} {
-                response.statusCode = 200;
-                response = Utils:setSuccessResponse(response, {"stats": statResult.value.toJson()});
-                return response;
-            } else {
-                response.statusCode = 404;
-                response = Utils:setErrorResponse(response, "No stats found");
-                return response;
-            }
-        } else {
-            response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "User is not a land owner");
-            return response;
-        }
-    }
 
-    resource function get stats/disputes/[int userId]() returns error|http:Response {
-        http:Response response = new;
-        if userId <= 0 {
-            response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Invalid user ID");
-            return response;
-        }
-        DB:User|persist:Error userResult = self.dbClient->/users/[userId](DB:User);
-        if userResult is persist:Error {
-            if userResult is persist:NotFoundError {
-                response.statusCode = 404;
-                response = Utils:setErrorResponse(response, "User not found");
-                return response;
-            }
-            response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Failed to fetch user");
-            return response;
-        }
-        stream<common:LandOwnerDisputeStats, persist:Error?> pendingResultStream = self.dbClient->queryNativeSQL(`
+            stream<common:LandOwnerDisputeStats, persist:Error?> pendingResultStream = self.dbClient->queryNativeSQL(`
         SELECT
             COUNT(CASE WHEN status = 'PENDING' THEN 1 END) AS pendingCount,
             COUNT(CASE WHEN status = 'RESOLVED' THEN 1 END) AS resolvedCount
         FROM disputes
         WHERE usersId = ${userId}`, common:LandOwnerDisputeStats);
-        record {|common:LandOwnerDisputeStats value;|}? pendingResult = check pendingResultStream.next();
-        _ = check pendingResultStream.close();
+            record {|common:LandOwnerDisputeStats value;|}? pendingResult = check pendingResultStream.next();
+            _ = check pendingResultStream.close();
 
-        sql:ParameterizedQuery landQuery = `SELECT l.*
+            sql:ParameterizedQuery landQuery = `SELECT l.*
                                         FROM lands l
                                         JOIN (
                                             SELECT ltc.landsId, ltc.toLandOwnersId
@@ -552,21 +519,26 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                                             WHERE ltc.toLandOwnersId = ${userId}
                                         ) AS ownedLands
                                         ON l.id = ownedLands.landsId;`;
-        DB:Land[] lands = [];
-        stream<DB:Land, persist:Error?> landResultStream = self.dbClient->queryNativeSQL(landQuery, DB:Land);
-        check from var land in landResultStream
-            do {
-                lands.push(land);
-            };
-        _ = check landResultStream.close();
+            DB:Land[] lands = [];
+            stream<DB:Land, persist:Error?> landResultStream = self.dbClient->queryNativeSQL(landQuery, DB:Land);
+            check from var land in landResultStream
+                do {
+                    lands.push(land);
+                };
+            _ = check landResultStream.close();
 
-        if pendingResult is record {|common:LandOwnerDisputeStats value;|} {
-            response.statusCode = 200;
-            response = Utils:setSuccessResponse(response, {"stats": pendingResult.value.toJson(), "lands": lands.toJson()});
-            return response;
+            if statResult is record {|common:LandOwnerStats value;|} && pendingResult is record {|common:LandOwnerDisputeStats value;|} {
+                response.statusCode = 200;
+                response = Utils:setSuccessResponse(response, {"stats": statResult.value.toJson(), "disputes": pendingResult.value.toJson(), "lands": lands.toJson()});
+                return response;
+            } else {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, "No stats found");
+                return response;
+            }
         } else {
-            response.statusCode = 404;
-            response = Utils:setErrorResponse(response, "No disputes found");
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "User is not a land owner");
             return response;
         }
     }
