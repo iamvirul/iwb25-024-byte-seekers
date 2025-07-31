@@ -78,7 +78,11 @@ service /auth on authMicroservice {
                                 message: "Login successful",
                                 token: jwt,
                                 socketToken: socketToken,
-                                userId: user.id
+                                userId: user.id,
+                                nic:check Utils:decryptData(user.nic),
+                                sludi:check Utils:decryptData(user.sludi),
+                                email: user.email,
+                                userType: loginUser.user_type
                             }
                     );
                     return response;
