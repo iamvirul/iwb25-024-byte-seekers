@@ -1,17 +1,17 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface User {
   id: string;
   name: string;
   email: string;
-  role: 'citizen' | 'land_officer' | 'legal_official';
+  role: "land_owner" | "land_officer" | "legal_official";
   nic: string;
   slUdiId: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, user_type: number) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -21,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -33,25 +33,51 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (
+    email: string,
+    password: string,
+    user_type: number
+  ): Promise<boolean> => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock user data based on email
+      const response = await fetch("/api/auth/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, user_type }),
+      });
+
+      if (!response.ok) return false;
+
+      const data = await response.json();
+
+      if (!data.success) return false;
+
+      const { token, userId ,socketToken} = data.content;
+      localStorage.setItem("token", token);
+      localStorage.setItem("socketToken", socketToken);
+      localStorage.setItem("userId", userId.toString());
+
+      const role =
+        user_type === 1
+          ? "land_owner"
+          : user_type === 2
+          ? "land_officer"
+          : "legal_official";
+
       const mockUser: User = {
-        id: '1',
-        name: 'Kasun Perera',
+        id: userId.toString(),
+        name: "Unknown", 
         email,
-        role: email.includes('officer') ? 'land_officer' : 
-              email.includes('legal') ? 'legal_official' : 'citizen',
-        nic: '199512345678',
-        slUdiId: 'SL-UDI-123456789'
+        role,
+        nic: "N/A",
+        slUdiId: "N/A",
       };
-      
+
       setUser(mockUser);
       return true;
     } catch (error) {
+      console.error("Login failed:", error);
       return false;
     }
   };
@@ -64,12 +90,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     login,
     logout,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
