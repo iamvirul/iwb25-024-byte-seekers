@@ -519,16 +519,21 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             record {|common:LandOwnerDisputeStats value;|}? pendingResult = check pendingResultStream.next();
             _ = check pendingResultStream.close();
 
-            sql:ParameterizedQuery landQuery = `SELECT ltc.landsId
-FROM land_transfer_chain ltc
-JOIN (
-    SELECT landsId, MAX(blockIndex) AS maxBlockIndex
-    FROM land_transfer_chain
-    GROUP BY landsId
-) lastTransfers
-ON ltc.landsId = lastTransfers.landsId AND ltc.blockIndex = lastTransfers.maxBlockIndex
-WHERE ltc.toLandOwnersId = ${userId};
-`;
+            sql:ParameterizedQuery landQuery = `SELECT l.*
+    FROM lands l
+    JOIN (
+        SELECT ltc.landsId, ltc.toLandOwnersId
+        FROM land_transfer_chain ltc
+        JOIN (
+            SELECT landsId, MAX(transferDate) AS latestDate
+            FROM land_transfer_chain
+            GROUP BY landsId
+        ) lastTransfers
+        ON ltc.landsId = lastTransfers.landsId AND ltc.transferDate = lastTransfers.latestDate
+        WHERE ltc.toLandOwnersId = ${userId}
+    ) AS ownedLands
+    ON l.id = ownedLands.landsId`;
+
             DB:Land[] lands = [];
             stream<DB:Land, persist:Error?> landResultStream = self.dbClient->queryNativeSQL(landQuery, DB:Land);
             check from var land in landResultStream
