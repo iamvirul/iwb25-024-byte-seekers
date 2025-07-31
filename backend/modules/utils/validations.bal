@@ -169,7 +169,7 @@ public function validateLoginUser(Common:LoginUser user) returns Common:Validati
     };
 }
 
-public function validateLandInsert(DB:LandInsert landInsert) returns Common:ValidationResult {
+public function validateLandInsert(Common:LandCreate landInsert) returns Common:ValidationResult {
     map<string> errorMsg = {};
     boolean errorFlag = false;
     if landInsert.landName == "" {
@@ -209,6 +209,13 @@ public function validateLandInsert(DB:LandInsert landInsert) returns Common:Vali
     if landInsert.priority < 0 {
         errorFlag = true;
         errorMsg["priority"] = PRIORITY_INVALID;
+    }
+    if landInsert.from_owner is DB:LandOwnerInsert {
+        Common:ValidationResult validateLandOwnerInsertResult = validateLandOwnerInsert(<DB:LandOwnerInsert>landInsert.from_owner);
+        if !validateLandOwnerInsertResult.isValid{
+            errorFlag = true;
+            errorMsg = validateLandOwnerInsertResult.errors;
+        }
     }
 
     return {

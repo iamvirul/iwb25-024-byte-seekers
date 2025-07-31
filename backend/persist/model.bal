@@ -161,7 +161,7 @@ public type LandTransferChain record {|
     @sql:Varchar {length: 128}
     string prevBlockHash;
     @sql:Index {name: "fk_land_transfer_chain_land_owners1_idx"}
-    int fromLandOwnersId;
+    int? fromLandOwnersId;
     @sql:Index {name: "fk_land_transfer_chain_land_owners2_idx"}
     int toLandOwnersId;
     @sql:Index {name: "fk_land_transfer_chain_lands1_idx"}

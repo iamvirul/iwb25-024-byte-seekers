@@ -19,6 +19,16 @@ func main() {
 	}
 
 	db.InitDB()
+	blocks, err := db.LoadAllBlocks()
+	if err != nil {
+		log.Fatalf("Failed to load blocks from DB: %v", err)
+	}
+
+	blockchain.LoadBlockchainFromDB(blocks)
+	if err := blockchain.ValidateChain(); err != nil {
+		log.Fatalf("Blockchain validation failed: %v", err)
+	}
+	log.Println("Blockchain integrity validated successfully")
 	blockchain.InitGenesisBlock()
 
 	apiKey := os.Getenv("API_KEY")

@@ -78,78 +78,122 @@ service http:InterceptableService /land_officer on landMicroservice {
     resource function post land/register(@http:Payload Common:LandCreate requestLandInsert) returns http:Response|error|http:Unauthorized {
         requestLandInsert.landId = Utils:generateShortId();
         http:Response response = new;
-        DB:LandInsert landInsert = Mappers:landInsertMapper(requestLandInsert);
-        Common:ValidationResult validateLandInsert = Utils:validateLandInsert(landInsert);
+        Common:ValidationResult validateLandInsert = Utils:validateLandInsert(requestLandInsert);
         if !validateLandInsert.isValid {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, validateLandInsert.errors);
-            return response;
+            return Utils:setErrorResponse(response, validateLandInsert.errors);
         }
-        transaction {
+        DB:LandInsert landInsert = Mappers:landInsertMapper(requestLandInsert);
+
+        int landId = 0;
+        int? fromOwnerId = ();
+        int toOwnerId = 0;
+        json payload;
+        error? blockchainResult = ();
+        string verifiedBy = requestLandInsert.verified_by is string ? requestLandInsert.verified_by == "" ? "unknown" : requestLandInsert.verified_by : "unknown";
+        time:Utc utc = check time:utcFromString(requestLandInsert.transferDate);
+
+        worker Registrar {
             int[]|persist:Error landInsertID = self.dbClient->/lands.post([landInsert]);
             if landInsertID is persist:Error {
-                if landInsertID is persist:AlreadyExistsError {
-                    response.statusCode = 409;
-                    response = Utils:setErrorResponse(response, Utils:LAND_ALREADY_EXISTS);
-                } else {
+                response.statusCode = landInsertID is persist:AlreadyExistsError ? 409 : 500;
+                response = Utils:setErrorResponse(response,
+                            landInsertID is persist:AlreadyExistsError ?
+                            Utils:LAND_ALREADY_EXISTS : Utils:FAILED_TO_REGISTER_LAND);
+                return;
+            }
+
+            landId = landInsertID[0];
+
+            if requestLandInsert.from_owner is DB:LandOwnerInsert {
+                error|int fromOwnerResult = self.creatLandOwner(<DB:LandOwnerInsert>requestLandInsert.from_owner);
+                if fromOwnerResult is error {
                     response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_REGISTER_LAND);
-
+                    response = Utils:setErrorResponse(response, fromOwnerResult.message());
+                    return;
                 }
+                fromOwnerId = fromOwnerResult;
             }
-            boolean isFromOwnerProvided = requestLandInsert.from_owner is (DB:LandOwnerInsert);
-            int fromLandOwnerResult = 0;
-            if requestLandInsert.from_owner is (DB:LandOwnerInsert) {
-                fromLandOwnerResult = check self.creatLandOwner(<DB:LandOwnerInsert>requestLandInsert.from_owner);
-            }
-            error|int toLandOwnerResult = self.creatLandOwner(requestLandInsert.to_owner);
 
-            if toLandOwnerResult is error {
+            error|int toOwnerResult = self.creatLandOwner(requestLandInsert.to_owner);
+            if toOwnerResult is error {
                 response.statusCode = 500;
-                response = Utils:setErrorResponse(response, toLandOwnerResult.message());
+                response = Utils:setErrorResponse(response, toOwnerResult.message());
+                return;
             }
-
-            time:Utc utc = check time:utcFromString(requestLandInsert.transferDate);
+            toOwnerId = toOwnerResult;
 
             Common:LandInsertResponse rawPayload = {
-                "LandID": landInsertID is int[] ? landInsertID[0] : 0,
-                "FromOwnerID": isFromOwnerProvided ? fromLandOwnerResult : (),
-                "ToOwnerID": toLandOwnerResult is int ? toLandOwnerResult : 0,
-                "TransferDate": time:utcToString(utc),
-                "VerifiedBy": requestLandInsert.verified_by is string ? requestLandInsert.verified_by is "" ? "unknown" : requestLandInsert.verified_by : "unknown"
+                LandID: landId,
+                FromOwnerID: fromOwnerId,
+                ToOwnerID: toOwnerId,
+                TransferDate: time:utcToString(utc),
+                VerifiedBy: verifiedBy
             };
-            json payload = rawPayload.toJson();
+
+            payload = rawPayload.toJson();
+            _ = payload ->> Blockchain;
+        }
+
+        worker Blockchain {
+            json|error data = <- Registrar;
+
+            if data is error {
+                blockchainResult = data;
+                return;
+            }
+
+            json payloadData = data;
 
             map<string> blockchainHeaders = {
                 "x-api-key": blockchain_api_key
             };
-            http:Client blockchainClient = check new (blockchain_url);
-            http:Response|http:ClientError blockchain_response = blockchainClient->post("/transfer", payload, blockchainHeaders);
-            if blockchain_response is http:ClientError {
-                response.statusCode = 500;
-                response = Utils:setErrorResponse(response, "Failed to connect to blockchain service");
+
+            http:Client|error blockchainClient = new (blockchain_url);
+            if blockchainClient is error {
+                blockchainResult = blockchainClient;
+                return;
             }
-            if blockchain_response is http:Response {
-                json blockchainResponsePayload = check blockchain_response.getJsonPayload();
-                if blockchainResponsePayload.success is false {
-                    response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, "Failed to transfer land on blockchain");
+            http:Response|http:ClientError blockchainRes = blockchainClient->post("/transfer", payloadData, blockchainHeaders);
+
+            if blockchainRes is http:ClientError {
+                blockchainResult = error("Failed to connect to blockchain");
+                return;
+            }
+
+            json|http:ClientError jsonPayload = blockchainRes.getJsonPayload();
+            if jsonPayload is http:ClientError {
+                blockchainResult = jsonPayload;
+                return;
+            }
+
+            json blockchainJson = jsonPayload;
+
+            if blockchainJson.success is boolean {
+                if blockchainJson.success is error {
+                    blockchainResult = error("Blockchain transfer failed");
+                    return;
                 }
             } else {
-                response.statusCode = 500;
-                response = Utils:setErrorResponse(response, "Failed to connect to blockchain service");
+                blockchainResult = error("Invalid blockchain response: 'success' field missing or invalid");
+                return;
             }
-            response.statusCode = 201;
-            response = Utils:setSuccessResponse(response, "Land registered successfully");
-
-            Common:socketMessage socketNotify = {
-                event: Common:CREATED,
-                message: landInsert.toJson()
-            };
-
-            Managers:connectionStore.broadcast(socketNotify);
-            check commit;
         }
+
+        if blockchainResult is error {
+            response.statusCode = 500;
+            return Utils:setErrorResponse(response, blockchainResult.message());
+        }
+
+        response.statusCode = 201;
+        response = Utils:setSuccessResponse(response, "Land registered successfully");
+
+        Common:socketMessage socketNotify = {
+            event: Common:CREATED,
+            message: landInsert.toJson()
+        };
+        Managers:connectionStore.broadcast(socketNotify);
+
         return response;
     }
 
@@ -396,34 +440,34 @@ service http:InterceptableService /land_officer on landMicroservice {
                 userTypeId = landOwnerTypeResult.id;
             };
         check landOwnerType.close();
-            check from var user in streamResult
-                do {
-                    if user.userTypesId == userTypeId {
-                        response.statusCode = 409;
-                        response = Utils:setErrorResponse(response, Utils:USER_ALREADY_EXISTS);
-                        return response;
-                    } else {
-                        [int, int][]|persist:Error userHasTypesAdded = self.dbClient->/userhasusertypes.post([
-                            {
-                                usersId: userID,
-                                userTypesId: <int>userTypeId
-                            }
-                        ]);
-                        if userHasTypesAdded is persist:Error {
-                            if userHasTypesAdded is persist:AlreadyExistsError {
-                                response.statusCode = 409;
-                                response = Utils:setErrorResponse(response, Utils:USER_ALREADY_EXISTS);
-                                return response;
-                            }
+        check from var user in streamResult
+            do {
+                if user.userTypesId == userTypeId {
+                    response.statusCode = 409;
+                    response = Utils:setErrorResponse(response, Utils:USER_ALREADY_EXISTS);
+                    return response;
+                } else {
+                    [int, int][]|persist:Error userHasTypesAdded = self.dbClient->/userhasusertypes.post([
+                        {
+                            usersId: userID,
+                            userTypesId: <int>userTypeId
+                        }
+                    ]);
+                    if userHasTypesAdded is persist:Error {
+                        if userHasTypesAdded is persist:AlreadyExistsError {
+                            response.statusCode = 409;
+                            response = Utils:setErrorResponse(response, Utils:USER_ALREADY_EXISTS);
+                            return response;
                         }
                     }
-                    check streamResult.close();
-                    response.statusCode = 200;
-                    response = Utils:setSuccessResponse(response, Utils:USER_UPDATED);
-                    return response;
-                };
-            response.statusCode = 500;
-            response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_USER_STATUS);
-            return response;
+                }
+                check streamResult.close();
+                response.statusCode = 200;
+                response = Utils:setSuccessResponse(response, Utils:USER_UPDATED);
+                return response;
+            };
+        response.statusCode = 500;
+        response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_USER_STATUS);
+        return response;
     }
 }
