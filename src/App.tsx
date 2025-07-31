@@ -13,8 +13,6 @@ import LandRegistry from "./pages/LandRegistry";
 import PropertySearch from "./pages/PropertySearch";
 import Transactions from "./pages/Transactions";
 import Disputes from "./pages/Disputes";
-import Documents from "./pages/Documents";
-import SmartContracts from "./pages/SmartContracts";
 import Profile from "./pages/Profile";
 import LandChainPage from "./pages/LandChainPage";
 import ProtectedRoute from "./components/ProtectedRoute";
