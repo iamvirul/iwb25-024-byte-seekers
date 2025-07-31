@@ -462,7 +462,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             response = Utils:setErrorResponse(response, "Failed to fetch user");
             return response;
         }
-        stream<DB:LandOwner, persist:Error?> landOwnerResult = self.dbClient->/landowners(DB:LandOwner, `nic=${userResult.nic}`);
+        stream<DB:LandOwner, persist:Error?> landOwnerResult = self.dbClient->/landowners(DB:LandOwner, `nic=${check Utils:decryptData(userResult.nic)}`);
         DB:LandOwner? landOwner = ();
         var result = check landOwnerResult.next();
         _ = check landOwnerResult.close();
