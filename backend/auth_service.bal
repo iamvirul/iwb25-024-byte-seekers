@@ -95,6 +95,7 @@ service /auth on authMicroservice {
                                 sludi: check Utils:decryptData(user.sludi),
                                 email: user.email,
                                 userType: userType,
+                                name: user.firstName + " " + user.lastName,
                                 legalOfficerId: legalOfficerId
                             }
                     );
