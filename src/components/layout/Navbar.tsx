@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { 
-  Home, Search, FileText, Users, Gavel, Upload, 
+  Home, Search, Users, Gavel, 
   Menu, X, LogOut, User, Shield, Settings, BarChart3, Scale
 } from 'lucide-react';
 import Button from '../ui/Button';
@@ -23,10 +23,8 @@ const Navbar = () => {
   const navigation = [
     { name: 'මුල් පිටුව', href: '/', icon: Home },
     { name: 'ඉඩම් ගවේෂණය', href: '/search', icon: Search },
-    { name: 'ලේඛන', href: '/documents', icon: FileText },
     { name: 'ගනුදෙනු', href: '/transactions', icon: Users },
     { name: 'ගැටළු', href: '/disputes', icon: Gavel },
-    { name: 'ස්මාර්ට් කොන්ත්‍රාක්ට්', href: '/contracts', icon: Upload }
   ];
 
   // Add land officer specific navigation

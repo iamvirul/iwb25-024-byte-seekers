@@ -11,7 +11,11 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, user_type: number) => Promise<boolean>;
+  login: (
+    email: string,
+    password: string,
+    user_type: number
+  ) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -53,28 +57,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (!data.success) return false;
 
-      const { token, userId ,socketToken} = data.content;
+      const {
+        token,
+        socketToken,
+        userId,
+        nic,
+        sludi,
+        email: userEmail,
+        userType,
+        name,
+        legalOfficerId
+      } = data.content;
+
       localStorage.setItem("token", token);
       localStorage.setItem("socketToken", socketToken);
       localStorage.setItem("userId", userId.toString());
+      localStorage.setItem("role",userType);
+      if (legalOfficerId != 0) {
+        localStorage.setItem("legalOfficerId", legalOfficerId.toString());
+      }
 
-      const role =
-        user_type === 1
-          ? "land_owner"
-          : user_type === 2
-          ? "land_officer"
-          : "legal_official";
 
-      const mockUser: User = {
+      const role = userType.toLowerCase() as User["role"];
+
+      const userObj: User = {
         id: userId.toString(),
-        name: "Unknown", 
-        email,
+        name, 
+        email: userEmail,
         role,
-        nic: "N/A",
-        slUdiId: "N/A",
+        nic,
+        slUdiId: sludi,
       };
 
-      setUser(mockUser);
+      setUser(userObj);
       return true;
     } catch (error) {
       console.error("Login failed:", error);
