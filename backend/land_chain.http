@@ -1,0 +1,168 @@
+POST http://localhost:9091/auth/users/register
+Content-Type: application/json
+
+{
+  "first_name": "Roshan",
+  "last_name": "Jayasinghe",
+  "email": "roshan@gmail.com",
+  "nic": "973456789V",
+  "password": "Hiru2005@",
+  "contact_no": "0768190976",
+  "address": "Colombo",
+  "sludi": "SL-UDI-000000008",
+  "user_type": 4
+}
+
+HTTP/1.1 502  - Bad Gateway
+content-type: application/json
+connection: close
+server: ballerina
+date: Wed, 30 Jul 2025 20:34:42 +0530
+content-encoding: gzip
+content-length: 199
+###
+POST http://localhost:9091/auth/users/login
+Content-Type: application/json
+
+{
+  "email": "kamalperera@gmail.com",
+  "password": "Hiru2005@",
+  "user_type": 2
+}
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Thu, 31 Jul 2025 00:56:43 +0530
+content-encoding: gzip
+content-length: 814
+###
+POST http://localhost:9095/land_officer/land/register
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzU3NzEwLCAibmJmIjoxNzUzMzU0MTEwLCAiaWF0IjoxNzUzMzU0MTEwfQ.cwpAOVn31X74lc_440Qk1EMxgfkCIrP_lQx7-4JBTo31ca_VcGdxfyTSHGtXvGY95hkqCDveO2VnpHNtJpVGlSCpo7ZgFVyDnwum-EePyO4dzEN0jnMfO-h1PZUGKnm9zZFirL-CfyHb4UMqD1Pvgru8aXk4VvGPKhZmP-_Klhne7fCbK9NJfYomfLTqk6-kuOo4NuXkx5llJspyfJgONK_oj_aqOxk0QCtgnIrBS__ZlqMXiQ-_nxQMzAcOsbp0u3LYP3V9HRAQ7a5_FpLIz3stobCHfdQUPavRR6RNz58b_iangMtWEyT_ecED7rCp3HcpJ_5ndHVnuINtcAczRA
+Content-Type: application/json
+
+{
+  "landId": "234da",
+  "landName": "Sample Land",
+  "landPlace": "Colombo",
+  "landLat": 0,
+  "landLang": 0,
+  "landSize": 10,
+  "landValue": 0,
+  "landType": "{?}",
+  "registerDate": {
+    "year": 2023,
+    "month": 10,
+    "day": 1
+  },
+  "landStatus": "REJECTED",
+  "priority": 0
+}
+
+HTTP/1.1 401  - Unauthorized
+content-type: text/plain
+connection: close
+server: ballerina
+date: Thu, 24 Jul 2025 17:53:12 +0530
+content-encoding: gzip
+content-length: 62
+###
+GET http://localhost:9095/land_officer/land/all
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzYwODgxLCAibmJmIjoxNzUzMzU3MjgxLCAiaWF0IjoxNzUzMzU3MjgxfQ.flFVTk2MJazz9lD2cpBKUARu4rkkcSdSmUciwvUgAjo5Kseceicnjqsk0nBXGgj93YZgNmLLIA-9M5xzYjRvoRQ8_7tDmdvAoi7mvZwnEeDOP9FN6EEIOPbfLR5HK4frL4Bp-zHlnlA8u-TM095P4axckWKXU9_i9Ce7Lp6e8EdAFc6upz1jpx1WamO7dqt2FDguWT28wBGyy6KaDl_JFnS626yf45warLv0cO8VSOMJckzHZ45Xfy9sjpgufPrB852KnbnoZQbwnnOAvqx_OBsm63rB-LQH9-xvmqDERBBYem_Qt_LVLVHcbEkVztV0mCAqUhKfMArkjMzuWpgKRw
+###
+GET http://localhost:9095/land/getLandById/2
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzMzYwODgxLCAibmJmIjoxNzUzMzU3MjgxLCAiaWF0IjoxNzUzMzU3MjgxfQ.flFVTk2MJazz9lD2cpBKUARu4rkkcSdSmUciwvUgAjo5Kseceicnjqsk0nBXGgj93YZgNmLLIA-9M5xzYjRvoRQ8_7tDmdvAoi7mvZwnEeDOP9FN6EEIOPbfLR5HK4frL4Bp-zHlnlA8u-TM095P4axckWKXU9_i9Ce7Lp6e8EdAFc6upz1jpx1WamO7dqt2FDguWT28wBGyy6KaDl_JFnS626yf45warLv0cO8VSOMJckzHZ45Xfy9sjpgufPrB852KnbnoZQbwnnOAvqx_OBsm63rB-LQH9-xvmqDERBBYem_Qt_LVLVHcbEkVztV0mCAqUhKfMArkjMzuWpgKRw
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Thu, 24 Jul 2025 17:53:13 +0530
+content-encoding: gzip
+content-length: 263
+###
+PUT http://localhost:9070/land_officer/land/status/1/REJECTED
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzNTQ1NDY2LCAibmJmIjoxNzUzNTQxODY2LCAiaWF0IjoxNzUzNTQxODY2LCAic2NwIjoiTEFORF9PRkZJQ0VSIn0.huH0RKCjQtWYGg3Enxxaodf-aXspTn5mXQZOx2C3e5iORkJqjn5SdLy2Geki3ro6fVRkPpK9FCHL8pQo9jwuCpkS7KsCfm1DvwsK96fnLGMVTJIoAotskc4tNOLAv9JMQdPMKWusT9SD4iOxozxNFp-LTF9GibmL2NGQSR_CwL6x7XrL7QZsyJM4Acc1p2MtqGhDQjMGnIWya6iMskfk26XLOyfK78Rf8Jo__8VsNOhHhxO6SFV6GJ1L9Nui0VyKYSfCQTnn9jaCkJje6OZHcu3wugIuEPeSTClvACnmrHbW1QgzKuaBBj6hrig3B-q8fnBxYx8KOvIU6e9VINoCSg
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Sat, 26 Jul 2025 20:29:39 +0530
+content-encoding: gzip
+content-length: 76
+###
+POST http://localhost:9070/land_officer/land/landowner/add
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJzdWIiOiJoaXJhbnlhZ3VuYXdhcmRoYW5lQGdtYWlsLmNvbSIsICJhdWQiOiJMQU5EX09GRklDRVIiLCAiZXhwIjoxNzUzNzYwMzcyLCAibmJmIjoxNzUzNzU2NzcyLCAiaWF0IjoxNzUzNzU2NzcyLCAic2NwIjoiTEFORF9PRkZJQ0VSIn0.AoX-Tep6bwk1mLsX1iGJYNskIIRtyXRf-NIQgmlx2SMgF4Xyd384dbQrvVCLqBhv8T7fDxxShykMV6HxAnwRoL4_X8xYwQoB62amftpbJ5_K8aBGfGv8vyqBPrGG18qsaFGFFQ2ROZ0jDZ0HzDSXBYUdRKpqJdXPMezv_MA3XRtwKo8350G4O8Q-VKjZ7CJbjfwlc64RXnQpZztReLBW0dk7f475JyVdq9ucIUM_N2qJPBLP-Z9cOJZG12X5zpWEJfPCzvCyerAAATxzAAwL9eHkiIpUe8gRyFm68o_o5zIEuwKQG7Ck3d9d6Eu6fT-n4LmCBlXP-8nHqZ4XA7V3RQ
+Content-Type: application/json
+
+
+{
+  "ownerId": "owner123",
+  "firstName": "Virul",
+  "lastName": "nirmala",
+  "nic": "200528100634",
+  "address": "107",
+  "contactNo": "0"
+}
+###
+GET http://localhost:9070/land_officer/user/landowner/register/2
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJzdWIiOiJrYW1hbHBlcmVyYUBnbWFpbC5jb20iLCAiYXVkIjoiTEFORF9PRkZJQ0VSIiwgImV4cCI6MTc1Mzg3OTE2MiwgIm5iZiI6MTc1Mzg3NTU2MiwgImlhdCI6MTc1Mzg3NTU2MiwgInNjcCI6IkxBTkRfT0ZGSUNFUiIsICJ1aWQiOjJ9.XzwjkX2DKrRJOwV2KXegDgkc40tTi7XExpfKetJzqe9RXtDyBe0O9bH6YKZWDSwiJ5Ia82sxdY53OSECa1qPmlO5Jp-J9w-y_bvROliuCCVWeoF29_rqeUmLAWVB_sM0pFqikgffRpegGliu4gIwk3EmV7a-EBzCgCyrBqP0OFdX5WEoAsJEEzxAU2c2aEixTr3s9RLuuCsvDSXXYhK4Ww2FPztOh8QmCcs8U5jb-QhNTJskjQtW-C7M0xX-w-QEV3bXyBh63noVqdAkmA6FmtcgnwSPzZYyguZW_pklVHyoABB9qokrzWKs0ZHRuVSvfpFUWoENP3-kEPIj2JBjVQ
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Wed, 30 Jul 2025 17:34:18 +0530
+content-encoding: gzip
+content-length: 76
+###
+POST http://localhost:9098/land_owner/createDispute
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMQU5EX09XTkVSIiwgImV4cCI6MTc1MzM4NzIwMSwgIm5iZiI6MTc1MzM4MzYwMSwgImlhdCI6MTc1MzM4MzYwMX0.TLulKo6FVafeFjQUA56ewW61deyOuu8tklT7lPuwylHckhyHQmqsRRB9Q8Q_fl9qKqktF_IyIoZUVr_pXrIAD2y7NurZUWvecykdq7O5pNzTNqOAbdORgY7Re85VdcyRPc6iaquHmvmmTfWbjtTSJZL53sOwioo2DJNQuo99qfw4LZTLQXab2_LBSmp4tr4cVMekiCUsVZS0ELacrMEG7TjwanPuk5n9wAi0hRhdYAWH93gmekm39XE0VG_8Fo7wg6GIQ1NPcaFbqLTKdOK3TCYM9eG-Tb6hMJo4_lxQi2CkiudP37_S_-iQfgLV-UTJXxI4P2We970AIDeR1ofgsQ
+Content-Type: application/json
+
+{
+  "witnessName": "234da",
+  "disputesDetails": "Sample Dispute",
+  "landsId": 1,
+  "legalOfficerId": 11
+}
+
+HTTP/1.1 201  - Created
+content-type: application/json
+connection: close
+server: ballerina
+date: Fri, 25 Jul 2025 00:30:30 +0530
+content-encoding: gzip
+content-length: 113
+###
+GET http://localhost:9092/legal_officer/getDisputes/11
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMRUdBTF9PRkZJQ0VSIiwgImV4cCI6MTc1MzM4NzM2NiwgIm5iZiI6MTc1MzM4Mzc2NiwgImlhdCI6MTc1MzM4Mzc2Nn0.JdRfwFNE8Lt0gToLYS60xN7XLK_ioVN0St0XQb6wjZgVcyGWeQxpZNXRum6hRRGEqq4vZKaDCZ1tHrSXanVzfs8_ctvWUmVu_Tmke51e4DbayE7V2if25PyT1ACuhR1X0jMK0JTlrP65hO9zy-zQeYw4rgKQRGrsVTFdFh1pFzmwxaSMFyq31LOqfc2ho_762xT2gcWFAm13aWkaZTCMoqQEqoKNqFGGw3tpYINU2VP932N2tnr6ii5ItNiR-jOscNf821t-UKYEkmAAVc6L8P6tox8A6513pvb-pi48aI2wsX7ebFdC1hM3Uizo7dDhIhoueVcSWhuctD0VJw8OBw
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Fri, 25 Jul 2025 00:33:17 +0530
+content-encoding: gzip
+content-length: 282
+###
+POST http://localhost:9092/legal_officer/addEstimateTime
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsICJ0eXAiOiJKV1QifQ.eyJpc3MiOiJieXRlc2Vla2VycyIsICJhdWQiOiJMRUdBTF9PRkZJQ0VSIiwgImV4cCI6MTc1MzM4NzM2NiwgIm5iZiI6MTc1MzM4Mzc2NiwgImlhdCI6MTc1MzM4Mzc2Nn0.JdRfwFNE8Lt0gToLYS60xN7XLK_ioVN0St0XQb6wjZgVcyGWeQxpZNXRum6hRRGEqq4vZKaDCZ1tHrSXanVzfs8_ctvWUmVu_Tmke51e4DbayE7V2if25PyT1ACuhR1X0jMK0JTlrP65hO9zy-zQeYw4rgKQRGrsVTFdFh1pFzmwxaSMFyq31LOqfc2ho_762xT2gcWFAm13aWkaZTCMoqQEqoKNqFGGw3tpYINU2VP932N2tnr6ii5ItNiR-jOscNf821t-UKYEkmAAVc6L8P6tox8A6513pvb-pi48aI2wsX7ebFdC1hM3Uizo7dDhIhoueVcSWhuctD0VJw8OBw
+{
+    "caseId": "CASE-17310792338",
+    "estimateTime":"2 weeks"
+}
+
+HTTP/1.1 200  - OK
+content-type: application/json
+connection: close
+server: ballerina
+date: Fri, 25 Jul 2025 00:32:59 +0530
+content-encoding: gzip
+content-length: 99
