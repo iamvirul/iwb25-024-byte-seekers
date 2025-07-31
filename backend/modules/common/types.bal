@@ -20,6 +20,17 @@ public type LoginUser record {
     int user_type;
 };
 
+public type LoginUserResponse record {|
+    string token;
+    string socketToken;
+    int userId;
+    string nic;
+    string sludi;
+    string email;
+    string userType;
+    anydata...;
+|};
+
 public type User record {|
     int id;
     string firstName;
