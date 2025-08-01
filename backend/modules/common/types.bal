@@ -326,3 +326,9 @@ public type DisputeStats record {|
     int resolved_disputes;
     int total_comments;
 |};
+
+public type UserSession record {|
+    string socketToken;
+    string serviceToken;
+    string userId;
+|};

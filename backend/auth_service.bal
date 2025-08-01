@@ -6,8 +6,16 @@ import ballerina/crypto;
 import ballerina/http;
 import ballerina/persist;
 import ballerina/uuid;
+import ballerinax/redis;
 
 listener http:Listener authMicroservice = new (9091);
+
+redis:Client redis = check new (
+    connection = {
+        host: "localhost",
+        port: 6379
+    }
+);
 
 @http:ServiceConfig {
     cors: {
@@ -83,20 +91,33 @@ service /auth on authMicroservice {
             string|error socketToken = Utils:issueSocketToken(userType, user.email);
             if jwt is string {
                 if socketToken is string {
+                    string userSessionID = user.id.toString() + "_" + uuid:createType4AsString();
+                    Common:UserSession userSession = {
+                        socketToken: socketToken,
+                        serviceToken: jwt,
+                        userId: user.id.toString()
+                    };
+                    string|redis:Error set = redis->set(userSessionID, userSession.toJsonString());
+                    if set is redis:Error {
+                        response.statusCode = 500;
+                        response = Utils:setErrorResponse(response, "Failed to set user session in Redis");
+                        return response;
+                    }
+
                     response.statusCode = 200;
                     response = Utils:setSuccessResponse(
                             response,
                             {
                                 message: "Login successful",
                                 token: jwt,
-                                socketToken: socketToken,
                                 userId: user.id,
                                 nic: check Utils:decryptData(user.nic),
                                 sludi: check Utils:decryptData(user.sludi),
                                 email: user.email,
                                 userType: userType,
                                 name: user.firstName + " " + user.lastName,
-                                legalOfficerId: legalOfficerId
+                                legalOfficerId: legalOfficerId,
+                                userSessionId: userSessionID
                             }
                     );
                     return response;
