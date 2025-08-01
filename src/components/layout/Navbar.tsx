@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { 
-  Home, Search, Users, Gavel, 
+import {
+  Home, Search, Users, Gavel,
   Menu, X, LogOut, User, Shield, Settings, BarChart3, Scale
 } from 'lucide-react';
 import Button from '../ui/Button';
@@ -29,20 +29,31 @@ const Navbar = () => {
 
   // Add land officer specific navigation
   const landOfficerNavigation = [
-    { name: 'නිලධාරී ඩෑෂ්බෝඩ්', href: '/land-officer', icon: BarChart3 },
+    { name: 'මුල් පිටුව', href: '/', icon: Home },
+    { name: 'ඉඩම් ගවේෂණය', href: '/search', icon: Search },
+    { name: 'ඉඩම් නිලධාරී ඩෑෂ්බෝඩ්', href: '/land-officer', icon: BarChart3 },
     { name: 'ඉඩම් ලියාපදිංචිය', href: '/registry', icon: Settings },
-    ...navigation.slice(1) // Exclude home, add others
   ];
 
   // Add legal officer specific navigation
   const legalOfficerNavigation = [
+    { name: 'මුල් පිටුව', href: '/', icon: Home },
+    { name: 'ඉඩම් ගවේෂණය', href: '/search', icon: Search },
     { name: 'නීති නිලධාරී ඩෑෂ්බෝඩ්', href: '/legal-officer', icon: Scale },
-    ...navigation.slice(1) // Exclude home, add others
+  ];
+
+  const landOwnerNavigation = [
+    { name: 'මුල් පිටුව', href: '/', icon: Home },
+    { name: 'ඉඩම් ගවේෂණය', href: '/search', icon: Search },
+    { name: 'ගනුදෙනු', href: '/transactions', icon: Users },
+    { name: 'ගැටළු', href: '/disputes', icon: Gavel },
+    { name: 'ඩෑෂ්බෝඩ්', href: '/dashboard', icon: Scale },
   ];
 
   const getCurrentNavigation = () => {
     if (user?.role === 'land_officer') return landOfficerNavigation;
-    if (user?.role === 'legal_official') return legalOfficerNavigation;
+    if (user?.role === 'legal_officer') return legalOfficerNavigation;
+    if (user?.role === 'land_owner') return landOwnerNavigation;
     return navigation;
   };
 
@@ -52,7 +63,7 @@ const Navbar = () => {
 
   const getDashboardPath = () => {
     if (user?.role === 'land_officer') return '/land-officer';
-    if (user?.role === 'legal_official') return '/legal-officer';
+    if (user?.role === 'legal_officer') return '/legal-officer';
     return '/dashboard';
   };
 
@@ -79,11 +90,10 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isActive(item.href)
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(item.href)
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{item.name}</span>
@@ -103,13 +113,13 @@ const Navbar = () => {
                   <User className="w-4 h-4" />
                   <span>{user?.name}</span>
                 </Link>
-                <Link
+                {/* <Link
                   to={getDashboardPath()}
                   className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-all duration-200"
                 >
                   <Shield className="w-4 h-4" />
                   <span>ඩෑෂ්බෝඩ්</span>
-                </Link>
+                </Link> */}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -162,18 +172,17 @@ const Navbar = () => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 ${
-                    isActive(item.href)
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium transition-all duration-200 ${isActive(item.href)
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.name}</span>
                 </Link>
               );
             })}
-            
+
             {isAuthenticated ? (
               <div className="border-t border-gray-200 pt-3 mt-3 space-y-1">
                 <Link

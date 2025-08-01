@@ -5,12 +5,14 @@ import Button from '../ui/Button';
 
 interface DashboardHeaderProps {
     userName?: string;
+    type: 'land_officer' | 'legal_officer';
     onNotificationsClick: () => void;
     onSettingsClick: () => void;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     userName,
+    type,
     onNotificationsClick,
     onSettingsClick
 }) => {
@@ -24,7 +26,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <div className="flex flex-col md:flex-row md:items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        නීති නිලධාරී ඩෑෂ්බෝඩ්
+                        {type === 'land_officer' ? 'ඉඩම්' : 'නීති'} නිලධාරී ඩෑෂ්බෝඩ්
                     </h1>
                     <p className="text-gray-600">
                         ආයුබෝවන්, {userName}! ඔබේ නීතිමය කාර්ය සාරාංශය

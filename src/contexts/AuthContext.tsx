@@ -4,7 +4,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: "land_owner" | "land_officer" | "legal_official";
+  role: "land_owner" | "land_officer" | "legal_officer";
   nic: string;
   slUdiId: string;
 }

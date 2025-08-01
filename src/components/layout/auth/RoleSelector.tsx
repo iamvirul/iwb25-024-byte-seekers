@@ -16,19 +16,19 @@ interface RoleSelectorProps {
 const RoleSelector: React.FC<RoleSelectorProps> = ({ value, onChange }) => {
   const roleOptions: RoleOption[] = [
     { 
-      value: 1, 
+      value: 2, 
       label: 'සාමාන්‍ය පුරවැසියා',
       description: 'ඉඩම් හිමියන් සහ සාමාන්‍ය පරිශීලකයන්',
       icon: Users
     },
     { 
-      value: 2, 
+      value: 3, 
       label: 'ඉඩම් නිලධාරියා',
       description: 'ඉඩම් ලියාපදිංචි කිරීම් සහ සත්‍යාපන',
       icon: Award
     },
     { 
-      value: 3, 
+      value: 4, 
       label: 'නීති නිලධාරියා',
       description: 'ගැටළු නිරාකරණය සහ නීතිමය කටයුතු',
       icon: Shield

@@ -748,7 +748,7 @@ const Disputes = () => {
                         </div>
                       )}
 
-                      {user?.role === 'legal_official' && selectedDispute.status === 'pending' && (
+                      {user?.role === 'legal_officer' && selectedDispute.status === 'pending' && (
                         <div className="border-t pt-4">
                           <h4 className="font-medium text-gray-900 mb-3">නිරාකරණ ක්‍රියාමාර්ග</h4>
                           <div className="space-y-2">

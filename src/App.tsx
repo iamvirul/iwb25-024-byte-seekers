@@ -47,38 +47,44 @@ function App() {
               <Route
                 path="/legal-officer"
                 element={
-                  <ProtectedRoute allowedRoles={["legal_official"]}>
+                  <ProtectedRoute allowedRoles={["legal_officer"]}>
                     <LegalOfficerDashboard />
                   </ProtectedRoute>
                 }
               />
-              <Route path="/registry" element={<LandRegistry />} />
-              <Route path="/search" element={<PropertySearch />} />
-              <Route
-                path="/transactions"
-                element={
+              <Route path="/registry" element={<ProtectedRoute allowedRoles={["land_officer"]}>
+                <LandRegistry /></ProtectedRoute>} />
+                <Route path="/search" element={<PropertySearch />} />
+                <Route
+                  path="/transactions"
+                  element={
+                    <ProtectedRoute allowedRoles={["land_owner"]}>
+                      <Transactions />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route path="/disputes" element={
                   <ProtectedRoute allowedRoles={["land_owner"]}>
-                    <Transactions />
+                    <Disputes />
                   </ProtectedRoute>
-                }
-              />
-              <Route path="/disputes" element={<Disputes />} />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute
-                    allowedRoles={[
-                      "land_owner",
-                      "land_officer",
-                      "legal_official",
-                    ]}
-                  >
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/land/:landId" element={<LandChainPage />} />
-            </Routes>
+                } />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute
+                      allowedRoles={[
+                        "land_owner",
+                        "land_officer",
+                        "legal_officer",
+                      ]}
+                    >
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/land/:landId" element={<LandChainPage />} />
+              </Routes>
           </main>
           <Footer />
         </div>

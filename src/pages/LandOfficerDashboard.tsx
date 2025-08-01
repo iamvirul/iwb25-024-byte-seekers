@@ -318,6 +318,7 @@ const LandOfficerDashboard = () => {
         {/* Header */}
         <DashboardHeader
           userName={user?.name}
+          type='land_officer'
           onNotificationsClick={() => setShowNotificationsModal(true)}
           onSettingsClick={() => setShowSettingsModal(true)}
         />

@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 interface ProtectedRouteProps {
-  allowedRoles: Array<"land_owner" | "land_officer" | "legal_official">;
+  allowedRoles: Array<"land_owner" | "land_officer" | "legal_officer">;
   children: JSX.Element;
 }
 

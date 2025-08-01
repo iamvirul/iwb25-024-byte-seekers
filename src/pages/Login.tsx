@@ -46,11 +46,11 @@ const Login = () => {
     try {
       const success = await login(formData.email, formData.password, formData.role);
       if (success) {
-        if (formData.role === 1) {
+        if (formData.role === 2) {
           navigate("/dashboard");
-        } else if (formData.role === 2) {
-          navigate("/land-officer");
         } else if (formData.role === 3) {
+          navigate("/land-officer");
+        } else if (formData.role === 4) {
           navigate("/legal-officer");
         }
       } else {
