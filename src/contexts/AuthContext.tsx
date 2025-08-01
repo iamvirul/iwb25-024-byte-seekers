@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const {
         token,
-        socketToken,
+        userSessionId,
         userId,
         nic,
         sludi,
@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } = data.content;
 
       localStorage.setItem("token", token);
-      localStorage.setItem("socketToken", socketToken);
+      localStorage.setItem("userSessionId", userSessionId);
       localStorage.setItem("userId", userId.toString());
       localStorage.setItem("role",userType);
       if (legalOfficerId != 0) {
