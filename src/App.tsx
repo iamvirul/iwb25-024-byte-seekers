@@ -16,6 +16,7 @@ import Disputes from "./pages/Disputes";
 import Profile from "./pages/Profile";
 import LandChainPage from "./pages/LandChainPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import LoadingOverlay from "./components/LoadingOverlay";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <BlockchainProvider>
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <Navbar />
+          <LoadingOverlay/>
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />
