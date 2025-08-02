@@ -332,3 +332,67 @@ public type UserSession record {|
     string serviceToken;
     string userId;
 |};
+
+public type LandTransfer record {
+    int id;
+    string? transferDate;
+    string? verifiedBy;
+    int? blockIndex;
+    string? blockHash;
+    string? prevBlockHash;
+
+    int? from_id;
+    string? from_ownerId;
+    string? from_firstName;
+    string? from_lastName;
+    string? from_nic;
+    string? from_address;
+    string? from_contactNo;
+
+    int to_id;
+    string to_ownerId;
+    string to_firstName;
+    string to_lastName;
+    string to_nic;
+    string? to_address;
+    string? to_contactNo;
+};
+
+public type LandTransferRow record {|
+    int land_id;
+    string landId;
+    string landName;
+    string landPlace;
+    string landLat;
+    string landLang;
+    float landSize;
+    decimal landValue;
+    string landType;
+    string registerDate;
+    string landStatus;
+    int priority;
+
+    int? transfer_id;
+    string? transferDate;
+    string? verifiedBy;
+    int? blockIndex;
+    string? blockHash;
+    string? prevBlockHash;
+
+    int? from_owner_id;
+    string? from_owner_ownerId;
+    string? from_owner_firstName;
+    string? from_owner_lastName;
+    string? from_owner_nic;
+    string? from_owner_address;
+    string? from_owner_contactNo;
+
+    int? to_owner_id;
+    string? to_owner_ownerId;
+    string? to_owner_firstName;
+    string? to_owner_lastName;
+    string? to_owner_nic;
+    string? to_owner_address;
+    string? to_owner_contactNo;
+|};
+

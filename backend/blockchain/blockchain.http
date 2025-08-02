@@ -3,15 +3,15 @@ Content-Type: application/json
 X-API-Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJCeXRlU2Vla2VycyIsIm5hbWUiOiJMYW5kQ2hhaW4tQmxvY2tjaGFpbiIsImFkbWluIjp0cnVlLCJpYXQiOjE1MTYyMzkwMjJ9.tzcCRcSX2bD-CB3ZYOOtnEkJj6LVEqY2NQ3nEuR7zmk
 
 {
-  "LandID": 2,
-  "FromOwnerID": 3 ,
-  "ToOwnerID": 4,
+  "LandID": 1,
+  "FromOwnerID": 2 ,
+  "ToOwnerID": 3,
   "TransferDate": "2025-07-23T10:00:00Z",
   "VerifiedBy": "land_officer_203"
 }
 
 HTTP/1.1 200  - OK
-date: Thu, 31 Jul 2025 15:09:17 GMT
+date: Sat, 02 Aug 2025 08:03:30 GMT
 content-length: 327
 content-type: text/plain; charset=utf-8
 connection: close

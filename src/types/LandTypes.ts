@@ -15,7 +15,7 @@ export interface LandTransfer {
   blockIndex: number;
   blockHash: string;
   prevBlockHash: string;
-  fromLandOwner: LandOwner;
+  fromLandOwner: LandOwner | null;
   toLandOwner: LandOwner;
 }
 
