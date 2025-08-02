@@ -18,6 +18,7 @@ import LandChainPage from "./pages/LandChainPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingOverlay from "./components/LoadingOverlay";
 import NotFoundPage from "./pages/NotFoundPage";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
       <BlockchainProvider>
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <Navbar />
-          <LoadingOverlay/>
+          <LoadingOverlay />
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />
@@ -57,41 +58,67 @@ function App() {
               />
               <Route path="/registry" element={<ProtectedRoute allowedRoles={["land_officer"]}>
                 <LandRegistry /></ProtectedRoute>} />
-                <Route path="/search" element={<PropertySearch />} />
-                <Route
-                  path="/transactions"
-                  element={
-                    <ProtectedRoute allowedRoles={["land_owner"]}>
-                      <Transactions />
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route path="/disputes" element={
+              <Route path="/search" element={<PropertySearch />} />
+              <Route
+                path="/transactions"
+                element={
                   <ProtectedRoute allowedRoles={["land_owner"]}>
-                    <Disputes />
+                    <Transactions />
                   </ProtectedRoute>
-                } />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute
-                      allowedRoles={[
-                        "land_owner",
-                        "land_officer",
-                        "legal_officer",
-                      ]}
-                    >
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/land/:landId" element={<LandChainPage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
+                }
+              />
+
+              <Route path="/disputes" element={
+                <ProtectedRoute allowedRoles={["land_owner"]}>
+                  <Disputes />
+                </ProtectedRoute>
+              } />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute
+                    allowedRoles={[
+                      "land_owner",
+                      "land_officer",
+                      "legal_officer",
+                    ]}
+                  >
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/land/:landId" element={<LandChainPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
           </main>
           <Footer />
         </div>
+        <Toaster
+          position="top-center"
+          reverseOrder={false}
+          gutter={8}
+          containerClassName=""
+          containerStyle={{}}
+          toastOptions={{
+            // Define default options
+            className: '',
+            duration: 5000,
+            removeDelay: 1000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+
+            // Default options for specific types
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: 'green',
+                secondary: 'black',
+              },
+            },
+          }}
+        />
       </BlockchainProvider>
     </AuthProvider>
   );

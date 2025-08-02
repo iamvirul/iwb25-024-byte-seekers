@@ -309,10 +309,12 @@ service on rabbitmqListener {
         if precedentResult is persist:Error {
             return error("Failed to insert legal precedent", precedentResult);
         }
+        int precedentId = precedentResult[0];
+        log:printInfo("Legal precedent ID: " + precedentId.toString());
         foreach var clause in message.legalClauses {
             DB:LegalClauseInsert clauseInsert = {
                 legalClause: clause,
-                legalPrecedentsId: precedentResult[0]
+                legalPrecedentsId: precedentId
             };
             clauseArray.push(clauseInsert);
             int[]|persist:Error clauseResult = self.dbClient->/legalclauses.post([clauseInsert]);
@@ -321,14 +323,16 @@ service on rabbitmqListener {
             }
         }
         Common:LegalPrecedentAdded legalPrecedentAdded = {
+            id: precedentId,
             precedent: message.legalPrecedent,
-            clauses: clauseArray
+            clauses: clauseArray,
+            dispute: message.dispute
         };
         Common:socketMessage socketNotify = {
             event: Common:PRECEDENT_CREATED,
             message: legalPrecedentAdded.toJson()
         };
-        Managers:legalOfficerConnectionStore.broadcast(socketNotify, message.legalOfficerId.toString());
+        Managers:legalOfficerConnectionStore.broadcast(socketNotify, message.dispute.legalOfficerId.toString());
         Common:socketMessage ownerSocketNotify = {
             event: Common:PRECEDENT_CREATED,
             message: legalPrecedentAdded.toJson()

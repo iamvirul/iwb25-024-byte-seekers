@@ -209,7 +209,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                 response = Utils:setErrorResponse(response, Utils:FAILED_TO_ADD_PRECEDENT);
                 return response;
             }
-            error? publishLegalPrecedentMessage = RabbitMQ:publishLegalPrecedentMessage({legalPrecedent: precedentInsert, legalClauses: requestPrecedent.legalClauses, legalOfficerId: dispute.legalOfficerId, userId: dispute.usersId});
+            error? publishLegalPrecedentMessage = RabbitMQ:publishLegalPrecedentMessage({legalPrecedent: precedentInsert, legalClauses: requestPrecedent.legalClauses, dispute: dispute, userId: dispute.usersId});
             if publishLegalPrecedentMessage is error {
                 response.statusCode = 500;
                 response = Utils:setErrorResponse(response, {"message": Utils:FAILED_TO_QUEUE_PRECEDENT});

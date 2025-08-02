@@ -111,15 +111,6 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
     });
   };
 
-  const handleScheduleHearing = () => {
-    if (selectedCase && hearingDate) {
-      const date = new Date(hearingDate).getTime();
-      onScheduleHearing(selectedCase.id, date);
-      setHearingDate('');
-      alert('විභාගය සාර්ථකව නියම කරන ලදී');
-    }
-  };
-
   const handleSaveNotes = () => {
     if (selectedCase) {
       onCaseUpdate(selectedCase.id, { notes: caseNotes });
@@ -210,6 +201,20 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                 >
                   සම්පූර්ණ විස්තර
                 </Button>
+                {selectedCase?.status === 'PENDING' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={Gavel}
+                    onClick={() => {
+                      onResolveCase(selectedCase.id, 'නිරාකරණය කරන ලදී');
+                      setShowCaseDetails(false);
+                    }}
+                    className="w-full"
+                  >
+                    නිරාකරණය
+                  </Button>
+                )}
               </div>
             </Card>
           </motion.div>
@@ -267,7 +272,7 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                         <span className="text-gray-600">ගොනු කළ දිනය:</span>
                         <span>{formatDate(selectedCase.createdAt)}</span>
                       </div>
-                       <div className="flex justify-between">
+                      <div className="flex justify-between">
                         <span className="text-gray-600">තොරතුරු:</span>
                         <span>{selectedCase.disputesDetails}</span>
                       </div>

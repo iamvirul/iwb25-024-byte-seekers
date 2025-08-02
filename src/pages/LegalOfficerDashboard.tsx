@@ -136,24 +136,6 @@ const LegalOfficerDashboard = () => {
     ));
   };
 
-  const handleAddPrecedent = (precedentData) => {
-    const newPrec = {
-      id: 'PREC' + (precedents.length + 1).toString().padStart(3, '0'),
-      ...precedentData,
-      lastUpdated: Date.now()
-    };
-    setPrecedents(prev => [...prev, newPrec]);
-  };
-
-  const handleUpdatePrecedent = (id, updates) => {
-    setPrecedents(prev => prev.map(prec =>
-      prec.id === id ? { ...prec, ...updates, lastUpdated: Date.now() } : prec
-    ));
-  };
-
-  const handleDeletePrecedent = (id) => {
-    setPrecedents(prev => prev.filter(prec => prec.id !== id));
-  };
 
   useEffect(() => {
     const userId = localStorage.getItem("userSessionId");
@@ -165,26 +147,40 @@ const LegalOfficerDashboard = () => {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log(data.content.disputes);
+      console.log('Received message:', data);
       setCases(data.content?.disputes || []);
       setPrecedents(data.content?.precedents || []);
-      
-      // Update stats based on the incoming data
+
       if (data.content?.stats) {
         setStatsData(data.content.stats);
       } else {
-        // Calculate stats from cases if not provided directly
         const pending = data.content?.stats?.filter(c => c.status === 'pending').length || 0;
         const rejected = data.content?.stats?.filter(c => c.status === 'rejected').length || 0;
         const resolved = data.content?.stats?.filter(c => c.status === 'resolved').length || 0;
         const legalPrecedents = data.content?.stats?.legalPrecedents.length || 0;
-        
+
         setStatsData({
           pending,
           rejected,
           resolved,
           legalPrecedents
         });
+      }
+
+      if (data.event == "Precedent Created") {
+        const newPrecedent = {
+          ...data.message.precedent,
+          id: data.message.precedent.id,
+          legalclauses: data.message.clauses,
+          dispute: data.message.dispute
+        };
+        console.log(newPrecedent);
+        setPrecedents(prev => [...prev, newPrecedent]);
+        setStatsData(prev => ({
+          ...prev,
+          legalPrecedents: prev.legalPrecedents + 1
+        }));
+        return;
       }
     };
 
@@ -201,7 +197,6 @@ const LegalOfficerDashboard = () => {
     };
   }, []);
 
-  // Generate stats cards based on the statsData
   const stats = [
     {
       label: 'පොරොත්තුවෙන් සිටින',
@@ -282,9 +277,6 @@ const LegalOfficerDashboard = () => {
           <LegalPrecedentsSection
             activeTab={activeTab}
             precedents={precedents}
-            onAddPrecedent={handleAddPrecedent}
-            onUpdatePrecedent={handleUpdatePrecedent}
-            onDeletePrecedent={handleDeletePrecedent}
           />
 
           <AnalyticsSection activeTab={activeTab} />

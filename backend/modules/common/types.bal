@@ -256,7 +256,7 @@ public type LegalPrecedentMessage record {|
     DB:LegalPrecedentInsert legalPrecedent;
     string[] legalClauses;
     int retryCount = 0;
-    int legalOfficerId;
+    DB:Dispute dispute;
     int userId;
 |};
 
@@ -297,8 +297,10 @@ public type DisputeSocketAdded record {|
 |};
 
 public type LegalPrecedentAdded record {|
+    int id;
     DB:LegalPrecedentInsert precedent;
     DB:LegalClauseInsert[] clauses;
+    DB:Dispute dispute;
 |};
 
 public type UpdatePassword record {|
