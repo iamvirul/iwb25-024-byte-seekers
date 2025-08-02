@@ -95,7 +95,7 @@ service /auth on authMicroservice {
                     Common:UserSession userSession = {
                         socketToken: socketToken,
                         serviceToken: jwt,
-                        userId: user.id.toString()
+                        userId: legalOfficerId == 0 ? user.id.toString() : legalOfficerId.toString()
                     };
                     string|redis:Error set = redis->set(userSessionID, userSession.toJsonString());
                     if set is redis:Error {
