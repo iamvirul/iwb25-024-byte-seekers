@@ -29,7 +29,11 @@ export interface LandDetails {
   landSize: number;
   landValue: number;
   landType: string;
-  registerDate: string;
+  registerDate: {
+    year: number;
+    month: number;
+    day: number;
+  };
   landStatus: string;
   priority: number;
 }

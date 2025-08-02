@@ -11,7 +11,6 @@ import {
   Hash,
   Zap,
   Eye,
-  PersonStanding,
   UserCheck,
 } from "lucide-react";
 import { LandDetails, LandTransfer } from "../types/LandTypes";
@@ -137,14 +136,10 @@ const LandChainVisualization: React.FC = () => {
             සඳහා වෙනස් කළ නොහැකි බ්ලොක්චේන් වාර්තාවක්
           </p>
         </div>
-
-        {/* Land Details Card */}
         {landDetails && (
           <div className="mb-20">
             <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-md relative overflow-hidden group hover:shadow-lg transition-all duration-500">
-              {/* Animated border */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-0 group-hover:opacity-5 transition-opacity duration-500 rounded-2xl" />
-
               <div className="relative z-10">
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
                   <div className="flex items-center gap-4 mb-6 lg:mb-0">
@@ -178,8 +173,10 @@ const LandChainVisualization: React.FC = () => {
                       <span>
                         ලියාපදිංචි කර ඇත:{" "}
                         {new Date(
-                          landDetails.registerDate
-                        ).toLocaleDateString()}
+                          landDetails.registerDate.year,
+                          landDetails.registerDate.month - 1,
+                          landDetails.registerDate.day
+                        ).toDateString()}
                       </span>
                     </div>
                   </div>
