@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  BookOpen, 
-  Search, 
+import {
+  BookOpen,
+  Search,
   Filter,
   Eye,
   Edit,
@@ -36,9 +36,9 @@ interface LegalPrecedent {
 }
 
 interface LegalPrecedentsProps {
-  precedents: LegalPrecedent[];
-  onAddPrecedent: (precedent: Omit<LegalPrecedent, 'id' | 'lastUpdated'>) => void;
-  onUpdatePrecedent: (id: string, updates: Partial<LegalPrecedent>) => void;
+  precedents: any[];
+  onAddPrecedent: (precedent: Omit<any, 'id' | 'lastUpdated'>) => void;
+  onUpdatePrecedent: (id: string, updates: Partial<any>) => void;
   onDeletePrecedent: (id: string) => void;
 }
 
@@ -51,7 +51,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCourt, setFilterCourt] = useState('all');
   const [filterYear, setFilterYear] = useState('all');
-  const [selectedPrecedent, setSelectedPrecedent] = useState<LegalPrecedent | null>(null);
+  const [selectedPrecedent, setSelectedPrecedent] = useState<any | null>(null);
   const [showPrecedentModal, setShowPrecedentModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -69,43 +69,53 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
 
   const courtOptions = [
     { value: 'all', label: 'සියලු අධිකරණ' },
-    { value: 'supreme_court', label: 'ශ්‍රේෂ්ඨාධිකරණය' },
-    { value: 'appeal_court', label: 'අභියාචනාධිකරණය' },
-    { value: 'high_court', label: 'මහාධිකරණය' },
-    { value: 'district_court', label: 'දිස්ත්‍රික් අධිකරණය' }
+    { value: 'SUPREME_COURT', label: 'ශ්‍රේෂ්ඨාධිකරණය' },
+    { value: 'APPELLATE_COURT', label: 'අභියාචනාධිකරණය' },
+    { value: 'HIGH_COURT', label: 'මහාධිකරණය' },
+    { value: 'DISTRICT_COURT', label: 'දිස්ත්‍රික් අධිකරණය' }
   ];
 
   const yearOptions = [
     { value: 'all', label: 'සියලු වර්ෂ' },
+    { value: '2025', label: '2025' },
     { value: '2024', label: '2024' },
     { value: '2023', label: '2023' },
     { value: '2022', label: '2022' },
     { value: '2021', label: '2021' },
-    { value: '2020', label: '2020' }
+    { value: '2019', label: '2019' },
+    { value: '2018', label: '2018' },
+    { value: '2017', label: '2017' },
+    { value: '2016', label: '2016' },
+    { value: '2015', label: '2015' },
+    { value: '2014', label: '2014' },
+    { value: '2013', label: '2013' },
+    { value: '2012', label: '2012' },
+    { value: '2011', label: '2011' },
+    { value: '2010', label: '2010' },
   ];
 
   const filteredPrecedents = precedents.filter(precedent => {
-    const matchesSearch = 
-      precedent.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      precedent.caseNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      precedent.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      precedent.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch =
+      precedent.headline.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      precedent.disspute.caseId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      precedent.summary.toLowerCase().includes(searchTerm.toLowerCase())
+      ;
 
     const matchesCourt = filterCourt === 'all' || precedent.court === filterCourt;
-    const matchesYear = filterYear === 'all' || precedent.year.toString() === filterYear;
+    const matchesYear = filterYear === 'all' || precedent.year.year.toString() === filterYear;
 
     return matchesSearch && matchesCourt && matchesYear;
   });
 
   const getCourtLabel = (court: string) => {
     switch (court) {
-      case 'supreme_court':
+      case 'SUPREME_COURT':
         return 'ශ්‍රේෂ්ඨාධිකරණය';
-      case 'appeal_court':
+      case 'APPELLATE_COURT':
         return 'අභියාචනාධිකරණය';
-      case 'high_court':
+      case 'HIGH_COURT':
         return 'මහාධිකරණය';
-      case 'district_court':
+      case 'DISTRICT_COURT':
         return 'දිස්ත්‍රික් අධිකරණය';
       default:
         return court;
@@ -122,7 +132,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
 
   const handleAddPrecedent = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newPrecedent = {
       ...formData,
       relevantSections: formData.relevantSections.filter(section => section.trim() !== ''),
@@ -221,36 +231,23 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <h4 className="text-lg font-semibold text-gray-900">{precedent.title}</h4>
+                    <h4 className="text-lg font-semibold text-gray-900">{precedent.headline}</h4>
                     <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-medium">
-                      {precedent.caseNumber}
+                      {precedent.dispute.caseId}
                     </span>
                   </div>
                   <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
-                    <span className="font-medium">{precedent.year}</span>
+                    <span className="font-medium">{precedent.year.year}</span>
                     <span>•</span>
                     <span>{getCourtLabel(precedent.court)}</span>
-                    <span>•</span>
-                    <span className="flex items-center">
-                      <Award className="w-3 h-3 mr-1" />
-                      {precedent.citationCount} උපුටා දැක්වීම්
-                    </span>
                   </div>
                   <p className="text-gray-700 mb-4">{precedent.summary}</p>
-                  
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {precedent.tags.map((tag, tagIndex) => (
-                      <span key={tagIndex} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+
                 </div>
                 <div className="flex space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     icon={Eye}
                     onClick={() => {
                       setSelectedPrecedent(precedent);
@@ -267,47 +264,31 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                   </Button>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <h5 className="font-medium text-gray-900 mb-2">අදාළ නීති වගන්ති:</h5>
                   <ul className="text-sm text-gray-600 space-y-1">
-                    {precedent.relevantSections.slice(0, 3).map((section, sectionIndex) => (
+                    {precedent.legalclauses.slice(0, 3).map((section, sectionIndex) => (
                       <li key={sectionIndex} className="flex items-center">
                         <CheckCircle className="w-3 h-3 mr-2 text-green-500" />
-                        {section}
+                        {section.legalClause}
                       </li>
                     ))}
-                    {precedent.relevantSections.length > 3 && (
+                    {precedent.legalclauses.length > 3 && (
                       <li className="text-xs text-gray-500">
-                        +{precedent.relevantSections.length - 3} තවත්
-                      </li>
-                    )}
-                  </ul>
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-900 mb-2">අදාළ අවස්ථා:</h5>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    {precedent.applicableScenarios.slice(0, 3).map((scenario, scenarioIndex) => (
-                      <li key={scenarioIndex} className="flex items-center">
-                        <Scale className="w-3 h-3 mr-2 text-purple-500" />
-                        {scenario}
-                      </li>
-                    ))}
-                    {precedent.applicableScenarios.length > 3 && (
-                      <li className="text-xs text-gray-500">
-                        +{precedent.applicableScenarios.length - 3} තවත්
+                        +{precedent.legalclauses.length - 3} තවත්
                       </li>
                     )}
                   </ul>
                 </div>
               </div>
-              
+
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3">
                 <div className="flex items-center">
                   <Gavel className="w-4 h-4 text-green-600 mr-2" />
                   <span className="text-sm font-medium text-green-800">
-                    තීරණය: {precedent.outcome}
+                    තීරණය: {precedent.decision}
                   </span>
                 </div>
               </div>
@@ -349,7 +330,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            
+
             <form onSubmit={handleAddPrecedent} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -359,7 +340,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                   <input
                     type="text"
                     value={formData.caseNumber}
-                    onChange={(e) => setFormData({...formData, caseNumber: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, caseNumber: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     placeholder="Case_2024_001"
                     required
@@ -373,7 +354,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                   <input
                     type="number"
                     value={formData.year}
-                    onChange={(e) => setFormData({...formData, year: parseInt(e.target.value)})}
+                    onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     min="1900"
                     max="2030"
@@ -388,7 +369,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                   <input
                     type="text"
                     value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     placeholder="නීතිමය සිද්ධියේ සිරස්තලය"
                     required
@@ -401,7 +382,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                   </label>
                   <select
                     value={formData.court}
-                    onChange={(e) => setFormData({...formData, court: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, court: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
                   >
@@ -420,7 +401,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                   <input
                     type="text"
                     value={formData.outcome}
-                    onChange={(e) => setFormData({...formData, outcome: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, outcome: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     placeholder="පැමිණිලිකරුට පක්ෂව"
                     required
@@ -433,7 +414,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                   </label>
                   <textarea
                     value={formData.summary}
-                    onChange={(e) => setFormData({...formData, summary: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     rows={4}
                     placeholder="නීතිමය සිද්ධියේ සාරාංශය"
@@ -536,8 +517,8 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
           >
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">{selectedPrecedent.title}</h3>
-                <p className="text-sm text-gray-600 mt-1">{selectedPrecedent.caseNumber}</p>
+                <h3 className="text-xl font-semibold text-gray-900">{selectedPrecedent.headline}</h3>
+                <p className="text-sm text-gray-600 mt-1">{selectedPrecedent.dispute.caseId}</p>
               </div>
               <button
                 onClick={() => setShowPrecedentModal(false)}
@@ -546,7 +527,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            
+
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-6">
@@ -555,23 +536,15 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">සිද්ධි අංකය:</span>
-                        <span className="font-medium">{selectedPrecedent.caseNumber}</span>
+                        <span className="font-medium">{selectedPrecedent.dispute.caseId}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">වර්ෂය:</span>
-                        <span>{selectedPrecedent.year}</span>
+                        <span>{selectedPrecedent.year.year}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">අධිකරණය:</span>
                         <span>{getCourtLabel(selectedPrecedent.court)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">උපුටා දැක්වීම්:</span>
-                        <span>{selectedPrecedent.citationCount}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">අවසන් යාවත්කාලීනය:</span>
-                        <span>{formatDate(selectedPrecedent.lastUpdated)}</span>
                       </div>
                     </div>
                   </div>
@@ -586,7 +559,7 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                     <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
                       <div className="flex items-center">
                         <Gavel className="w-5 h-5 text-green-600 mr-3" />
-                        <span className="font-medium text-green-800">{selectedPrecedent.outcome}</span>
+                        <span className="font-medium text-green-800">{selectedPrecedent.decision}</span>
                       </div>
                     </div>
                   </div>
@@ -596,34 +569,11 @@ const LegalPrecedents: React.FC<LegalPrecedentsProps> = ({
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3">අදාළ නීති වගන්ති</h4>
                     <div className="space-y-2">
-                      {selectedPrecedent.relevantSections.map((section, index) => (
+                      {selectedPrecedent.legalclauses.map((section, index) => (
                         <div key={index} className="flex items-start text-sm p-3 bg-gray-50 rounded-lg">
                           <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" />
-                          <span>{section}</span>
+                          <span>{section.legalClause}</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">අදාළ අවස්ථා</h4>
-                    <div className="space-y-2">
-                      {selectedPrecedent.applicableScenarios.map((scenario, index) => (
-                        <div key={index} className="flex items-start text-sm p-3 bg-purple-50 rounded-lg">
-                          <Scale className="w-4 h-4 mr-2 mt-0.5 text-purple-500 flex-shrink-0" />
-                          <span>{scenario}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">ටැග්</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedPrecedent.tags.map((tag, index) => (
-                        <span key={index} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
-                          {tag}
-                        </span>
                       ))}
                     </div>
                   </div>

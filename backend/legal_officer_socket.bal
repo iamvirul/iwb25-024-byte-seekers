@@ -49,7 +49,6 @@ service class LegalOfficerService {
 
     remote function onOpen(websocket:Caller caller) returns error? {
         Managers:legalOfficerConnectionStore.addClient(self.userID, caller);
-        check caller->writeMessage(string `Welcome ${self.userID}!`);
         string header = check self.req.getHeader("x-service-token");
         map<string> serviceHeaders = {
             "Authorization": header

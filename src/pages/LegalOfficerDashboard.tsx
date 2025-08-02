@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  Scale, 
-  BarChart3, 
-  Gavel, 
+import {
+  Scale,
+  BarChart3,
+  Gavel,
   BookOpen,
   TrendingUp,
-  CheckCircle, 
-  Clock, 
+  CheckCircle,
+  Clock,
   Calendar
 } from 'lucide-react';
 
@@ -26,110 +26,16 @@ const LegalOfficerDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
+  const [cases, setCases] = useState([]);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-
-  // Mock data for legal officer specific metrics
-  const [cases, setCases] = useState([
-    {
-      id: 'CASE001',
-      disputeId: 'DISP001',
-      title: 'ඉඩම් සීමා ගැටළුව - කොළොන්නාව',
-      propertyId: 'PROP001',
-      complainant: 'සුනිල් සිල්වා',
-      defendant: 'කමල් පෙරේරා',
-      filedDate: Date.now() - 86400000 * 15,
-      status: 'investigating',
-      priority: 'high',
-      assignedDate: Date.now() - 86400000 * 10,
-      hearingDate: Date.now() + 86400000 * 7,
-      caseType: 'boundary_dispute',
-      evidence: ['survey_report.pdf', 'witness_statement.pdf', 'photos.zip'],
-      legalPrecedents: ['CASE_2023_045', 'CASE_2022_123'],
-      estimatedResolutionDays: 30,
-      notes: 'සර්වේ වාර්තාව සමාලෝචනය කිරීම අවශ්‍යයි'
-    },
-    {
-      id: 'CASE002',
-      disputeId: 'DISP002',
-      title: 'හිමිකම් ගැටළුව - ගම්පහ',
-      propertyId: 'PROP002',
-      complainant: 'මාලිනී ජයවර්ධන',
-      defendant: 'රාජ් සිංහ',
-      filedDate: Date.now() - 86400000 * 8,
-      status: 'pending_review',
-      priority: 'medium',
-      assignedDate: Date.now() - 86400000 * 5,
-      caseType: 'ownership_dispute',
-      evidence: ['deed_copy.pdf', 'bank_documents.pdf'],
-      legalPrecedents: ['CASE_2023_078'],
-      estimatedResolutionDays: 45,
-      notes: ''
-    },
-    {
-      id: 'CASE003',
-      disputeId: 'DISP003',
-      title: 'කොන්ත්‍රාක්ටු උල්ලංඝනය - කළුතර',
-      propertyId: 'PROP003',
-      complainant: 'අනිල් ප්‍රේමසිරි',
-      defendant: 'සුමන් ප්‍රේමසිරි',
-      filedDate: Date.now() - 86400000 * 3,
-      status: 'hearing_scheduled',
-      priority: 'urgent',
-      assignedDate: Date.now() - 86400000 * 2,
-      hearingDate: Date.now() + 86400000 * 3,
-      caseType: 'contract_breach',
-      evidence: ['contract.pdf', 'payment_records.pdf', 'correspondence.pdf'],
-      legalPrecedents: ['CASE_2024_012', 'CASE_2023_156'],
-      estimatedResolutionDays: 21,
-      notes: 'හදිසි සිද්ධියක් - ඉක්මන් විභාගයක් අවශ්‍යයි'
-    }
-  ]);
-
-  const [precedents, setPrecedents] = useState([
-    {
-      id: 'PREC001',
-      caseNumber: 'CASE_2023_045',
-      title: 'ඉඩම් සීමා නිර්ණය - සර්වේ වාර්තා මත පදනම්ව',
-      year: 2023,
-      court: 'high_court',
-      summary: 'ඉඩම් සීමා ගැටළුවක් සම්බන්ධයෙන් සර්වේ වාර්තාවේ නිරවද්‍යතාව මත පදනම්ව තීරණයක් ගන්නා ලදී. නිල සර්වේකරුවන්ගේ වාර්තා ප්‍රමුඛත්වය ලබයි.',
-      relevantSections: ['ඉඩම් ලියාපදිංචි කිරීමේ ආඥාව 19වන වගන්තිය', 'සර්වේ ආඥාව 12වන වගන්තිය'],
-      outcome: 'පැමිණිලිකරුට පක්ෂව',
-      applicableScenarios: ['ඉඩම් සීමා ගැටළු', 'සර්වේ වාර්තා මත පදනම්ව තීරණ', 'නිල සර්වේකරුවන්ගේ සාක්ෂි'],
-      tags: ['ඉඩම් සීමා', 'සර්වේ වාර්තා', 'මහාධිකරණය'],
-      citationCount: 15,
-      lastUpdated: Date.now() - 86400000 * 30
-    },
-    {
-      id: 'PREC002',
-      caseNumber: 'CASE_2023_078',
-      title: 'හිමිකම් ගැටළුව - ලේඛන සත්‍යතාව',
-      year: 2023,
-      court: 'district_court',
-      summary: 'ඉඩම් හිමිකම් ගැටළුවක් සම්බන්ධයෙන් ලේඛනවල සත්‍යතාව සහ නීතිමය වලංගුතාව පරීක්ෂා කරන ලදී. මුල් ලේඛන සහ සහතික කළ පිටපත් අතර වෙනස.',
-      relevantSections: ['ඉඩම් ලියාපදිංචි කිරීමේ ආඥාව 25වන වගන්තිය', 'සාක්ෂි ආඥාව 67වන වගන්තිය'],
-      outcome: 'විත්තිකරුට පක්ෂව',
-      applicableScenarios: ['හිමිකම් ගැටළු', 'ලේඛන සත්‍යතාව', 'සහතික කළ පිටපත්'],
-      tags: ['හිමිකම්', 'ලේඛන සත්‍යතාව', 'දිස්ත්‍රික් අධිකරණය'],
-      citationCount: 8,
-      lastUpdated: Date.now() - 86400000 * 45
-    },
-    {
-      id: 'PREC003',
-      caseNumber: 'CASE_2024_012',
-      title: 'කොන්ත්‍රාක්ටු උල්ලංඝනය - වන්දි ගෙවීම',
-      year: 2024,
-      court: 'supreme_court',
-      summary: 'ඉඩම් විකිණීමේ කොන්ත්‍රාක්ටුවක් උල්ලංඝනය කිරීම සම්බන්ධයෙන් වන්දි ගෙවීමේ ප්‍රමාණය නිර්ණය කිරීම. වෙළඳපල වටිනාකම සහ අලාභය සලකා බැලීම.',
-      relevantSections: ['කොන්ත්‍රාක්ටු ආඥාව 73වන වගන්තිය', 'වන්දි ගෙවීමේ ආඥාව 15වන වගන්තිය'],
-      outcome: 'පැමිණිලිකරුට වන්දි ගෙවීමට නියම',
-      applicableScenarios: ['කොන්ත්‍රාක්ටු උල්ලංඝනය', 'වන්දි ගණනය කිරීම', 'වෙළඳපල වටිනාකම'],
-      tags: ['කොන්ත්‍රාක්ටු', 'වන්දි', 'ශ්‍රේෂ්ඨාධිකරණය'],
-      citationCount: 23,
-      lastUpdated: Date.now() - 86400000 * 15
-    }
-  ]);
+  const [precedents, setPrecedents] = useState([]);
+  const [statsData, setStatsData] = useState({
+    pending: 0,
+    rejected: 0,
+    resolved: 0,
+    legalPrecedents: 0
+  });
 
   const monthlyStats = [
     { month: 'ජන', cases: 12, resolved: 8, pending: 4 },
@@ -155,41 +61,6 @@ const LegalOfficerDashboard = () => {
     { day: 'සිකු', avgDays: 27 },
     { day: 'සෙන', avgDays: 24 },
     { day: 'ඉරිදා', avgDays: 26 }
-  ];
-
-  const stats = [
-    { 
-      label: 'අද සම්පූර්ණ කළ', 
-      value: '5', 
-      icon: CheckCircle, 
-      color: 'from-green-500 to-green-600',
-      change: '+2',
-      changeType: 'positive'
-    },
-    { 
-      label: 'විමර්ශනය වෙමින්', 
-      value: '8', 
-      icon: Clock, 
-      color: 'from-blue-500 to-blue-600',
-      change: '+1',
-      changeType: 'positive'
-    },
-    { 
-      label: 'විභාගය නියමිත', 
-      value: '5', 
-      icon: Calendar, 
-      color: 'from-purple-500 to-purple-600',
-      change: '+3',
-      changeType: 'positive'
-    },
-    { 
-      label: 'සාමාන්‍ය නිරාකරණ කාලය', 
-      value: '28 දින', 
-      icon: TrendingUp, 
-      color: 'from-orange-500 to-orange-600',
-      change: '-3 දින',
-      changeType: 'positive'
-    }
   ];
 
   const recentActivities = [
@@ -241,26 +112,25 @@ const LegalOfficerDashboard = () => {
     { id: 'overview', label: 'සාරාංශය', icon: BarChart3 },
     { id: 'cases', label: 'නීතිමය සිද්ධි', icon: Gavel },
     { id: 'precedents', label: 'නීතිමය පූර්වාදර්ශ', icon: BookOpen },
-    { id: 'analytics', label: 'විශ්ලේෂණ', icon: TrendingUp }
   ];
 
   const handleCaseUpdate = (caseId, updates) => {
-    setCases(prev => prev.map(case_ => 
+    setCases(prev => prev.map(case_ =>
       case_.id === caseId ? { ...case_, ...updates } : case_
     ));
   };
 
   const handleScheduleHearing = (caseId, date) => {
-    setCases(prev => prev.map(case_ => 
-      case_.id === caseId 
+    setCases(prev => prev.map(case_ =>
+      case_.id === caseId
         ? { ...case_, hearingDate: date, status: 'hearing_scheduled' }
         : case_
     ));
   };
 
   const handleResolveCase = (caseId, resolution) => {
-    setCases(prev => prev.map(case_ => 
-      case_.id === caseId 
+    setCases(prev => prev.map(case_ =>
+      case_.id === caseId
         ? { ...case_, status: 'resolved', resolution }
         : case_
     ));
@@ -276,7 +146,7 @@ const LegalOfficerDashboard = () => {
   };
 
   const handleUpdatePrecedent = (id, updates) => {
-    setPrecedents(prev => prev.map(prec => 
+    setPrecedents(prev => prev.map(prec =>
       prec.id === id ? { ...prec, ...updates, lastUpdated: Date.now() } : prec
     ));
   };
@@ -284,6 +154,88 @@ const LegalOfficerDashboard = () => {
   const handleDeletePrecedent = (id) => {
     setPrecedents(prev => prev.filter(prec => prec.id !== id));
   };
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userSessionId");
+    const socket = new WebSocket(`ws://127.0.0.1:8075/proxy/${userId}`);
+
+    socket.onopen = () => {
+      console.log('WebSocket connected');
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data.content.disputes);
+      setCases(data.content?.disputes || []);
+      setPrecedents(data.content?.precedents || []);
+      
+      // Update stats based on the incoming data
+      if (data.content?.stats) {
+        setStatsData(data.content.stats);
+      } else {
+        // Calculate stats from cases if not provided directly
+        const pending = data.content?.stats?.filter(c => c.status === 'pending').length || 0;
+        const rejected = data.content?.stats?.filter(c => c.status === 'rejected').length || 0;
+        const resolved = data.content?.stats?.filter(c => c.status === 'resolved').length || 0;
+        const legalPrecedents = data.content?.stats?.legalPrecedents.length || 0;
+        
+        setStatsData({
+          pending,
+          rejected,
+          resolved,
+          legalPrecedents
+        });
+      }
+    };
+
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    socket.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
+
+  // Generate stats cards based on the statsData
+  const stats = [
+    {
+      label: 'පොරොත්තුවෙන් සිටින',
+      value: statsData.pending.toString(),
+      icon: Clock,
+      color: 'from-blue-500 to-blue-600',
+      change: '+0',
+      changeType: 'neutral'
+    },
+    {
+      label: 'ප්‍රතික්ෂේප කළ',
+      value: statsData.rejected.toString(),
+      icon: Gavel,
+      color: 'from-red-500 to-red-600',
+      change: '+0',
+      changeType: 'neutral'
+    },
+    {
+      label: 'නිරාකරණය කළ',
+      value: statsData.resolved.toString(),
+      icon: CheckCircle,
+      color: 'from-green-500 to-green-600',
+      change: '+0',
+      changeType: 'neutral'
+    },
+    {
+      label: 'නීතිමය පූර්වාදර්ශ',
+      value: statsData.legalPrecedents.toString(),
+      icon: BookOpen,
+      color: 'from-purple-500 to-purple-600',
+      change: '+0',
+      changeType: 'neutral'
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30">
@@ -339,14 +291,14 @@ const LegalOfficerDashboard = () => {
         </div>
 
         {/* Modals */}
-        <NotificationsModal 
-          isOpen={showNotificationsModal} 
-          onClose={() => setShowNotificationsModal(false)} 
+        <NotificationsModal
+          isOpen={showNotificationsModal}
+          onClose={() => setShowNotificationsModal(false)}
         />
 
-        <SettingsModal 
-          isOpen={showSettingsModal} 
-          onClose={() => setShowSettingsModal(false)} 
+        <SettingsModal
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
         />
       </div>
     </div>
