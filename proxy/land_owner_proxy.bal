@@ -1,23 +1,32 @@
 import ballerina/lang.value as value;
 import ballerina/log;
 import ballerina/websocket;
+import ballerinax/redis;
 
+redis:Client redisClient = check new (
+    connection = {
+        host: "localhost",
+        port: 6379
+    }
+);
 
-service /proxy on new websocket:Listener(8075) {
+service /proxy on new websocket:Listener(8070) {
 
-    resource function get [string userSessionId]() returns websocket:Service {
-        return new legalOfficerProxy(userSessionId);
+    resource function get [string path]/[string userSessionId]() returns websocket:Service {
+        return new landOwnerProxy(path, userSessionId);
     }
 }
 
-service class legalOfficerProxy {
+service class landOwnerProxy {
     *websocket:Service;
     websocket:Client? realClient = ();
     websocket:Caller? clientCaller = ();
     string userSessionId;
+    string path;
 
-    function init(string userSessionId) {
+    function init(string path, string userSessionId) {
         self.userSessionId = userSessionId;
+        self.path = path;
     }
 
     remote function onOpen(websocket:Caller caller) returns error? {
@@ -32,8 +41,11 @@ service class legalOfficerProxy {
             return;
         }
 
+        string url = "wss://localhost:9065/stats/" + self.path + "/" + fromJsonWithType.userId;
+        log:printInfo(url);
+
         self.clientCaller = caller;
-        self.realClient = check new ("wss://localhost:9060/stats/" + fromJsonWithType.userId,
+        self.realClient = check new ("wss://localhost:9065/stats/" + self.path + "/" + fromJsonWithType.userId,
             secureSocket = {
                 cert: "resources/certificates/sockets/public.crt"
             },

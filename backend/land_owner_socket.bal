@@ -3,7 +3,6 @@ import backend.utils as Utils;
 
 import ballerina/http;
 import ballerina/log;
-// import ballerina/log;
 import ballerina/websocket;
 
 listener websocket:Listener landOwnerSocketListener = new (9065,
@@ -68,7 +67,8 @@ service class LandOwnerService {
             }
         }
         if response is http:ClientError {
-            log:printError("Error fetching disputes: ");
+            log:printError("Error fetching : "+response.message());
+            check caller->writeMessage({"error": response.message()});
             return;
         }
         check caller->writeMessage(response);

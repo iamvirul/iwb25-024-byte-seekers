@@ -1,16 +1,9 @@
 import ballerina/log;
 import ballerina/websocket;
-import ballerinax/redis;
 import ballerina/lang.value as value;
 
-redis:Client redis = check new (
-    connection = {
-        host: "localhost",
-        port: 6379
-    }
-);
 
-service /proxy on new websocket:Listener(8070) {
+service /proxy on new websocket:Listener(8065) {
 
     resource function get [string userSessionId]() returns websocket:Service {
         return new landOfficerProxy(userSessionId);
@@ -34,7 +27,7 @@ service class landOfficerProxy {
     }
 
     remote function onOpen(websocket:Caller caller) returns error? {
-        string? jsonString = check redis->get(self.userSessionId);
+        string? jsonString = check redisClient->get(self.userSessionId);
         if jsonString is () {
             return;
         }

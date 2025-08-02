@@ -58,7 +58,8 @@ service class LegalOfficerService {
 
         anydata|http:ClientError allLand = serviceClient->get("/data/" + self.userID, serviceHeaders);
         if allLand is http:ClientError {
-            log:printError("Error fetching all data: ");
+            log:printError("Error fetching all data: " + allLand.message());
+            check caller->writeMessage({"error": allLand.message()});
             return;
         }
         check caller->writeMessage(allLand);
