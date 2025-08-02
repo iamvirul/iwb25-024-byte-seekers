@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import LandChainPage from "./pages/LandChainPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingOverlay from "./components/LoadingOverlay";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -86,6 +87,7 @@ function App() {
                   }
                 />
                 <Route path="/land/:landId" element={<LandChainPage />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
           </main>
           <Footer />
