@@ -572,6 +572,7 @@ modules = [
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.common"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.db"},
+	{org = "virulnirmala", packageName = "backend", moduleName = "backend.db_client"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.interceptors"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.managers"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.mappers"},

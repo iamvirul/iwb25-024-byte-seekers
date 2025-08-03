@@ -1,6 +1,7 @@
 import backend.common as Common;
 import backend.db as DB;
 import backend.utils as Utils;
+import backend.db_client as DBClient;
 
 import ballerina/crypto;
 import ballerina/http;
@@ -29,7 +30,7 @@ service /auth on authMicroservice {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     function __deinit() returns error? {

@@ -65,7 +65,7 @@ service class LegalOfficerService {
     }
 
     remote function onClose(websocket:Caller caller) returns error? {
-        Managers:connectionStore.removeClient(self.userID);
+        Managers:legalOfficerConnectionStore.removeClient(self.userID);
     }
 
     remote function onMessage(websocket:Caller caller, string data) returns error? {

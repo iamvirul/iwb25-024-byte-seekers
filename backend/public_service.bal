@@ -1,6 +1,7 @@
 import backend.common;
 import backend.db as DB;
 import backend.utils as Utils;
+import backend.db_client as DBClient;
 
 import ballerina/http;
 import ballerina/persist;
@@ -19,7 +20,7 @@ service /lands on publicMicroservice {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     function __deinit() returns error? {

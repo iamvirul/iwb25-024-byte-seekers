@@ -4,6 +4,7 @@ import backend.interceptors as Interceptors;
 import backend.mappers as Mappers;
 import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
+import backend.db_client as DBClient;
 
 import ballerina/constraint;
 import ballerina/crypto;
@@ -52,7 +53,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
     }
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     function __deinit() returns error? {

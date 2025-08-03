@@ -2,6 +2,7 @@ import backend.common as Common;
 import backend.db as DB;
 import backend.managers as Managers;
 import backend.utils as Utils;
+import backend.db_client as DBClient;
 
 import ballerina/http;
 import ballerina/log;
@@ -27,7 +28,7 @@ service on rabbitmqListener {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     remote function onMessage(Common:DisputeMessage disputeMessage) returns error? {
@@ -127,7 +128,7 @@ service on rabbitmqListener {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     remote function onMessage(Common:DisputeEstimateTimeMessage disputeMessage) returns error? {
@@ -203,7 +204,7 @@ service on rabbitmqListener {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     remote function onMessage(Common:DisputeCommentMessage message) returns error? {
@@ -285,7 +286,7 @@ service on rabbitmqListener {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     remote function onMessage(Common:LegalPrecedentMessage message) returns error? {

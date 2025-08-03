@@ -29,7 +29,7 @@ interface CaseManagementSectionProps {
     cases: any[];
     onCaseUpdate: (caseId: string, updates: any) => void;
     onScheduleHearing: (caseId: string, date: number) => void;
-    onResolveCase: (caseId: string, resolution: string) => void;
+    onResolveCase: (caseId: string) => void;
     activeTab: string;
 }
 

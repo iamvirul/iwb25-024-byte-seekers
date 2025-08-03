@@ -5,6 +5,7 @@ import backend.managers as Managers;
 import backend.mappers as Mapper;
 import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
+import backend.db_client as DBClient;
 
 import ballerina/http;
 import ballerina/log;
@@ -46,7 +47,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     public function createInterceptors() returns Interceptors:RequestInterceptor {

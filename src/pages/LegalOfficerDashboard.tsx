@@ -21,6 +21,7 @@ import LegalPrecedentsSection from '../components/legal/LegalPrecedentsSection';
 import AnalyticsSection from '../components/legal/AnalyticsSection';
 import NotificationsModal from '../components/legal/NotificationsModal';
 import SettingsModal from '../components/legal/SettingsModal';
+import toast from 'react-hot-toast';
 
 const LegalOfficerDashboard = () => {
   const { user } = useAuth();
@@ -128,72 +129,96 @@ const LegalOfficerDashboard = () => {
     ));
   };
 
-  const handleResolveCase = (caseId, resolution) => {
-    setCases(prev => prev.map(case_ =>
-      case_.id === caseId
-        ? { ...case_, status: 'resolved', resolution }
-        : case_
-    ));
+  const handleResolveCase = (caseId) => {
+    const legalOfficerId = localStorage.getItem("legalOfficerId")
+    const token = localStorage.getItem("token")
+    fetch(`/api/legal_officer/dispute/status/update/${caseId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        if (data.success) {
+          toast.success(data.content.message);
+          setCases(prev => prev.map(case_ =>
+            case_.id === caseId
+              ? { ...case_, status: 'RESOLVED' }
+              : case_
+          ));
+        } else {
+          toast.error(data.message);
+        }
+      })
+      .catch(error => console.error('Error:', error));
   };
 
 
   useEffect(() => {
+    let socket;
     const userId = localStorage.getItem("userSessionId");
-    const socket = new WebSocket(`ws://127.0.0.1:8075/proxy/${userId}`);
+    const connect = () => {
+      socket = new WebSocket(`ws://127.0.0.1:8075/proxy/${userId}`);
 
-    socket.onopen = () => {
-      console.log('WebSocket connected');
-    };
+      socket.onopen = () => {
+        console.log('WebSocket connected');
+      };
 
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log('Received message:', data);
-      setCases(data.content?.disputes || []);
-      setPrecedents(data.content?.precedents || []);
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received message:', data);
+        setCases(data.content?.disputes || []);
+        setPrecedents(data.content?.precedents || []);
 
-      if (data.content?.stats) {
-        setStatsData(data.content.stats);
-      } else {
-        const pending = data.content?.stats?.filter(c => c.status === 'pending').length || 0;
-        const rejected = data.content?.stats?.filter(c => c.status === 'rejected').length || 0;
-        const resolved = data.content?.stats?.filter(c => c.status === 'resolved').length || 0;
-        const legalPrecedents = data.content?.stats?.legalPrecedents.length || 0;
+        if (data.content?.stats) {
+          setStatsData(data.content.stats);
+        } else {
+          const pending = data.content?.stats?.filter(c => c.status === 'pending').length || 0;
+          const rejected = data.content?.stats?.filter(c => c.status === 'rejected').length || 0;
+          const resolved = data.content?.stats?.filter(c => c.status === 'resolved').length || 0;
+          const legalPrecedents = data.content?.stats?.legalPrecedents.length || 0;
 
-        setStatsData({
-          pending,
-          rejected,
-          resolved,
-          legalPrecedents
-        });
-      }
+          setStatsData({
+            pending,
+            rejected,
+            resolved,
+            legalPrecedents
+          });
+        }
 
-      if (data.event == "Precedent Created") {
-        const newPrecedent = {
-          ...data.message.precedent,
-          id: data.message.precedent.id,
-          legalclauses: data.message.clauses,
-          dispute: data.message.dispute
-        };
-        console.log(newPrecedent);
-        setPrecedents(prev => [...prev, newPrecedent]);
-        setStatsData(prev => ({
-          ...prev,
-          legalPrecedents: prev.legalPrecedents + 1
-        }));
-        return;
-      }
-    };
+        if (data.event == "Precedent Created") {
+          const newPrecedent = {
+            ...data.message.precedent,
+            id: data.message.precedent.id,
+            legalclauses: data.message.clauses,
+            dispute: data.message.dispute
+          };
+          console.log(newPrecedent);
+          setPrecedents(prev => [...prev, newPrecedent]);
+          setStatsData(prev => ({
+            ...prev,
+            legalPrecedents: prev.legalPrecedents + 1
+          }));
+          return;
+        }
+      };
 
-    socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+      socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
 
-    socket.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
+      socket.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+    }
+
+    const timer = setTimeout(connect, 300);
 
     return () => {
-      socket.close();
+      clearTimeout(timer);
+      if (socket) socket.close();
     };
   }, []);
 

@@ -4,6 +4,7 @@ import backend.interceptors as Interceptors;
 import backend.managers as Managers;
 import backend.mappers as Mappers;
 import backend.utils as Utils;
+import backend.db_client as DBClient;
 
 import ballerina/http;
 import ballerina/persist;
@@ -39,7 +40,7 @@ service http:InterceptableService /land_officer on landMicroservice {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     function __deinit() returns error? {

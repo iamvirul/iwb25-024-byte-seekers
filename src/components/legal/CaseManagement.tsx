@@ -24,36 +24,17 @@ import Card from '../ui/Card';
 import Button from '../ui/Button';
 import Select from '../ui/Select';
 
-interface Case {
-  id: string;
-  disputeId: string;
-  title: string;
-  propertyId: string;
-  complainant: string;
-  defendant: string;
-  filedDate: number;
-  status: string;
-  priority: string;
-  assignedDate: number;
-  hearingDate?: number;
-  caseType: string;
-  evidence: string[];
-  legalPrecedents: string[];
-  estimatedResolutionDays: number;
-  notes?: string;
-}
 
 interface CaseManagementProps {
   cases: any[];
-  onCaseUpdate: (caseId: string, updates: Partial<Case>) => void;
+  onCaseUpdate: (caseId: string, updates: Partial<any>) => void;
   onScheduleHearing: (caseId: string, date: number) => void;
-  onResolveCase: (caseId: string, resolution: string) => void;
+  onResolveCase: (caseId: string) => void;
 }
 
 const CaseManagement: React.FC<CaseManagementProps> = ({
   cases,
   onCaseUpdate,
-  onScheduleHearing,
   onResolveCase
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,20 +43,13 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
   const [selectedCase, setSelectedCase] = useState<any | null>(null);
   const [showCaseDetails, setShowCaseDetails] = useState(false);
   const [caseNotes, setCaseNotes] = useState('');
-  const [hearingDate, setHearingDate] = useState('');
+  console.log(cases)
+
 
   const statusOptions = [
     { value: 'all', label: 'සියලු තත්ත්වයන්' },
     { value: 'PENDING', label: 'සමාලෝචනය වෙමින්' },
     { value: 'RESOLVED', label: 'නිරාකරණය' },
-  ];
-
-  const priorityOptions = [
-    { value: 'all', label: 'සියලු ප්‍රමුඛතා' },
-    { value: 'urgent', label: 'හදිසි' },
-    { value: 'high', label: 'ඉහළ' },
-    { value: 'medium', label: 'මධ්‍යම' },
-    { value: 'low', label: 'අඩු' }
   ];
 
   const filteredCases = cases.filter(case_ => {
@@ -201,13 +175,13 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                 >
                   සම්පූර්ණ විස්තර
                 </Button>
-                {selectedCase?.status === 'PENDING' && (
+                {case_.status === 'PENDING' && (
                   <Button
                     variant="outline"
                     size="sm"
                     icon={Gavel}
                     onClick={() => {
-                      onResolveCase(selectedCase.id, 'නිරාකරණය කරන ලදී');
+                      onResolveCase(case_.id);
                       setShowCaseDetails(false);
                     }}
                     className="w-full"
@@ -364,7 +338,7 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                   <Button
                     icon={Gavel}
                     onClick={() => {
-                      onResolveCase(selectedCase.id, 'නිරාකරණය කරන ලදී');
+                      onResolveCase(selectedCase.id);
                       setShowCaseDetails(false);
                     }}
                   >
