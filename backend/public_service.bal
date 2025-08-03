@@ -57,7 +57,6 @@ service /lands on publicMicroservice {
   ltc.blockHash,
   ltc.prevBlockHash,
 
-  -- fromLandOwner
   flo.id AS from_id,
   flo.ownerId AS from_ownerId,
   flo.firstName AS from_firstName,
@@ -66,7 +65,6 @@ service /lands on publicMicroservice {
   flo.address AS from_address,
   flo.contactNo AS from_contactNo,
 
-  -- toLandOwner
   tlo.id AS to_id,
   tlo.ownerId AS to_ownerId,
   tlo.firstName AS to_firstName,

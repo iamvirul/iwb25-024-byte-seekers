@@ -9,7 +9,6 @@ interface DashboardOverviewSectionProps {
   selectedTimeRange: string;
   setSelectedTimeRange: (value: string) => void;
   timeRangeOptions: { value: string; label: string }[];
-  monthlyStats: any[];
   statusData: any[];
   recentActivities: any[];
 }
@@ -70,7 +69,7 @@ const DashboardOverviewSection: React.FC<DashboardOverviewSectionProps> = ({
                 return (
                   <div
                     key={activity.id}
-                    className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-start space-x-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <div
                       className={`w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center ${activity.color}`}

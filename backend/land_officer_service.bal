@@ -383,6 +383,7 @@ service http:InterceptableService /land_officer on landMicroservice {
     COUNT(CASE WHEN landStatus = 'VERIFIED' THEN 1 END) AS accepted_lands
     FROM lands;`, Common:statDataLandOfficer);
 
+
         Common:statDataLandOfficer responseStat;
         DB:LandWithRelations[] lands = [];
 
