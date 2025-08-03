@@ -5,6 +5,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import { jwtDecode } from "jwt-decode";
 
 interface User {
   id: string;
@@ -13,6 +14,10 @@ interface User {
   role: "land_owner" | "land_officer" | "legal_officer";
   nic: string;
   slUdiId: string;
+}
+
+interface JwtPayload {
+  exp: number;
 }
 
 interface AuthContextType {
@@ -39,12 +44,38 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const decoded = jwtDecode<JwtPayload>(token);
+    const now = Date.now() / 1000;
+    return decoded.exp < now;
+  } catch (e) {
+    return true;
+  }
+}
+
+let logoutTimer: ReturnType<typeof setTimeout>;
+
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    clearTimeout(logoutTimer);
+    localStorage.clear();
+    setUser(null);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
+
+    if (!token || isTokenExpired(token)) {
+      logout();
+      setLoading(false);
+      return;
+    }
+
     const userId = localStorage.getItem("userId");
     const name = localStorage.getItem("name");
     const email = localStorage.getItem("email");
@@ -52,7 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const nic = localStorage.getItem("nic");
     const slUdiId = localStorage.getItem("slUdiId");
 
-    if (token && userId && name && email && role && nic && slUdiId) {
+    if (userId && name && email && role && nic && slUdiId) {
       const userObj: User = {
         id: userId,
         name,
@@ -62,6 +93,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         slUdiId,
       };
       setUser(userObj);
+    }
+
+    // Set up auto logout timer
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      const expiresIn = decoded.exp * 1000 - Date.now();
+      logoutTimer = setTimeout(() => logout(), expiresIn);
+    } catch (err) {
+      logout();
     }
 
     setLoading(false);
@@ -122,16 +162,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       };
 
       setUser(userObj);
+
+      // Setup auto logout timer
+      try {
+        const decoded = jwtDecode<JwtPayload>(token);
+        const expiresIn = decoded.exp * 1000 - Date.now();
+        logoutTimer = setTimeout(() => logout(), expiresIn);
+      } catch (err) {
+        console.error("Invalid token received:", err);
+      }
+
       return true;
     } catch (error) {
       console.error("Login failed:", error);
       return false;
     }
-  };
-
-  const logout = () => {
-    localStorage.clear();
-    setUser(null);
   };
 
   const value: AuthContextType = {
