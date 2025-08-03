@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Clock } from "lucide-react";
+import { Clock, AlertCircle } from "lucide-react";
 import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import Card from "../ui/Card";
 
@@ -32,26 +32,33 @@ const DashboardOverviewSection: React.FC<DashboardOverviewSectionProps> = ({
             <h3 className="text-lg font-semibold text-gray-900 mb-6">
               ලියාපදිංචි තත්ත්ව
             </h3>
-            <ResponsiveContainer width="100%" height={385}>
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
-                  }
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {statusData && statusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={385}>
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-96 text-gray-400">
+                <AlertCircle className="w-12 h-12 mb-4" />
+                <p className="text-lg">No status data available</p>
+              </div>
+            )}
           </Card>
         </motion.div>
         <motion.div
@@ -63,35 +70,42 @@ const DashboardOverviewSection: React.FC<DashboardOverviewSectionProps> = ({
             <h3 className="text-lg font-semibold text-gray-900 mb-6">
               මෑත ක්‍රියාකාරකම්
             </h3>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => {
-                const Icon = activity.icon;
-                return (
-                  <div
-                    key={activity.id}
-                    className="flex items-start space-x-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
+            {recentActivities && recentActivities.length > 0 ? (
+              <div className="space-y-4">
+                {recentActivities.map((activity) => {
+                  const Icon = activity.icon;
+                  return (
                     <div
-                      className={`w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center ${activity.color}`}
+                      key={activity.id}
+                      className="flex items-start space-x-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <Icon className="w-4 h-4" />
+                      <div
+                        className={`w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center ${activity.color}`}
+                      >
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">
+                          {activity.title}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {activity.description}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1 flex items-center">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {activity.time}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
-                        {activity.title}
-                      </p>
-                      <p className="text-xs text-gray-600 mt-1">
-                        {activity.description}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1 flex items-center">
-                        <Clock className="w-3 h-3 mr-1" />
-                        {activity.time}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-96 text-gray-400">
+                <AlertCircle className="w-12 h-12 mb-4" />
+                <p className="text-lg">No recent activities</p>
+              </div>
+            )}
           </Card>
         </motion.div>
       </div>

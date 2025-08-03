@@ -35,15 +35,6 @@ const StatsSection: React.FC<StatsSectionProps> = ({ stats }) => {
                                 <p className="text-2xl font-bold text-gray-900 mb-2">
                                     {stat.value}
                                 </p>
-                                {stat.change && (
-                                    <div className="flex items-center">
-                                        <span className={`text-xs font-medium ${stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                                            }`}>
-                                            {stat.change}
-                                        </span>
-                                        <span className="text-xs text-gray-500 ml-1">පසුගිය සතියට වඩා</span>
-                                    </div>
-                                )}
                             </div>
                             <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${stat.color} flex items-center justify-center shadow-lg`}>
                                 <Icon className="w-6 h-6 text-white" />

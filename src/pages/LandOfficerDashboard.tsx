@@ -8,7 +8,6 @@ import {
   Clock,
 } from "lucide-react";
 
-// Import components
 import DashboardHeader from "../components/legal/DashboardHeader";
 import StatsSection from "../components/legal/StatsSection";
 import TabNavigationSection from "../components/legal/TabNavigationSection";
@@ -17,6 +16,7 @@ import RegistrationQueueSection from "../components/landofficer/RegistrationQueu
 import VerificationPanelSection from "../components/landofficer/VerificationPanelSection";
 import NotificationsModal from "../components/legal/NotificationsModal";
 import SettingsModal from "../components/legal/SettingsModal";
+import LandRegistry from "./LandRegistry";
 
 const LandOfficerDashboard = () => {
   const { user } = useAuth();
@@ -357,7 +357,6 @@ const LandOfficerDashboard = () => {
     }
   }, [statsFromRes.lands]);
 
-  // Stats data
   const stats = [
     {
       label: "සත්‍යාපනය කිරීමට නියමිත ඉඩම්",
@@ -420,8 +419,7 @@ const LandOfficerDashboard = () => {
 
   const tabs = [
     { id: "overview", label: "සාරාංශය", icon: BarChart3 },
-    { id: "registrations", label: "ලියාපදිංචි කිරීම්", icon: FileText },
-    { id: "verification", label: "සත්‍යාපනය", icon: CheckCircle },
+    { id: "landRegistry", label: "ලියාපදිංචිය", icon: FileText}
   ];
 
   const handleViewRegistrationDetails = (registration) => {
@@ -493,32 +491,8 @@ const LandOfficerDashboard = () => {
             statusData={statusData}
             recentActivities={recentActivities}
           />
-
-          <RegistrationQueueSection
-            activeTab={activeTab}
-            registrations={registrations}
-            onViewDetails={handleViewRegistrationDetails}
-            onApprove={handleApproveRegistration}
-            onReject={handleRejectRegistration}
-          />
-
-          <VerificationPanelSection
-            activeTab={activeTab}
-            verificationItems={verificationItems}
-            onVerifyDocument={handleVerifyDocument}
-            onCompleteVerification={handleCompleteVerification}
-          />
+          <LandRegistry activeTab={activeTab}/>
         </div>
-
-        <NotificationsModal
-          isOpen={showNotificationsModal}
-          onClose={() => setShowNotificationsModal(false)}
-        />
-
-        <SettingsModal
-          isOpen={showSettingsModal}
-          onClose={() => setShowSettingsModal(false)}
-        />
       </div>
     </div>
   );
