@@ -32,7 +32,6 @@ const Navbar = () => {
     { name: 'මුල් පිටුව', href: '/', icon: Home },
     { name: 'ඉඩම් ගවේෂණය', href: '/search', icon: Search },
     { name: 'ඉඩම් නිලධාරී ඩෑෂ්බෝඩ්', href: '/land-officer', icon: BarChart3 },
-    { name: 'ඉඩම් ලියාපදිංචිය', href: '/registry', icon: Settings },
   ];
 
   // Add legal officer specific navigation
