@@ -279,7 +279,7 @@ public type socketMessage record {|
 
 public type LegalOfficerStats record {|
     int pending;
-    int rejected;
+    int all;
     int resolved;
     int legalPrecedents;
 |};

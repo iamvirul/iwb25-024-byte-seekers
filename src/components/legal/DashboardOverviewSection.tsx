@@ -8,7 +8,7 @@ import {
     TrendingUp,
     Activity
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 import Card from '../ui/Card';
 import Select from '../ui/Select';
 
@@ -21,6 +21,12 @@ interface DashboardOverviewSectionProps {
     caseStatusData: any[];
     resolutionTimeData: any[];
     recentActivities: any[];
+    statsData: {  // Add this
+        pending: number;
+        resolved: number;
+        all: number;
+        legalPrecedents: number;
+    };
 }
 
 const DashboardOverviewSection: React.FC<DashboardOverviewSectionProps> = ({
@@ -31,7 +37,8 @@ const DashboardOverviewSection: React.FC<DashboardOverviewSectionProps> = ({
     monthlyStats,
     caseStatusData,
     resolutionTimeData,
-    recentActivities
+    recentActivities,
+    statsData,
 }) => {
     if (activeTab !== 'overview') return null;
 
@@ -68,7 +75,7 @@ const DashboardOverviewSection: React.FC<DashboardOverviewSectionProps> = ({
                         </ResponsiveContainer>
                     </Card>
                 </motion.div> */}
-                  <motion.div
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.5 }}
@@ -100,28 +107,61 @@ const DashboardOverviewSection: React.FC<DashboardOverviewSectionProps> = ({
 
                 {/* Case Status Distribution */}
                 <motion.div
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
                 >
                     <Card>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-6">සිද්ධි තත්ත්ව බෙදාහැරීම</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-6">සිද්ධි සහ පූර්වාදර්ශ දත්ත</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie
-                                    data={caseStatusData}
+                                    data={[
+                                        {
+                                            name: 'පොරොත්තුවෙන් සිටින',
+                                            value: statsData.pending,
+                                            color: '#3B82F6'
+                                        },
+                                        {
+                                            name: 'නිරාකරණය කළ',
+                                            value: statsData.resolved,
+                                            color: '#10B981'
+                                        },
+                                        {
+                                            name: 'සියලු ගැටලු',
+                                            value: statsData.all,
+                                            color: '#F59E0B'
+                                        },
+                                        {
+                                            name: 'නීතිමය පූර්වාදර්ශ',
+                                            value: statsData.legalPrecedents,
+                                            color: '#8B5CF6'
+                                        }
+                                    ]}
                                     cx="50%"
                                     cy="50%"
                                     outerRadius={80}
-                                    fill="#8884d8"
+                                    innerRadius={40}
+                                    paddingAngle={5}
                                     dataKey="value"
-                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                                 >
-                                    {caseStatusData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    {[
+                                        '#3B82F6', // pending - blue
+                                        '#10B981', // resolved - green
+                                        '#F59E0B', // all - orange
+                                        '#8B5CF6'  // precedents - purple
+                                    ].map((color, index) => (
+                                        <Cell key={`cell-${index}`} fill={color} />
                                     ))}
                                 </Pie>
-                                <Tooltip />
+                                <Tooltip
+                                    formatter={(value, name, props) => [
+                                        value,
+                                        `${name} (${((props.payload.percent || 0) * 100).toFixed(1)}%)`
+                                    ]}
+                                />
+                                <Legend />
                             </PieChart>
                         </ResponsiveContainer>
                     </Card>
@@ -131,7 +171,7 @@ const DashboardOverviewSection: React.FC<DashboardOverviewSectionProps> = ({
             {/* Recent Activities and Resolution Time */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
                 {/* Recent Activities */}
-              
+
 
                 {/* Average Resolution Time */}
                 {/* <motion.div

@@ -61,7 +61,7 @@ service class LegalOfficerService {
             check caller->writeMessage({"error": allLand.message()});
             return;
         }
-        check caller->writeMessage(allLand);
+        check caller->writeMessage({"event": "Initial", "message": allLand});
     }
 
     remote function onClose(websocket:Caller caller) returns error? {

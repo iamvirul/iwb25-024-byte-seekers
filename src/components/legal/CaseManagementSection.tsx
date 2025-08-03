@@ -28,16 +28,12 @@ import CaseManagement from './CaseManagement';
 interface CaseManagementSectionProps {
     cases: any[];
     onCaseUpdate: (caseId: string, updates: any) => void;
-    onScheduleHearing: (caseId: string, date: number) => void;
-    onResolveCase: (caseId: string) => void;
     activeTab: string;
 }
 
 const CaseManagementSection: React.FC<CaseManagementSectionProps> = ({
     cases,
     onCaseUpdate,
-    onScheduleHearing,
-    onResolveCase,
     activeTab
 }) => {
     if (activeTab !== 'cases') return null;
@@ -51,8 +47,6 @@ const CaseManagementSection: React.FC<CaseManagementSectionProps> = ({
             <CaseManagement
                 cases={cases}
                 onCaseUpdate={onCaseUpdate}
-                onScheduleHearing={onScheduleHearing}
-                onResolveCase={onResolveCase}
             />
         </motion.div>
     );

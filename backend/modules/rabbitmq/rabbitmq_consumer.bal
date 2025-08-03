@@ -155,11 +155,12 @@ service on rabbitmqListener {
         if updateResult is persist:Error {
             return error("Failed to update dispute", updateResult);
         }
-        Common:socketMessage ownerSocketNotify = {
+        Common:socketMessage socketNotify = {
             event: Common:ESTIMATE_TIME_UPDATED,
             message: updateResult.toJson()
         };
-        Managers:landOwnerConnectionStore.broadcast(ownerSocketNotify, disputeMessage.dispute.usersId.toString());
+        Managers:landOwnerConnectionStore.broadcast(socketNotify, disputeMessage.dispute.usersId.toString());
+        Managers:legalOfficerConnectionStore.broadcast(socketNotify, disputeMessage.dispute.legalOfficerId.toString());
     }
 
     private function shouldRetry(Common:DisputeEstimateTimeMessage disputeMessage, error err) returns boolean {

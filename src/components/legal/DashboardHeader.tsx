@@ -32,7 +32,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                         ආයුබෝවන්, {userName}! ඔබේ නීතිමය කාර්ය සාරාංශය
                     </p>
                 </div>
-                <div className="flex items-center space-x-3 mt-4 md:mt-0">
+                {/* <div className="flex items-center space-x-3 mt-4 md:mt-0">
                     <Button
                         variant="outline"
                         icon={Bell}
@@ -49,7 +49,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     >
                         සැකසුම්
                     </Button>
-                </div>
+                </div> */}
             </div>
         </motion.div>
     );

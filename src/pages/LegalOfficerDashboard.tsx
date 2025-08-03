@@ -33,7 +33,7 @@ const LegalOfficerDashboard = () => {
   const [precedents, setPrecedents] = useState([]);
   const [statsData, setStatsData] = useState({
     pending: 0,
-    rejected: 0,
+    all: 0,
     resolved: 0,
     legalPrecedents: 0
   });
@@ -129,35 +129,10 @@ const LegalOfficerDashboard = () => {
     ));
   };
 
-  const handleResolveCase = (caseId) => {
-    const legalOfficerId = localStorage.getItem("legalOfficerId")
-    const token = localStorage.getItem("token")
-    fetch(`/api/legal_officer/dispute/status/update/${caseId}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        if (data.success) {
-          toast.success(data.content.message);
-          setCases(prev => prev.map(case_ =>
-            case_.id === caseId
-              ? { ...case_, status: 'RESOLVED' }
-              : case_
-          ));
-        } else {
-          toast.error(data.message);
-        }
-      })
-      .catch(error => console.error('Error:', error));
-  };
-
 
   useEffect(() => {
-    let socket;
+    let socket: WebSocket;
+    let initialDataLoaded = false;
     const userId = localStorage.getItem("userSessionId");
     const connect = () => {
       socket = new WebSocket(`ws://127.0.0.1:8075/proxy/${userId}`);
@@ -169,39 +144,58 @@ const LegalOfficerDashboard = () => {
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log('Received message:', data);
-        setCases(data.content?.disputes || []);
-        setPrecedents(data.content?.precedents || []);
 
-        if (data.content?.stats) {
-          setStatsData(data.content.stats);
-        } else {
-          const pending = data.content?.stats?.filter(c => c.status === 'pending').length || 0;
-          const rejected = data.content?.stats?.filter(c => c.status === 'rejected').length || 0;
-          const resolved = data.content?.stats?.filter(c => c.status === 'resolved').length || 0;
-          const legalPrecedents = data.content?.stats?.legalPrecedents.length || 0;
 
-          setStatsData({
-            pending,
-            rejected,
-            resolved,
-            legalPrecedents
-          });
-        }
+        // Handle different event types properly
+        switch (data.event) {
+          case 'Status Updated':
+            setCases(prev => {
+              return prev.map(case_ =>
+                case_.id === data.message.id
+                  ? { ...case_, status: 'RESOLVED' }  
+                  : case_
+              );
+            });
+            setStatsData(prev => ({
+              ...prev,
+              resolved: prev.resolved + 1,
+              pending: prev.pending - 1
+            }));
+            break;
 
-        if (data.event == "Precedent Created") {
-          const newPrecedent = {
-            ...data.message.precedent,
-            id: data.message.precedent.id,
-            legalclauses: data.message.clauses,
-            dispute: data.message.dispute
-          };
-          console.log(newPrecedent);
-          setPrecedents(prev => [...prev, newPrecedent]);
-          setStatsData(prev => ({
-            ...prev,
-            legalPrecedents: prev.legalPrecedents + 1
-          }));
-          return;
+          case 'Precedent Created':
+            const newPrecedent = {
+              ...data.message.precedent,
+              id: data.message.precedent.id,
+              legalclauses: data.message.clauses,
+              dispute: data.message.dispute
+            };
+            setPrecedents(prev => [...prev, newPrecedent]);
+            setStatsData(prev => ({
+              ...prev,
+              legalPrecedents: prev.legalPrecedents + 1
+            }));
+            break;
+
+          case "Initial":
+            setCases(data.message?.content?.disputes || []);
+            setPrecedents(data.message?.content?.precedents || []);
+            // Update stats if available
+            if (data.message?.content?.stats) {
+              setStatsData(data.message?.content.stats);
+            }
+            break;
+
+          case 'Estimate Time Updated':  
+            setCases(prev => prev.map(case_ =>
+              case_.id === data.message.id
+                ? { ...case_, estimateTime: data.message.estimateTime }
+                : case_
+            ));
+            break;
+
+          default:
+            console.log('Unhandled event type:', data.event);
         }
       };
 
@@ -214,12 +208,8 @@ const LegalOfficerDashboard = () => {
       };
     }
 
-    const timer = setTimeout(connect, 300);
-
-    return () => {
-      clearTimeout(timer);
-      if (socket) socket.close();
-    };
+    connect();
+    return () => socket?.close();
   }, []);
 
   const stats = [
@@ -232,8 +222,8 @@ const LegalOfficerDashboard = () => {
       changeType: 'neutral'
     },
     {
-      label: 'ප්‍රතික්ෂේප කළ',
-      value: statsData.rejected.toString(),
+      label: 'සියලු ගැටලු',
+      value: statsData.all.toString(),
       icon: Gavel,
       color: 'from-red-500 to-red-600',
       change: '+0',
@@ -256,6 +246,7 @@ const LegalOfficerDashboard = () => {
       changeType: 'neutral'
     }
   ];
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30">
@@ -289,14 +280,13 @@ const LegalOfficerDashboard = () => {
             caseStatusData={caseStatusData}
             resolutionTimeData={resolutionTimeData}
             recentActivities={recentActivities}
+            statsData={statsData}
           />
 
           <CaseManagementSection
             activeTab={activeTab}
             cases={cases}
             onCaseUpdate={handleCaseUpdate}
-            onScheduleHearing={handleScheduleHearing}
-            onResolveCase={handleResolveCase}
           />
 
           <LegalPrecedentsSection
