@@ -1,4 +1,3 @@
-import { useBlockchain } from "../contexts/BlockchainContext";
 import { motion } from "framer-motion";
 import {
   Search,
@@ -8,7 +7,6 @@ import {
   List,
   Sparkles,
   TrendingUp,
-  Users,
   Hash,
   AlertCircle,
   CheckCircle,
