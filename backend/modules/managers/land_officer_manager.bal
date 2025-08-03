@@ -10,7 +10,9 @@ public class ConnectionStore {
     }
 
     public function removeClient(string userId) {
+       if self.clients.hasKey(userId) {
         _ = self.clients.remove(userId);
+    }
     }
 
     public function broadcast(Common:socketMessage message) {
