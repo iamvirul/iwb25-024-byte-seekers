@@ -75,9 +75,12 @@ service on rabbitmqListener {
             }
             docIndex += 1;
         }
+        DB:DisputeWithRelations|persist:Error unionResult = self.dbClient->/disputes/[insertedDisputeId](DB:DisputeWithRelations);
+        if unionResult is persist:Error {
+            return error("Failed to fetch dispute with documents", unionResult);
+        }
         Common:DisputeSocketAdded disputeSocketAdded = {
-            dispute: disputeInsert,
-            documents: docArray
+            dispute: unionResult
         };
         Common:socketMessage socketNotify = {
             event: Common:DISPUTE_CREATED,

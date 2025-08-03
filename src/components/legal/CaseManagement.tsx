@@ -386,45 +386,59 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3">සාක්ෂි</h4>
                     <div className="space-y-2">
-                      {selectedCase.disputedocuments.map((item, index) => {
-                        // Extract just the filename without path and extension
-                        const fullPath = item.docPath;
-                        const filenameWithExt = fullPath.split('/').pop() || ''; // Gets "CASE-1588840273_doc1.docx"
-                        const filename = filenameWithExt.split('.').slice(0, -1).join('.'); // Removes extension
+                      {selectedCase.disputedocuments.length > 0 ? (
+                        selectedCase.disputedocuments.map((item, index) => {
+                          const fullPath = item.docPath;
+                          const filenameWithExt = fullPath.split('/').pop() || '';
+                          const filename = filenameWithExt.split('.').slice(0, -1).join('.');
 
-                        return (
-                          <div key={index} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
-                            <div className="flex items-center">
-                              <FileText className="w-4 h-4 mr-2 text-blue-500" />
-                              <span>{filename}</span> {/* Shows "CASE-1588840273_doc1" */}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              icon={Download}
+                          return (
+                            <div key={index} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                              <div className="flex items-center">
+                                <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                                <span>{filename}</span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                icon={Download}
                               // onClick={() => handleDownload(fullPath, filenameWithExt)}
-                            >
-                              බාගන්න
-                            </Button>
-                          </div>
-                        );
-                      })}
+                              >
+                                බාගන්න
+                              </Button>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-center py-4 text-gray-500">
+                          <FileText className="w-6 h-6 mx-auto mb-2 text-gray-400" />
+                          <p>සාක්ෂි නැත</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3">නීතිමය පූර්වාදර්ශ</h4>
                     <div className="space-y-2">
-                      {selectedCase.legalprecedents.map((precedent, index) => (
-                        <div key={index} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
-                          <div className="flex items-center">
-                            <BookOpen className="w-4 h-4 mr-2 text-purple-500" />
-                            <span>{precedent.headline}</span>
+                      {selectedCase.legalprecedents.length > 0 ? (
+                        selectedCase.legalprecedents.map((precedent, index) => (
+                          <div key={index} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                            <div className="flex items-center">
+                              <BookOpen className="w-4 h-4 mr-2 text-purple-500" />
+                              <span>{precedent.headline}</span>
+                            </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-4 text-gray-500">
+                          <BookOpen className="w-6 h-6 mx-auto mb-2 text-gray-400" />
+                          <p>පූර්වාදර්ශ නැත</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
+
                 </div>
 
                 <div className="space-y-6">

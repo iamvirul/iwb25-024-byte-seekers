@@ -292,8 +292,7 @@ public type statDataLandOfficer record {|
 |};
 
 public type DisputeSocketAdded record {|
-    DB:DisputeInsert dispute;
-    DB:DisputeDocumentInsert[] documents;
+    DB:DisputeWithRelations dispute;
 |};
 
 public type LegalPrecedentAdded record {|

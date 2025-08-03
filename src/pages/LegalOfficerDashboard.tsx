@@ -152,7 +152,7 @@ const LegalOfficerDashboard = () => {
             setCases(prev => {
               return prev.map(case_ =>
                 case_.id === data.message.id
-                  ? { ...case_, status: 'RESOLVED' }  
+                  ? { ...case_, status: 'RESOLVED' }
                   : case_
               );
             });
@@ -186,12 +186,22 @@ const LegalOfficerDashboard = () => {
             }
             break;
 
-          case 'Estimate Time Updated':  
+          case 'Estimate Time Updated':
             setCases(prev => prev.map(case_ =>
               case_.id === data.message.id
                 ? { ...case_, estimateTime: data.message.estimateTime }
                 : case_
             ));
+            break;
+
+          case "Dispute Created":
+            setCases(prev => [...prev, data.message.dispute]);
+            setStatsData(prev => ({
+              ...prev,
+              all: prev.all + 1,
+              pending: prev.pending + 1
+            }));
+
             break;
 
           default:
