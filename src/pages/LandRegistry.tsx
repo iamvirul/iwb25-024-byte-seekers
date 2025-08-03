@@ -248,7 +248,6 @@ const LandRegistry: React.FC = ({activeTab}) => {
       }
 
       alert("Land registered successfully!");
-      // Reset form
       setFormData({
         landName: "",
         landPlace: "",
@@ -291,7 +290,7 @@ if (activeTab !== "landRegistry") return null;
       <div>
         <PageHeader
           title="ඉඩම් ලියාපදිංචිය"
-          description="Register a new land property in the system"
+          description="පද්ධතිය තුළ නව ඉඩම් දේපලක් ලියාපදිංචි කරන්න."
           icon={MapPin}
         />
 
