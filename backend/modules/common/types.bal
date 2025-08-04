@@ -397,3 +397,12 @@ public type LandTransferRow record {|
     string? to_owner_contactNo;
 |};
 
+public type systemUser record {|
+    int id;
+    string firstName;
+    string lastName;
+    string nic;
+    string address;
+    string contactNo;
+|};
+

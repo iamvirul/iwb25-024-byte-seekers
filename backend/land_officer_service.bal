@@ -1,10 +1,10 @@
 import backend.common as Common;
 import backend.db as DB;
+import backend.db_client as DBClient;
 import backend.interceptors as Interceptors;
 import backend.managers as Managers;
 import backend.mappers as Mappers;
 import backend.utils as Utils;
-import backend.db_client as DBClient;
 
 import ballerina/http;
 import ballerina/persist;
@@ -383,7 +383,6 @@ service http:InterceptableService /land_officer on landMicroservice {
     COUNT(CASE WHEN landStatus = 'VERIFIED' THEN 1 END) AS accepted_lands
     FROM lands;`, Common:statDataLandOfficer);
 
-
         Common:statDataLandOfficer responseStat;
         DB:LandWithRelations[] lands = [];
 
@@ -470,6 +469,27 @@ service http:InterceptableService /land_officer on landMicroservice {
             };
         response.statusCode = 500;
         response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_USER_STATUS);
+        return response;
+    }
+
+    resource function get user/landowners() returns error|http:Response {
+        http:Response response = new;
+        stream<DB:UserOptionalized, persist:Error?> streamResult = self.dbClient->/users(DB:UserOptionalized);
+        Common:systemUser[] users = [];
+        check from var user in streamResult
+            do {
+                Common:systemUser systemUser = {
+                    id: <int>user.id,
+                    firstName: <string>user.firstName,
+                    lastName: <string>user.lastName,
+                    contactNo: check Utils:decryptData(<byte[]>user.contactNo),
+                    nic: check Utils:decryptData(<byte[]>user.nic),
+                    address: check Utils:decryptData(<byte[]>user?.address)
+                };
+                users.push(systemUser);
+            };
+        check streamResult.close();
+        response = Utils:setSuccessResponse(response, users);
         return response;
     }
 }
