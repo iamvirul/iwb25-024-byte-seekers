@@ -87,6 +87,7 @@ service on rabbitmqListener {
             message: disputeSocketAdded.toJson()
         };
         Managers:legalOfficerConnectionStore.broadcast(socketNotify, disputeInsert.legalOfficerId.toString());
+        Managers:landOwnerConnectionStore.broadcast(socketNotify, disputeInsert.usersId.toString());
     }
 
     private function shouldRetry(Common:DisputeMessage disputeMessage, error err) returns boolean {
