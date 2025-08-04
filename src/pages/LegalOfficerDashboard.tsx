@@ -8,7 +8,10 @@ import {
   TrendingUp,
   CheckCircle,
   Clock,
-  Calendar
+  Calendar,
+  FileText,
+  User,
+  AlertCircle
 } from 'lucide-react';
 
 // Import components
@@ -23,6 +26,17 @@ import NotificationsModal from '../components/legal/NotificationsModal';
 import SettingsModal from '../components/legal/SettingsModal';
 import toast from 'react-hot-toast';
 
+interface RecentActivity {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  time: string;
+  icon: React.ComponentType<any>;
+  color: string;
+  timestamp: number;
+}
+
 const LegalOfficerDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
@@ -31,6 +45,7 @@ const LegalOfficerDashboard = () => {
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [precedents, setPrecedents] = useState([]);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [statsData, setStatsData] = useState({
     pending: 0,
     all: 0,
@@ -64,45 +79,6 @@ const LegalOfficerDashboard = () => {
     { day: 'ඉරිදා', avgDays: 26 }
   ];
 
-  const recentActivities = [
-    {
-      id: 1,
-      type: 'case_resolved',
-      title: 'නීතිමය සිද්ධියක් නිරාකරණය',
-      description: 'CASE001 - ඉඩම් සීමා ගැටළුව සාර්ථකව නිරාකරණය කරන ලදී',
-      time: '30 මිනිත්තුවකට පෙර',
-      icon: CheckCircle,
-      color: 'text-green-600'
-    },
-    {
-      id: 2,
-      type: 'hearing_scheduled',
-      title: 'විභාගයක් නියම කරන ලදී',
-      description: 'CASE003 සඳහා හෙට දින 2:00 PM විභාගය',
-      time: '1 පැයකට පෙර',
-      icon: Calendar,
-      color: 'text-purple-600'
-    },
-    {
-      id: 3,
-      type: 'precedent_added',
-      title: 'නව පූර්වාදර්ශයක් එක් කරන ලදී',
-      description: 'CASE_2024_089 - හිමිකම් ගැටළු සම්බන්ධයෙන්',
-      time: '2 පැයකට පෙර',
-      icon: BookOpen,
-      color: 'text-blue-600'
-    },
-    {
-      id: 4,
-      type: 'case_assigned',
-      title: 'නව සිද්ධියක් පවරන ලදී',
-      description: 'CASE004 - කොන්ත්‍රාක්ටු ගැටළුව ඔබට පවරන ලදී',
-      time: '3 පැයකට පෙර',
-      icon: Gavel,
-      color: 'text-orange-600'
-    }
-  ];
-
   const timeRangeOptions = [
     { value: '7d', label: 'පසුගිය 7 දින' },
     { value: '30d', label: 'පසුගිය 30 දින' },
@@ -129,11 +105,35 @@ const LegalOfficerDashboard = () => {
     ));
   };
 
+  const addActivity = (activity: Omit<RecentActivity, 'id' | 'timestamp'>) => {
+    const now = new Date();
+    const timestamp = now.getTime();
+    
+    // Format time as "X minutes/hours ago"
+    const formatTime = () => {
+      const seconds = Math.floor((Date.now() - timestamp) / 1000);
+      if (seconds < 60) return 'මීට මෑතක';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)} මිනිත්තුවකට පෙර`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)} පැයකට පෙර`;
+      return `${Math.floor(seconds / 86400)} දිනකට පෙර`;
+    };
+
+    setRecentActivities(prev => [
+      {
+        ...activity,
+        id: `activity-${timestamp}`,
+        timestamp,
+        time: formatTime()
+      },
+      ...prev.slice(0, 9) // Keep only the last 10 activities
+    ]);
+  };
 
   useEffect(() => {
     let socket: WebSocket;
     let initialDataLoaded = false;
     const userId = localStorage.getItem("userSessionId");
+    
     const connect = () => {
       socket = new WebSocket(`ws://127.0.0.1:8075/proxy/${userId}`);
 
@@ -144,7 +144,6 @@ const LegalOfficerDashboard = () => {
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log('Received message:', data);
-
 
         // Handle different event types properly
         switch (data.event) {
@@ -161,6 +160,15 @@ const LegalOfficerDashboard = () => {
               resolved: prev.resolved + 1,
               pending: prev.pending - 1
             }));
+            
+            // Add activity for resolved case
+            addActivity({
+              type: 'case_resolved',
+              title: 'නීතිමය සිද්ධියක් නිරාකරණය',
+              description: `${data.message.caseId} - සිද්ධිය සාර්ථකව නිරාකරණය කරන ලදී`,
+              icon: CheckCircle,
+              color: 'text-green-600'
+            });
             break;
 
           case 'Precedent Created':
@@ -175,6 +183,15 @@ const LegalOfficerDashboard = () => {
               ...prev,
               legalPrecedents: prev.legalPrecedents + 1
             }));
+            
+            // Add activity for new precedent
+            addActivity({
+              type: 'precedent_added',
+              title: 'නව පූර්වාදර්ශයක් එක් කරන ලදී',
+              description: `${data.message.precedent.headline} - ${data.message.precedent.court}`,
+              icon: BookOpen,
+              color: 'text-blue-600'
+            });
             break;
 
           case "Initial":
@@ -184,6 +201,23 @@ const LegalOfficerDashboard = () => {
             if (data.message?.content?.stats) {
               setStatsData(data.message?.content.stats);
             }
+            
+            // Add initial activities if needed
+            if (!initialDataLoaded) {
+              const initialActivities = data.message?.content?.disputes
+                ?.slice(0, 4)
+                .map((dispute: any, index: number) => ({
+                  type: 'case_created',
+                  title: 'නව සිද්ධියක් ලියාපදිංචි කරන ලදී',
+                  description: `${dispute.caseId} - ${dispute.disputesDetails.substring(0, 30)}...`,
+                  icon: FileText,
+                  color: 'text-purple-600',
+                  timestamp: Date.now() - (index * 1000 * 60 * 60) // Stagger timestamps
+                })) || [];
+              
+              setRecentActivities(initialActivities);
+              initialDataLoaded = true;
+            }
             break;
 
           case 'Estimate Time Updated':
@@ -192,6 +226,15 @@ const LegalOfficerDashboard = () => {
                 ? { ...case_, estimateTime: data.message.estimateTime }
                 : case_
             ));
+            
+            // Add activity for estimate update
+            addActivity({
+              type: 'estimate_updated',
+              title: 'සිද්ධියක් සඳහා ඇස්තමේන්තු කාලය යාවත්කාලීන කරන ලදී',
+              description: `${data.message.caseId} - ${data.message.estimateTime}`,
+              icon: Clock,
+              color: 'text-orange-600'
+            });
             break;
 
           case "Dispute Created":
@@ -201,7 +244,48 @@ const LegalOfficerDashboard = () => {
               all: prev.all + 1,
               pending: prev.pending + 1
             }));
+            
+            // Add activity for new dispute
+            addActivity({
+              type: 'case_created',
+              title: 'නව සිද්ධියක් ලියාපදිංචි කරන ලදී',
+              description: `${data.message.dispute.caseId} - ${data.message.dispute.disputesDetails.substring(0, 30)}...`,
+              icon: FileText,
+              color: 'text-purple-600'
+            });
+            break;
 
+          case "Comment Added":
+            // Add activity for new comment
+            addActivity({
+              type: 'comment_added',
+              title: 'සිද්ධියකට අදහසක් එක් කරන ලදී',
+              description: `${data.message.caseId} - ${data.message.comment.substring(0, 30)}...`,
+              icon: User,
+              color: 'text-indigo-600'
+            });
+            break;
+
+          case "Document Added":
+            // Add activity for new document
+            addActivity({
+              type: 'document_added',
+              title: 'නව ලේඛනයක් උඩුගත කරන ලදී',
+              description: `${data.message.caseId} - ${data.message.docPath.split('/').pop()}`,
+              icon: FileText,
+              color: 'text-blue-600'
+            });
+            break;
+
+          case "Error":
+            // Add activity for error
+            addActivity({
+              type: 'error_occurred',
+              title: 'දෝෂයක් ඇතිවිය',
+              description: data.message.error,
+              icon: AlertCircle,
+              color: 'text-red-600'
+            });
             break;
 
           default:
@@ -211,10 +295,27 @@ const LegalOfficerDashboard = () => {
 
       socket.onerror = (error) => {
         console.error('WebSocket error:', error);
+        addActivity({
+          type: 'connection_error',
+          title: 'සම්බන්ධතා දෝෂයක්',
+          description: 'WebSocket සම්බන්ධතාවය අහිමි විය',
+          icon: AlertCircle,
+          color: 'text-red-600'
+        });
       };
 
       socket.onclose = () => {
         console.log('WebSocket connection closed');
+        addActivity({
+          type: 'connection_closed',
+          title: 'සම්බන්ධතාවය වසා ඇත',
+          description: 'WebSocket සම්බන්ධතාවය නැවත ස්ථාපිත කිරීමට උත්සාහ කරයි',
+          icon: AlertCircle,
+          color: 'text-yellow-600'
+        });
+        
+        // Try to reconnect after 5 seconds
+        setTimeout(connect, 5000);
       };
     }
 
@@ -257,7 +358,6 @@ const LegalOfficerDashboard = () => {
     }
   ];
 
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -266,7 +366,7 @@ const LegalOfficerDashboard = () => {
           userName={user?.name}
           type='legal_officer'
           onNotificationsClick={() => setShowNotificationsModal(true)}
-          onSettingsClick={() => setShowSettingsModal(true)}
+          onSettingsClick={() => setShowNotificationsModal(true)}
         />
 
         {/* Stats Cards */}
