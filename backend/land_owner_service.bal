@@ -61,26 +61,6 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         check self.dbClient.close();
     }
 
-    resource function get legal_officers() returns error|http:Response {
-        http:Response response = new;
-        common:LegalOfficer[] legalOfficers = [];
-        stream<common:LegalOfficer, persist:Error?> legalOfficerResult = self.dbClient->/legalofficers(common:LegalOfficer);
-
-        check from var legalOfficer in legalOfficerResult
-            do {
-                legalOfficers.push(legalOfficer);
-            };
-        check legalOfficerResult.close();
-        if legalOfficers.length() == 0 {
-            response.statusCode = 404;
-            response = Utils:setErrorResponse(response, Utils:NO_LANDS_FOUND);
-        } else {
-            response.statusCode = 200;
-            response = Utils:setSuccessResponse(response, {"legal_officers": legalOfficers.toJson()});
-        }
-        return response;
-    }
-
     resource function post dispute/add(http:Request req, @http:Header string Authorization) returns http:Response|error {
         http:Response response = new;
         string token = regex:replace(Authorization, "Bearer ", "");
@@ -204,7 +184,39 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         record {|common:DisputeStats value;|}? statResult = check disputeStatsResult.next();
         _ = check disputeStatsResult.close();
 
-        response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson(), "stats": statResult.toJson()});
+        common:LegalOfficer[] legalOfficers = [];
+        stream<common:LegalOfficer, persist:Error?> legalOfficerResult = self.dbClient->/legalofficers(common:LegalOfficer);
+
+        check from var legalOfficer in legalOfficerResult
+            do {
+                legalOfficers.push(legalOfficer);
+            };
+        check legalOfficerResult.close();
+
+         sql:ParameterizedQuery landQuery = `SELECT l.*
+    FROM lands l
+    JOIN (
+        SELECT ltc.landsId, ltc.toLandOwnersId
+        FROM land_transfer_chain ltc
+        JOIN (
+            SELECT landsId, MAX(transferDate) AS latestDate
+            FROM land_transfer_chain
+            GROUP BY landsId
+        ) lastTransfers
+        ON ltc.landsId = lastTransfers.landsId AND ltc.transferDate = lastTransfers.latestDate
+        WHERE ltc.toLandOwnersId = ${userId}
+    ) AS ownedLands
+    ON l.id = ownedLands.landsId`;
+
+            DB:Land[] lands = [];
+            stream<DB:Land, persist:Error?> landResultStream = self.dbClient->queryNativeSQL(landQuery, DB:Land);
+            check from var land in landResultStream
+                do {
+                    lands.push(land);
+                };
+            _ = check landResultStream.close();
+
+        response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson(), "stats": statResult.toJson(), "legal_officers": legalOfficers.toJson(), "lands": lands.toJson()});
         return response;
     }
 
