@@ -9,7 +9,7 @@ import ballerina/crypto;
 import ballerina/data.jsondata;
 
 
-listener http:Listener commonMicroservice = new (9065);
+listener http:Listener commonMicroservice = new (9050);
 
 @http:ServiceConfig {
     cors: {
@@ -22,7 +22,7 @@ listener http:Listener commonMicroservice = new (9065);
             jwtValidatorConfig:
             {
                 issuer: "byteseekers",
-                audience: Utils:LAND_OWNER,
+                audience: [Utils:LAND_OWNER, Utils:LEGAL_OFFICER, Utils:LAND_OFFICER],
                 signatureConfig: {
                     certFile: "resources/certificates/public.crt"
                 },
