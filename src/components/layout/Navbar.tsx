@@ -23,7 +23,6 @@ const Navbar = () => {
   const navigation = [
     { name: 'මුල් පිටුව', href: '/', icon: Home },
     { name: 'ඉඩම් ගවේෂණය', href: '/search', icon: Search },
-    { name: 'ගනුදෙනු', href: '/transactions', icon: Users },
     { name: 'ගැටළු', href: '/disputes', icon: Gavel },
   ];
 
@@ -44,7 +43,6 @@ const Navbar = () => {
   const landOwnerNavigation = [
     { name: 'මුල් පිටුව', href: '/', icon: Home },
     { name: 'ඉඩම් ගවේෂණය', href: '/search', icon: Search },
-    { name: 'ගනුදෙනු', href: '/transactions', icon: Users },
     { name: 'ගැටළු', href: '/disputes', icon: Gavel },
     { name: 'ඩෑෂ්බෝඩ්', href: '/dashboard', icon: Scale },
   ];
