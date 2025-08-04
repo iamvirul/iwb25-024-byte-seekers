@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBlockchain } from '../contexts/BlockchainContext';
 import { motion } from 'framer-motion';
-import { 
-  Gavel, 
-  Plus, 
+import {
+  Gavel,
+  Plus,
   AlertCircle,
   Calendar,
   User,
@@ -33,11 +34,114 @@ import {
 import Card from '../components/ui/Card';
 import EmptyState from '../components/common/EmptyState';
 
+interface DisputeComment {
+  id: number;
+  comment: string;
+  createdAt: [number, number];
+  disputesId: number;
+}
+
+interface DisputeDocument {
+  id: number;
+  docPath: string;
+  uploadedDate: [number, number];
+  disputesId: number;
+}
+
+interface LegalPrecedent {
+  id: number;
+  year: { year: number; month: number; day: number };
+  headline: string;
+  court: string;
+  decision: string;
+  summary: string;
+  disputesId: number;
+}
+
+interface Land {
+  id: number;
+  landId: string;
+  landName: string;
+  landPlace: string;
+  landLat: number;
+  landLang: number;
+  landSize: number;
+  landValue: number;
+  landType: string;
+  registerDate: { year: number; month: number; day: number };
+  landStatus: string;
+  priority: number;
+}
+
+interface LegalOfficer {
+  id: number;
+  firstName: string;
+  lastName: string;
+  baslId: string;
+  initialCost: number;
+}
+
+interface UserData {
+  id: number;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  nic: number[];
+  sludi: number[];
+  contactNo: number[];
+  address: number[];
+}
+
+interface Dispute {
+  disputecomments: DisputeComment[];
+  land: Land;
+  legalofficer: LegalOfficer;
+  user: UserData;
+  disputedocuments: DisputeDocument[];
+  legalprecedents: LegalPrecedent[];
+  id: number;
+  caseId: string;
+  witnessName: string;
+  disputesDetails: string;
+  estimateTime: string;
+  status: string;
+  createdAt: [number, number];
+  landsId: number;
+  legalOfficerId: number;
+  usersId: number;
+}
+
+interface Stats {
+  value: {
+    usersId: number;
+    total_disputes: number;
+    pending_disputes: number;
+    resolved_disputes: number;
+    total_comments: number;
+  };
+}
+
+interface InitialData {
+  event: string;
+  response: {
+    success: boolean;
+    content: {
+      disputes: Dispute[];
+      stats: Stats;
+    };
+  };
+}
+
 const Disputes = () => {
+  const PRECEDENTS_PER_PAGE = 4;
+  const COMMENTS_PER_PAGE = 5;
+
   const { user } = useAuth();
-  const { disputes, fileDispute, resolveDispute, properties } = useBlockchain();
+  const { fileDispute, resolveDispute, properties } = useBlockchain();
   const [showNewDispute, setShowNewDispute] = useState(false);
-  const [selectedDispute, setSelectedDispute] = useState<any>(null);
+  const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
@@ -51,46 +155,53 @@ const Disputes = () => {
     description: '',
     documents: [] as File[]
   });
+  const [precedentPage, setPrecedentPage] = useState(0);
+  const [commentPage, setCommentPage] = useState(0);
+  const [showAllComments, setShowAllComments] = useState(false);
+  const [showFullDetails, setShowFullDetails] = useState('');
+  const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [stats, setStats] = useState<Stats['value']>({
+    usersId: 0,
+    total_disputes: 0,
+    pending_disputes: 0,
+    resolved_disputes: 0,
+    total_comments: 0
+  });
 
-  const userDisputes = disputes.filter(d => 
-    d.complainant === user?.name || d.defendant === user?.name
-  );
-
-  const filteredDisputes = userDisputes.filter(dispute => {
-    const matchesSearch = 
-      dispute.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dispute.propertyId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dispute.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dispute.defendant.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredDisputes = disputes.filter(dispute => {
+    const matchesSearch =
+      dispute.caseId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dispute.land.landId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dispute.disputesDetails.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dispute.witnessName.toLowerCase().includes(searchTerm.toLowerCase());
 
     let matchesFilter = true;
-    if (filterType !== 'all') {
-      if (filterType === 'my_complaints') matchesFilter = dispute.complainant === user?.name;
-      if (filterType === 'against_me') matchesFilter = dispute.defendant === user?.name;
-    }
+
     if (statusFilter !== 'all') matchesFilter = matchesFilter && dispute.status === statusFilter;
 
     // Date range filter
     if (dateRange.start) {
       const startDate = new Date(dateRange.start).getTime();
-      if (dispute.filedDate < startDate) matchesFilter = false;
+      const disputeDate = new Date(dispute.createdAt[0] * 1000).getTime();
+      if (disputeDate < startDate) matchesFilter = false;
     }
     if (dateRange.end) {
       const endDate = new Date(dateRange.end).getTime() + 86400000; // Add 1 day
-      if (dispute.filedDate > endDate) matchesFilter = false;
+      const disputeDate = new Date(dispute.createdAt[0] * 1000).getTime();
+      if (disputeDate > endDate) matchesFilter = false;
     }
 
     return matchesSearch && matchesFilter;
   }).sort((a, b) => {
     switch (sortBy) {
       case 'newest':
-        return b.filedDate - a.filedDate;
+        return b.createdAt[0] - a.createdAt[0];
       case 'oldest':
-        return a.filedDate - b.filedDate;
+        return a.createdAt[0] - b.createdAt[0];
       case 'status':
         return a.status.localeCompare(b.status);
       case 'property':
-        return a.propertyId.localeCompare(b.propertyId);
+        return a.land.landId.localeCompare(b.land.landId);
       default:
         return 0;
     }
@@ -98,8 +209,8 @@ const Disputes = () => {
 
   const handleSubmitDispute = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
+      // Adapt this to your actual API call
       fileDispute({
         propertyId: formData.propertyId,
         complainant: user?.name || '',
@@ -124,67 +235,54 @@ const Disputes = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-            <Clock className="w-3 h-3 mr-1" />
-            රැදී සිටින
-          </span>
-        );
-      case 'investigating':
+      case 'PENDING':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
             <Search className="w-3 h-3 mr-1" />
             විමර්ශනය
           </span>
         );
-      case 'resolved':
+      case 'RESOLVED':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
             <CheckCircle className="w-3 h-3 mr-1" />
             නිරාකරණය
           </span>
         );
-      case 'rejected':
+      default:
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            <XCircle className="w-3 h-3 mr-1" />
-            ප්‍රතික්ෂේප
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            {status}
           </span>
         );
-      default:
-        return null;
     }
   };
 
   const getDisputeIcon = (status: string) => {
     switch (status) {
-      case 'pending':
+      case 'PENDING':
         return <Clock className="w-5 h-5 text-yellow-600" />;
-      case 'investigating':
-        return <Search className="w-5 h-5 text-blue-600" />;
-      case 'resolved':
+      case 'RESOLVED':
         return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'rejected':
-        return <XCircle className="w-5 h-5 text-red-600" />;
       default:
         return <AlertCircle className="w-5 h-5 text-gray-600" />;
     }
   };
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString('si-LK', {
+    return new Date(timestamp * 1000).toLocaleDateString('si-LK', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
   };
 
-  const stats = [
-    { label: 'මුළු ගැටළු', value: userDisputes.length, icon: Gavel, color: 'text-red-600' },
-    { label: 'රැදී සිටින', value: userDisputes.filter(d => d.status === 'pending').length, icon: Clock, color: 'text-yellow-600' },
-    { label: 'විමර්ශනය', value: userDisputes.filter(d => d.status === 'investigating').length, icon: Search, color: 'text-blue-600' },
-    { label: 'නිරාකරණය', value: userDisputes.filter(d => d.status === 'resolved').length, icon: CheckCircle, color: 'text-green-600' }
+  const disputeStats = [
+    { label: 'මුළු ගැටළු', value: stats.total_disputes, icon: Gavel, color: 'text-red-600' },
+    { label: 'රැදී සිටින', value: stats.pending_disputes, icon: Clock, color: 'text-yellow-600' },
+    { label: 'මුළු අදහස්', value: stats.total_comments, icon: Search, color: 'text-blue-600' },
+    { label: 'නිරාකරණය', value: stats.resolved_disputes, icon: CheckCircle, color: 'text-green-600' }
   ];
 
   const filterOptions = [
@@ -202,11 +300,40 @@ const Disputes = () => {
 
   const statusOptions = [
     { value: 'all', label: 'සියලු තත්ත්වයන්' },
-    { value: 'pending', label: 'රැදී සිටින' },
-    { value: 'investigating', label: 'විමර්ශනය' },
-    { value: 'resolved', label: 'නිරාකරණය' },
-    { value: 'rejected', label: 'ප්‍රතික්ෂේප' }
+    { value: 'PENDING', label: 'රැදී සිටින' },
+    { value: 'RESOLVED', label: 'නිරාකරණය' }
+    // Add other statuses if needed
   ];
+
+  useEffect(() => {
+    let socket: WebSocket;
+    const userId = localStorage.getItem("userSessionId");
+    const connect = () => {
+      socket = new WebSocket(`ws://127.0.0.1:8070/proxy/disputes/${userId}`);
+
+      socket.onopen = () => {
+        console.log('WebSocket connected');
+      };
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received message:', data);
+
+        setDisputes(data.response.content.disputes);
+        setStats(data.response.content.stats.value);
+      };
+
+      socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      socket.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+    }
+    connect();
+    return () => socket?.close();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
@@ -237,7 +364,7 @@ const Disputes = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
         >
-          {stats.map((stat, index) => {
+          {disputeStats.map((stat, index) => {
             const Icon = stat.icon;
             return (
               <Card key={stat.label} hover className="text-center h-full">
@@ -279,7 +406,7 @@ const Disputes = () => {
           >
             <Card>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">නව ගැටළුවක් ගොනු කරන්න</h2>
-              
+
               <form onSubmit={handleSubmitDispute} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -289,7 +416,7 @@ const Disputes = () => {
                     <select
                       id="propertyId"
                       value={formData.propertyId}
-                      onChange={(e) => setFormData({...formData, propertyId: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, propertyId: e.target.value })}
                       className="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
                       required
                     >
@@ -310,7 +437,7 @@ const Disputes = () => {
                       type="text"
                       id="defendant"
                       value={formData.defendant}
-                      onChange={(e) => setFormData({...formData, defendant: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, defendant: e.target.value })}
                       className="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
                       placeholder="විත්තිකරුගේ නම"
                       required
@@ -326,7 +453,7 @@ const Disputes = () => {
                     id="description"
                     rows={4}
                     value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
                     placeholder="ගැටළුව සම්බන්ධයෙන් සම්පූර්ණ විස්තරයක් ලියන්න"
                     required
@@ -344,7 +471,7 @@ const Disputes = () => {
                       id="documents"
                       multiple
                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                      onChange={(e) => setFormData({...formData, documents: Array.from(e.target.files || [])})}
+                      onChange={(e) => setFormData({ ...formData, documents: Array.from(e.target.files || []) })}
                       className="hidden"
                     />
                     <label htmlFor="documents" className="cursor-pointer">
@@ -374,7 +501,7 @@ const Disputes = () => {
                     <div>
                       <h4 className="text-lg font-semibold text-red-800 mb-2">AI සහායක ගැටළු විශ්ලේෂණය</h4>
                       <p className="text-red-700 leading-relaxed">
-                        ඔබේ ගැටළුව ගොනු කිරීමෙන් පසු, අපගේ AI පද්ධතිය ගැටළුවේ ස්වභාවය විශ්ලේෂණය කර 
+                        ඔබේ ගැටළුව ගොනු කිරීමෙන් පසු, අපගේ AI පද්ධතිය ගැටළුවේ ස්වභාවය විශ්ලේෂණය කර
                         ඉක්මන් නිරාකරණයක් සඳහා නිර්දේශ ලබා දෙයි.
                       </p>
                     </div>
@@ -408,149 +535,63 @@ const Disputes = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <Card className="mb-8">
-            <div className="space-y-6">
-              {/* Main Search Bar */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Search className="h-6 w-6 text-gray-400" />
+            <div className="space-y-4">
+              {/* Combined Search and Filter Row */}
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                {/* Search Bar - Takes remaining space */}
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Search className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="block w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
+                    placeholder="ගැටළු ID, ඉඩම් ID හෝ විස්තරය ඇතුළත් කරන්න..."
+                  />
                 </div>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                  placeholder="ගැටළු ID, ඉඩම් ID හෝ විස්තරය ඇතුළත් කරන්න..."
-                />
-              </div>
 
-              {/* Filter Controls */}
-              <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                <div className="flex flex-wrap gap-3">
-                  <div className="min-w-[180px]">
-                    <select
-                      value={filterType}
-                      onChange={(e) => setFilterType(e.target.value)}
-                      className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                    >
-                      {filterOptions.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="min-w-[150px]">
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                    >
-                      {sortOptions.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <button
-                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                    className={`inline-flex items-center px-4 py-2 border rounded-lg transition-all duration-200 ${
-                      showAdvancedFilters 
-                        ? 'border-red-500 bg-red-50 text-red-700' 
-                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                    }`}
+                {/* Status Filter - Fixed width */}
+                <div className="w-full md:w-48">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
                   >
-                    <SlidersHorizontal className="w-4 h-4 mr-2" />
-                    උසස් ෆිල්ටර්
-                  </button>
+                    {statusOptions.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-600">
+                {/* View Toggle and Results Count */}
+                <div className="flex items-center gap-3 ml-auto">
+                  <span className="text-sm text-gray-600 whitespace-nowrap">
                     {filteredDisputes.length} ප්‍රතිඵල
                   </span>
                   <div className="flex items-center border border-gray-300 rounded-lg p-1">
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`p-2 rounded transition-colors ${
-                        viewMode === 'grid' 
-                          ? 'bg-red-500 text-white' 
-                          : 'text-gray-600 hover:bg-gray-100'
-                      }`}
+                      className={`p-2 rounded transition-colors ${viewMode === 'grid'
+                        ? 'bg-red-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                        }`}
                     >
                       <Grid3X3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`p-2 rounded transition-colors ${
-                        viewMode === 'list' 
-                          ? 'bg-red-500 text-white' 
-                          : 'text-gray-600 hover:bg-gray-100'
-                      }`}
+                      className={`p-2 rounded transition-colors ${viewMode === 'list'
+                        ? 'bg-red-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                        }`}
                     >
                       <List className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               </div>
-
-              {/* Advanced Filters */}
-              {showAdvancedFilters && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="border-t border-gray-200 pt-6"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        තත්ත්වය
-                      </label>
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                      >
-                        {statusOptions.map(option => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        ආරම්භක දිනය
-                      </label>
-                      <input
-                        type="date"
-                        value={dateRange.start}
-                        onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        අවසාන දිනය
-                      </label>
-                      <input
-                        type="date"
-                        value={dateRange.end}
-                        onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <button
-                        onClick={() => {
-                          setFilterType('all');
-                          setStatusFilter('all');
-                          setDateRange({ start: '', end: '' });
-                          setSearchTerm('');
-                        }}
-                        className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        ෆිල්ටර් ඉවත් කරන්න
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
             </div>
           </Card>
         </motion.div>
@@ -565,11 +606,11 @@ const Disputes = () => {
               </h2>
               {filteredDisputes.length > 0 && (
                 <div className="text-sm text-gray-600">
-                  {filteredDisputes.length} න් {userDisputes.length}
+                  {filteredDisputes.length} න් {disputes.length}
                 </div>
               )}
             </div>
-            
+
             {filteredDisputes.length === 0 ? (
               <Card>
                 <EmptyState
@@ -602,23 +643,23 @@ const Disputes = () => {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                  ගැටළුව #{dispute.id.slice(-6)}
+                                  {dispute.caseId}
                                 </h3>
                                 <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                                  {dispute.description}
+                                  {dispute.disputesDetails}
                                 </p>
                                 <div className="space-y-1 text-sm text-gray-500 mb-4">
                                   <div className="flex items-center">
                                     <FileText className="w-4 h-4 mr-2" />
-                                    ඉඩම්: {dispute.propertyId}
+                                    ඉඩම්: {dispute.land.landId}
                                   </div>
                                   <div className="flex items-center">
                                     <User className="w-4 h-4 mr-2" />
-                                    විත්තිකරු: {dispute.defendant}
+                                    සාක්ෂිකරු: {dispute.witnessName}
                                   </div>
                                   <div className="flex items-center">
                                     <Calendar className="w-4 h-4 mr-2" />
-                                    {formatDate(dispute.filedDate)}
+                                    {formatDate(dispute.createdAt[0])}
                                   </div>
                                 </div>
                               </div>
@@ -644,11 +685,11 @@ const Disputes = () => {
                             </div>
                             <div>
                               <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                ගැටළුව #{dispute.id.slice(-6)}
+                                {dispute.caseId}
                               </h3>
-                              <p className="text-gray-600 text-sm mb-1">{dispute.propertyId} • {dispute.defendant}</p>
+                              <p className="text-gray-600 text-sm mb-1">{dispute.land.landId} • {dispute.witnessName}</p>
                               <div className="flex items-center space-x-4 text-sm text-gray-500">
-                                <span>{formatDate(dispute.filedDate)}</span>
+                                <span>{formatDate(dispute.createdAt[0])}</span>
                                 <span>•</span>
                                 {getStatusBadge(dispute.status)}
                               </div>
@@ -670,117 +711,370 @@ const Disputes = () => {
             )}
           </div>
 
+          {/* Full Details Modal */}
+          {showFullDetails && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
+              >
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">සම්පූර්ණ ගැටළු විස්තර</h2>
+                    <button
+                      onClick={() => setShowFullDetails(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  {/* All dispute details */}
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <span className="text-sm text-gray-600">ඉඩම් ID:</span>
+                        <p className="font-medium mt-1">{selectedDispute.land.landId}</p>
+                      </div>
+
+                      <div>
+                        <span className="text-sm text-gray-600">ඉඩම් නම:</span>
+                        <p className="font-medium mt-1">{selectedDispute.land.landName}</p>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">ගැටළු විස්තර</h3>
+                        <p className="text-gray-600">{selectedDispute.disputesDetails}</p>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">තත්ත්වය</h3>
+                        {getStatusBadge(selectedDispute.status)}
+                      </div>
+                      <div>
+                        <span className="text-sm text-gray-600">සාක්ෂිකරු:</span>
+                        <p className="font-medium mt-1">{selectedDispute.witnessName}</p>
+                      </div>
+
+                      <div>
+                        <span className="text-sm text-gray-600">නඩු නීතිඥ:</span>
+                        <p className="font-medium mt-1">
+                          {selectedDispute.legalofficer?.firstName} {selectedDispute.legalofficer?.lastName}
+                        </p>
+                      </div>
+
+                      <div>
+                        <span className="text-sm text-gray-600">ඇස්තමේන්තු කළ කාලය:</span>
+                        <p className="font-medium mt-1">
+                          {selectedDispute.estimateTime || 'නොදක්වා ඇත'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <span className="text-sm text-gray-600">ගොනු කළ දිනය:</span>
+                        <div className="flex items-center mt-1">
+                          <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                          {formatDate(selectedDispute.createdAt[0])}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* All documents */}
+                    {selectedDispute.disputedocuments.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-3">සියලු ලේඛන</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {selectedDispute.disputedocuments.map((doc, index) => (
+                            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                              <FileText className="w-5 h-5 mr-3 text-gray-600" />
+                              <div>
+                                <p className="font-medium">{doc.docPath.split('/').pop()}</p>
+                                <p className="text-xs text-gray-500">
+                                  {formatDate(doc.uploadedDate[0])}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* All legal precedents */}
+                    {selectedDispute.legalprecedents.length > 0 && (
+                      <div>
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="text-lg font-medium text-gray-900">සියලු නීතිමය පූර්වාදර්ශ</h3>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => setPrecedentPage(p => Math.max(p - 1, 0))}
+                              disabled={precedentPage === 0}
+                              className={`p-1 rounded ${precedentPage === 0 ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-100'}`}
+                            >
+                              <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <span className="text-sm text-gray-600">
+                              පිටු {precedentPage + 1} / {Math.ceil(selectedDispute.legalprecedents.length / PRECEDENTS_PER_PAGE)}
+                            </span>
+                            <button
+                              onClick={() => setPrecedentPage(p =>
+                                Math.min(p + 1, Math.ceil(selectedDispute.legalprecedents.length / PRECEDENTS_PER_PAGE) - 1)
+                              )}
+                              disabled={(precedentPage + 1) * PRECEDENTS_PER_PAGE >= selectedDispute.legalprecedents.length}
+                              className={`p-1 rounded ${(precedentPage + 1) * PRECEDENTS_PER_PAGE >= selectedDispute.legalprecedents.length ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-100'}`}
+                            >
+                              <ChevronRight className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          {selectedDispute.legalprecedents
+                            .slice(
+                              precedentPage * PRECEDENTS_PER_PAGE,
+                              (precedentPage + 1) * PRECEDENTS_PER_PAGE
+                            )
+                            .map((precedent, index) => (
+                              <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="flex justify-between items-start">
+                                  <h4 className="font-medium text-lg">
+                                    {precedent.headline}
+                                  </h4>
+                                  <span className="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                                    {precedent.court.replace('_', ' ')}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {precedent.year.year} - {precedent.decision}
+                                </p>
+                                <p className="mt-2 text-gray-700">{precedent.summary}</p>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* All comments */}
+                    {selectedDispute.disputecomments.length > 0 && (
+                      <div>
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="text-lg font-medium text-gray-900">සියලු අදහස්</h3>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => setCommentPage(p => Math.max(p - 1, 0))}
+                              disabled={commentPage === 0}
+                              className={`p-1 rounded ${commentPage === 0 ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-100'}`}
+                            >
+                              <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <span className="text-sm text-gray-600">
+                              පිටු {commentPage + 1} / {Math.ceil(selectedDispute.disputecomments.length / COMMENTS_PER_PAGE)}
+                            </span>
+                            <button
+                              onClick={() => setCommentPage(p =>
+                                Math.min(p + 1, Math.ceil(selectedDispute.disputecomments.length / COMMENTS_PER_PAGE) - 1)
+                              )}
+                              disabled={(commentPage + 1) * COMMENTS_PER_PAGE >= selectedDispute.disputecomments.length}
+                              className={`p-1 rounded ${(commentPage + 1) * COMMENTS_PER_PAGE >= selectedDispute.disputecomments.length ? 'text-gray-400' : 'text-gray-700 hover:bg-gray-100'}`}
+                            >
+                              <ChevronRight className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          {selectedDispute.disputecomments
+                            .sort((a, b) => b.createdAt[0] - a.createdAt[0])
+                            .slice(
+                              commentPage * COMMENTS_PER_PAGE,
+                              (commentPage + 1) * COMMENTS_PER_PAGE
+                            )
+                            .map((comment, index) => (
+                              <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="font-medium">
+                                    {selectedDispute.legalofficer.firstName + selectedDispute.legalofficer.lastName || 'නිලධාරියෙක්'}
+                                  </span>
+                                  <span className="text-sm text-gray-500">
+                                    {formatDate(comment.createdAt[0])}
+                                  </span>
+                                </div>
+                                <p className="text-gray-700 whitespace-pre-line">
+                                  {comment.comment}
+                                </p>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      onClick={() => setShowFullDetails(false)}
+                      className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      වසන්න
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+
           {/* Dispute Details Sidebar */}
           <div className="xl:col-span-1">
             <div className="sticky top-8">
               {selectedDispute ? (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Card>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-6">ගැටළු විස්තර</h2>
-                    
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-medium text-gray-900">
-                          ගැටළුව #{selectedDispute.id.slice(-6)}
-                        </h3>
-                        {getStatusBadge(selectedDispute.status)}
-                      </div>
+                <>
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card>
+                      <h2 className="text-xl font-semibold text-gray-900 mb-6">ගැටළු විස්තර</h2>
 
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">ගැටළුවේ විස්තරය</h4>
-                        <p className="text-gray-600 text-sm leading-relaxed">
-                          {selectedDispute.description}
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-4">
-                        <div>
-                          <span className="text-sm text-gray-600">ඉඩම් ID:</span>
-                          <p className="font-medium mt-1">{selectedDispute.propertyId}</p>
+                      <div className="space-y-4">
+                        {/* Case header and basic info */}
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-medium text-gray-900">
+                            {selectedDispute.caseId}
+                          </h3>
+                          {getStatusBadge(selectedDispute.status)}
                         </div>
 
                         <div>
-                          <span className="text-sm text-gray-600">පැමිණිලිකරු:</span>
-                          <p className="font-medium mt-1">{selectedDispute.complainant}</p>
-                        </div>
-
-                        <div>
-                          <span className="text-sm text-gray-600">විත්තිකරු:</span>
-                          <p className="font-medium mt-1">{selectedDispute.defendant}</p>
-                        </div>
-
-                        <div>
-                          <span className="text-sm text-gray-600">ගොනු කළ දිනය:</span>
-                          <div className="flex items-center mt-1">
-                            <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                            {formatDate(selectedDispute.filedDate)}
-                          </div>
-                        </div>
-                      </div>
-
-                      {selectedDispute.documents.length > 0 && (
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">සහාය ලේඛන</h4>
-                          <div className="space-y-2">
-                            {selectedDispute.documents.map((doc: string, index: number) => (
-                              <div key={index} className="flex items-center text-sm text-gray-600">
-                                <FileText className="w-4 h-4 mr-2" />
-                                {doc}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {selectedDispute.nlpAnalysis && (
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-                          <h4 className="font-medium text-blue-900 mb-2 flex items-center">
-                            <MessageSquare className="w-4 h-4 mr-2" />
-                            AI විශ්ලේෂණය
-                          </h4>
-                          <p className="text-sm text-blue-700">
-                            {selectedDispute.nlpAnalysis}
+                          <h4 className="font-medium text-gray-900 mb-2">ගැටළුවේ විස්තරය</h4>
+                          <p className="text-gray-600 text-sm leading-relaxed">
+                            {selectedDispute.disputesDetails}
                           </p>
                         </div>
-                      )}
 
-                      {user?.role === 'legal_officer' && selectedDispute.status === 'pending' && (
-                        <div className="border-t pt-4">
-                          <h4 className="font-medium text-gray-900 mb-3">නිරාකරණ ක්‍රියාමාර්ග</h4>
-                          <div className="space-y-2">
-                            <button
-                              onClick={() => {
-                                resolveDispute(selectedDispute.id, 'ගැටළුව සාධාරණව නිරාකරණය කරන ලදී');
-                                setSelectedDispute({...selectedDispute, status: 'resolved'});
-                              }}
-                              className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                            >
-                              ගැටළුව නිරාකරණය කරන්න
-                            </button>
-                            <button className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                              වැඩිදුර විමර්ශනය
-                            </button>
+                        {/* Property details grid */}
+                        <div className="grid grid-cols-1 gap-4">
+                          <div>
+                            <span className="text-sm text-gray-600">ඉඩම් ID:</span>
+                            <p className="font-medium mt-1">{selectedDispute.land.landId}</p>
+                          </div>
+
+                          <div>
+                            <span className="text-sm text-gray-600">ඉඩම් නම:</span>
+                            <p className="font-medium mt-1">{selectedDispute.land.landName}</p>
+                          </div>
+
+                          <div>
+                            <span className="text-sm text-gray-600">සාක්ෂිකරු:</span>
+                            <p className="font-medium mt-1">{selectedDispute.witnessName}</p>
+                          </div>
+
+                          <div>
+                            <span className="text-sm text-gray-600">නඩු නීතිඥ:</span>
+                            <p className="font-medium mt-1">
+                              {selectedDispute.legalofficer.firstName} {selectedDispute.legalofficer.lastName}
+                            </p>
+                          </div>
+
+                          <div>
+                            <span className="text-sm text-gray-600">ඇස්තමේන්තු කළ කාලය:</span>
+                            <p className="font-medium mt-1">
+                              {selectedDispute.estimateTime || 'නොදක්වා ඇත'}
+                            </p>
+                          </div>
+
+                          <div>
+                            <span className="text-sm text-gray-600">ගොනු කළ දිනය:</span>
+                            <div className="flex items-center mt-1">
+                              <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                              {formatDate(selectedDispute.createdAt[0])}
+                            </div>
                           </div>
                         </div>
-                      )}
 
-                      <div className="flex space-x-2">
-                        <button className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-colors">
-                          <Download className="w-4 h-4 mr-2" />
-                          බාගන්න
-                        </button>
-                        <button className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                          <Eye className="w-4 h-4 mr-2" />
-                          සම්පූර්ණ විස්තර
-                        </button>
+                        {/* Documents section */}
+                        {selectedDispute.disputedocuments.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-2">සහාය ලේඛන</h4>
+                            <div className="space-y-2">
+                              {selectedDispute.disputedocuments.slice(0, 3).map((doc, index) => (
+                                <div key={index} className="flex items-center text-sm text-gray-600">
+                                  <FileText className="w-4 h-4 mr-2" />
+                                  {doc.docPath.split('/').pop()}
+                                </div>
+                              ))}
+                              {selectedDispute.disputedocuments.length > 3 && (
+                                <div className="text-sm text-blue-600">
+                                  + {selectedDispute.disputedocuments.length - 3} more documents
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Legal precedents (limited to 3) */}
+                        {selectedDispute.legalprecedents.length > 0 && (
+                          <div className="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-4">
+                            <h4 className="font-medium text-purple-900 mb-2 flex items-center">
+                              <Scale className="w-4 h-4 mr-2" />
+                              නීතිමය පූර්වාදර්ශ ({selectedDispute.legalprecedents.length})
+                            </h4>
+                            <div className="space-y-2">
+                              {selectedDispute.legalprecedents
+                                .slice(0, 3)
+                                .map((precedent, index) => (
+                                  <div key={index} className="text-sm text-purple-700">
+                                    <p className="font-medium">
+                                      {precedent.headline} ({precedent.year.year})
+                                    </p>
+                                    <p className="text-xs">{precedent.court.replace('_', ' ')}</p>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Comments (limited to 3) */}
+                        {selectedDispute.disputecomments.length > 0 && (
+                          <div className="border border-gray-200 rounded-lg overflow-hidden">
+                            <div className="bg-gray-50 px-4 py-3">
+                              <h4 className="font-medium text-gray-900 flex items-center">
+                                <MessageSquare className="w-4 h-4 mr-2 text-blue-600" />
+                                අදහස් ({selectedDispute.disputecomments.length})
+                              </h4>
+                            </div>
+                            <div className="divide-y divide-gray-200">
+                              {selectedDispute.disputecomments
+                                .sort((a, b) => b.createdAt[0] - a.createdAt[0])
+                                .slice(0, 3)
+                                .map((comment, index) => (
+                                  <div key={index} className="p-4">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-sm font-medium text-gray-700">
+                                        {selectedDispute.legalofficer.firstName + selectedDispute.legalofficer.lastName || 'නිලධාරියෙක්'}
+                                      </span>
+                                      <span className="text-xs text-gray-500">
+                                        {formatDate(comment.createdAt[0])}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm text-gray-600 whitespace-pre-line">
+                                      {comment.comment}
+                                    </p>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* View full details button */}
+                        <div className="border-t pt-4">
+                          <button
+                            onClick={() => setShowFullDetails(true)}
+                            className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-colors flex items-center justify-center"
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            සම්පූර්ණ විස්තර
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </Card>
-                </motion.div>
+                    </Card>
+                  </motion.div>
+                </>
               ) : (
                 <Card>
                   <div className="text-center py-12">
@@ -798,11 +1092,11 @@ const Disputes = () => {
                       </div>
                       <div className="flex items-center justify-center">
                         <MessageSquare className="w-4 h-4 mr-2" />
-                        <span>AI විශ්ලේෂණ ප්‍රතිඵල</span>
+                        <span>අදහස් සහ අනුස්මරණ</span>
                       </div>
                       <div className="flex items-center justify-center">
                         <Database className="w-4 h-4 mr-2" />
-                        <span>ගැටළු මෙටාඩේටා</span>
+                        <span>නීතිමය පූර්වාදර්ශ</span>
                       </div>
                     </div>
                   </div>
@@ -810,6 +1104,7 @@ const Disputes = () => {
               )}
             </div>
           </div>
+
         </div>
       </div>
     </div>
