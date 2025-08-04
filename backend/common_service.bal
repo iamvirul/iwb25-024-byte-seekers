@@ -14,7 +14,7 @@ listener http:Listener commonMicroservice = new (9065);
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["*"],
-        allowMethods: ["GET", "POST"],
+        allowMethods: ["GET", "POST", "PUT"],
         allowCredentials: true
     },
     auth: [
