@@ -17,9 +17,7 @@ interface TabNavigationProps {
 const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs: Tab[] = [
     { id: 'personal', label: 'පුද්ගලික තොරතුරු', icon: User },
-    { id: 'documents', label: 'ලේඛන', icon: FileText },
     { id: 'security', label: 'ආරක්ෂාව', icon: Shield },
-    { id: 'settings', label: 'සැකසුම්', icon: Settings }
   ];
 
   return (
