@@ -307,10 +307,10 @@ const Disputes = () => {
             }));
             break;
           case "Initial":
-            setDisputes(data.response.content.disputes);
-            setStats(data.response.content.stats.value);
-            setLegalOfficers(data.response.content.legal_officers)
-            setProperties(data.response.content.lands)
+            setDisputes(data.response?.content.disputes);
+            setStats(data.response?.content.stats.value);
+            setLegalOfficers(data?.response?.content.legal_officers)
+            setProperties(data.response?.content.lands)
             break;
           case 'Status Updated':
             setDisputes(prev => {
