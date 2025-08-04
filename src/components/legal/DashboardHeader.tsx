@@ -1,20 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Settings } from 'lucide-react';
-import Button from '../ui/Button';
 
 interface DashboardHeaderProps {
     userName?: string;
     type: 'land_officer' | 'legal_officer';
-    onNotificationsClick: () => void;
-    onSettingsClick: () => void;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     userName,
     type,
-    onNotificationsClick,
-    onSettingsClick
 }) => {
     return (
         <motion.div
