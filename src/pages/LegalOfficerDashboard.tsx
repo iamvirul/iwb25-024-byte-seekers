@@ -133,7 +133,7 @@ const LegalOfficerDashboard = () => {
   useEffect(() => {
     let socket: WebSocket;
     let initialDataLoaded = false;
-    const userId = localStorage.getItem("legalOfficerId");
+    const userId = localStorage.getItem("userSessionId");
     const connect = () => {
       socket = new WebSocket(`ws://127.0.0.1:8075/proxy/${userId}`);
 
