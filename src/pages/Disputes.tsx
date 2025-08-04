@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import Card from '../components/ui/Card';
 import EmptyState from '../components/common/EmptyState';
+import toast from 'react-hot-toast';
 
 interface DisputeComment {
   id: number;
@@ -79,6 +80,17 @@ interface LegalOfficer {
   lastName: string;
   baslId: string;
   initialCost: number;
+}
+
+declare interface PayHere {
+  onCompleted: (orderId: string) => void;
+  onDismissed: () => void;
+  onError: (error: any) => void;
+  startPayment: (payment: any) => void;
+}
+
+declare interface Window {
+  payhere: PayHere;
 }
 
 interface UserData {
@@ -139,7 +151,7 @@ const Disputes = () => {
   const COMMENTS_PER_PAGE = 5;
 
   const { user } = useAuth();
-  const { fileDispute, resolveDispute, properties } = useBlockchain();
+  const { fileDispute, resolveDispute } = useBlockchain();
   const [showNewDispute, setShowNewDispute] = useState(false);
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -152,8 +164,10 @@ const Disputes = () => {
   const [formData, setFormData] = useState({
     propertyId: '',
     defendant: '',
+    legalOfficerId: '',
+    initialCost: 0,
     description: '',
-    documents: [] as File[]
+    documents: []
   });
   const [precedentPage, setPrecedentPage] = useState(0);
   const [commentPage, setCommentPage] = useState(0);
@@ -167,6 +181,8 @@ const Disputes = () => {
     resolved_disputes: 0,
     total_comments: 0
   });
+  const [legalOfficers, setLegalOfficers] = useState([]);
+  const [properties, setProperties] = useState([]);
 
   const filteredDisputes = disputes.filter(dispute => {
     const matchesSearch =
@@ -207,31 +223,6 @@ const Disputes = () => {
     }
   });
 
-  const handleSubmitDispute = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      // Adapt this to your actual API call
-      fileDispute({
-        propertyId: formData.propertyId,
-        complainant: user?.name || '',
-        defendant: formData.defendant,
-        description: formData.description,
-        status: 'pending',
-        documents: formData.documents.map(file => file.name)
-      });
-
-      setFormData({
-        propertyId: '',
-        defendant: '',
-        description: '',
-        documents: []
-      });
-      setShowNewDispute(false);
-      alert('ගැටළුව සාර්ථකව ගොනු කරන ලදී');
-    } catch (error) {
-      alert('ගැටළුව ගොනු කිරීමේදී දෝෂයක් ඇතිවිය');
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -285,19 +276,6 @@ const Disputes = () => {
     { label: 'නිරාකරණය', value: stats.resolved_disputes, icon: CheckCircle, color: 'text-green-600' }
   ];
 
-  const filterOptions = [
-    { value: 'all', label: 'සියලු ගැටළු' },
-    { value: 'my_complaints', label: 'මගේ පැමිණිලි' },
-    { value: 'against_me', label: 'මට එරෙහි' }
-  ];
-
-  const sortOptions = [
-    { value: 'newest', label: 'නවතම' },
-    { value: 'oldest', label: 'පැරණිතම' },
-    { value: 'status', label: 'තත්ත්වය අනුව' },
-    { value: 'property', label: 'ඉඩම් අනුව' }
-  ];
-
   const statusOptions = [
     { value: 'all', label: 'සියලු තත්ත්වයන්' },
     { value: 'PENDING', label: 'රැදී සිටින' },
@@ -319,8 +297,43 @@ const Disputes = () => {
         const data = JSON.parse(event.data);
         console.log('Received message:', data);
 
-        setDisputes(data.response.content.disputes);
-        setStats(data.response.content.stats.value);
+        switch (data.event) {
+          case "Dispute Created":
+            setDisputes(prev => [...prev, data.message.dispute]);
+            setStats(prev => ({
+              ...prev,
+              total_disputes: prev.total_disputes + 1,
+              pending_disputes: prev.pending_disputes + 1
+            }));
+            break;
+          case "Initial":
+            setDisputes(data.response.content.disputes);
+            setStats(data.response.content.stats.value);
+            setLegalOfficers(data.response.content.legal_officers)
+            setProperties(data.response.content.lands)
+            break;
+          case 'Status Updated':
+            setDisputes(prev => {
+              return prev.map(case_ =>
+                case_.id === data.message.id
+                  ? { ...case_, status: 'RESOLVED' }
+                  : case_
+              );
+            });
+            setStats(prev => ({
+              ...prev,
+              resolved_disputes: prev.resolved_disputes + 1,
+              pending_disputes: prev.pending_disputes - 1
+            }));
+            break;
+          case 'Estimate Time Updated':
+            setDisputes(prev => prev.map(case_ =>
+              case_.id === data.message.id
+                ? { ...case_, estimateTime: data.message.estimateTime }
+                : case_
+            ));
+            break;
+        }
       };
 
       socket.onerror = (error) => {
@@ -334,6 +347,164 @@ const Disputes = () => {
     connect();
     return () => socket?.close();
   }, []);
+
+
+  const handleSubmitDispute = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (!formData.propertyId) {
+        toast.error('Please select a property');
+      }
+      if (!formData.defendant) {
+        toast.error('Please enter defendant/witness name');
+      }
+      if (!formData.legalOfficerId) {
+        toast.error('Please select a legal officer');
+      }
+      if (!formData.description) {
+        toast.error('Please enter dispute details');
+      }
+      if (formData.documents.length === 0) {
+        toast.error('Please upload at least one document');
+      }
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+
+      if (!userId || !token) {
+        toast.error('User authentication missing');
+      }
+
+      const selectedOfficer = legalOfficers.find(lo => lo.id === parseInt(formData.legalOfficerId));
+      if (!selectedOfficer) {
+        toast.error('Please select a legal officer');
+      }
+      const amountString = formData.initialCost.toFixed(2);
+      // 1. First get the checkout data
+      const checkoutUrl = `/api/land_owner/checkout/${userId}?amount=${amountString}&barslId=${selectedOfficer.baslId}`;
+
+      const checkoutResponse = await fetch(checkoutUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!checkoutResponse.ok) {
+        const errorText = await checkoutResponse.text();
+        throw new Error(errorText || 'Failed to prepare payment');
+      }
+
+      const checkoutData = await checkoutResponse.json();
+      const paymentData = checkoutData.content.data;
+
+      const payment = {
+        sandbox: paymentData.sandbox,
+        merchant_id: paymentData.merchant_id,
+        return_url: undefined,
+        cancel_url: undefined,
+        notify_url: "YOUR_BACKEND_NOTIFY_URL", // Replace with your actual notify URL
+        order_id: paymentData.order_id,
+        items: paymentData.items,
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        hash: paymentData.hash,
+        first_name: paymentData.first_name,
+        last_name: paymentData.last_name,
+        email: paymentData.email,
+        phone: paymentData.phone,
+        address: paymentData.address,
+        city: paymentData.city,
+        country: paymentData.country,
+        delivery_address: paymentData.address || '',
+        delivery_city: paymentData.city || '',
+        delivery_country: paymentData.country || '',
+        custom_1: `dispute_for_property_${formData.propertyId}`,
+        custom_2: `legal_officer_${selectedOfficer.id}`
+      };
+
+      (window as any).payhere.onCompleted = async function onCompleted(orderId: string) {
+        console.log("Payment completed. OrderID:" + orderId);
+
+        try {
+          // Only submit dispute after successful payment
+          await submitDispute(token, formData);
+          toast.success('Payment and dispute submission successful!');
+          resetForm();
+        } catch (error) {
+          console.error('Error submitting dispute:', error);
+          toast.success('Payment succeeded but dispute submission failed. Please contact support.');
+        }
+      };
+
+      (window as any).payhere.onDismissed = function onDismissed() {
+        console.log("Payment dismissed");
+        toast.error('Payment was cancelled. Please complete payment to submit your dispute.');
+      };
+
+      (window as any).payhere.onError = function onError(error: any) {
+        console.log("Error:" + error);
+        toast.error('Payment failed. Please try again.');
+      };
+
+      // 4. Start PayHere payment
+      (window as any).payhere.startPayment(payment);
+
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+    }
+  };
+
+  const submitDispute = async (token: string, formData: any) => {
+    try {
+      const disputeData = new FormData();
+      const userId = localStorage.getItem('userId');
+      disputeData.append('witnessName', formData.defendant); // Assuming defendant is the witness
+      disputeData.append('disputesDetails', formData.description);
+      disputeData.append('landsId', formData.propertyId);
+      disputeData.append('legalOfficerId', formData.legalOfficerId);
+      disputeData.append('userId', userId);
+
+      formData.documents.forEach((file: File) => {
+        disputeData.append('documents', file);
+      });
+
+      // Make the API request
+      const response = await fetch('api/land_owner/dispute/add', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: disputeData
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(errorText || 'Failed to submit dispute');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error in submitDispute:', error);
+      throw error;
+    }
+  };
+
+  // Updated reset form function
+  const resetForm = () => {
+    setFormData({
+      propertyId: '',
+      defendant: '',
+      legalOfficerId: '',
+      initialCost: 0.00,
+      description: '',
+      documents: []
+    });
+    setShowNewDispute(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-red-50/30">
@@ -423,7 +594,7 @@ const Disputes = () => {
                       <option value="">ඉඩමක් තෝරන්න</option>
                       {properties.map(property => (
                         <option key={property.id} value={property.id}>
-                          {property.id} - {property.title}
+                          {property.landName} ({property.landPlace})
                         </option>
                       ))}
                     </select>
@@ -445,6 +616,42 @@ const Disputes = () => {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="legalOfficer" className="block text-sm font-medium text-gray-700 mb-2">
+                      නීති නිලධාරී
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <select
+                        id="legalOfficer"
+                        value={formData.legalOfficerId}
+                        onChange={(e) => {
+                          const selectedOfficer = legalOfficers.find(lo => lo.id === parseInt(e.target.value));
+                          setFormData({
+                            ...formData,
+                            legalOfficerId: e.target.value,
+                            initialCost: selectedOfficer?.initialCost || 0
+                          });
+                        }}
+                        className="block flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
+                        required
+                      >
+                        <option value="">නීති නිලධාරියෙකු තෝරන්න</option>
+                        {legalOfficers.map(officer => (
+                          <option key={officer.id} value={officer.id}>
+                            {officer.firstName} {officer.lastName} (BASL: {officer.baslId})
+                          </option>
+                        ))}
+                      </select>
+                      {formData.legalOfficerId && (
+                        <div className="bg-red-100 text-red-800 px-4 py-2 rounded-lg font-medium">
+                          LKR {formData.initialCost.toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
                     ගැටළුවේ විස්තරය
@@ -462,7 +669,7 @@ const Disputes = () => {
 
                 <div>
                   <label htmlFor="documents" className="block text-sm font-medium text-gray-700 mb-2">
-                    සහාය ලේඛන
+                    සහාය ලේඛන (බහු තේරීම්)
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-red-400 transition-colors bg-gradient-to-br from-gray-50 to-red-50/30">
                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -471,7 +678,13 @@ const Disputes = () => {
                       id="documents"
                       multiple
                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                      onChange={(e) => setFormData({ ...formData, documents: Array.from(e.target.files || []) })}
+                      onChange={(e) => {
+                        const newFiles = Array.from(e.target.files || []);
+                        setFormData({
+                          ...formData,
+                          documents: [...formData.documents, ...newFiles]
+                        });
+                      }}
                       className="hidden"
                     />
                     <label htmlFor="documents" className="cursor-pointer">
@@ -479,32 +692,30 @@ const Disputes = () => {
                       <span className="text-gray-500"> හෝ මෙහි ඇද දමන්න</span>
                     </label>
                     <p className="text-sm text-gray-500 mt-2">
-                      PDF, DOC, DOCX, JPG, PNG (උපරිම 10MB)
+                      PDF, DOC, DOCX, JPG, PNG (උපරිම 10MB එක් එක් ගොනුව සඳහා)
                     </p>
                     {formData.documents.length > 0 && (
                       <div className="mt-4 space-y-2">
                         {formData.documents.map((file, index) => (
-                          <div key={index} className="p-3 bg-white rounded-lg border border-red-200">
+                          <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border border-red-200">
                             <p className="text-sm text-gray-700 font-medium">
                               {file.name}
                             </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updatedFiles = [...formData.documents];
+                                updatedFiles.splice(index, 1);
+                                setFormData({ ...formData, documents: updatedFiles });
+                              }}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
                           </div>
                         ))}
                       </div>
                     )}
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-6">
-                  <div className="flex items-start">
-                    <Scale className="w-6 h-6 text-red-600 mt-1 mr-4 flex-shrink-0" />
-                    <div>
-                      <h4 className="text-lg font-semibold text-red-800 mb-2">AI සහායක ගැටළු විශ්ලේෂණය</h4>
-                      <p className="text-red-700 leading-relaxed">
-                        ඔබේ ගැටළුව ගොනු කිරීමෙන් පසු, අපගේ AI පද්ධතිය ගැටළුවේ ස්වභාවය විශ්ලේෂණය කර
-                        ඉක්මන් නිරාකරණයක් සඳහා නිර්දේශ ලබා දෙයි.
-                      </p>
-                    </div>
                   </div>
                 </div>
 
@@ -520,7 +731,7 @@ const Disputes = () => {
                     type="submit"
                     className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-colors"
                   >
-                    ගැටළුව ගොනු කරන්න
+                    Pay &  ගැටළුව ගොනු කරන්න
                   </button>
                 </div>
               </form>
