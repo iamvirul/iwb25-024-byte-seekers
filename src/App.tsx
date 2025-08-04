@@ -11,7 +11,6 @@ import LandOfficerDashboard from "./pages/LandOfficerDashboard";
 import LegalOfficerDashboard from "./pages/LegalOfficerDashboard";
 import LandRegistry from "./pages/LandRegistry";
 import PropertySearch from "./pages/PropertySearch";
-import Transactions from "./pages/Transactions";
 import Disputes from "./pages/Disputes";
 import Profile from "./pages/Profile";
 import LandChainPage from "./pages/LandChainPage";
@@ -60,14 +59,6 @@ function App() {
               <Route path="/registry" element={<ProtectedRoute allowedRoles={["land_officer"]}>
                 <LandRegistry /></ProtectedRoute>} />
               <Route path="/search" element={<PropertySearch />} />
-              <Route
-                path="/transactions"
-                element={
-                  <ProtectedRoute allowedRoles={["land_owner"]}>
-                    <Transactions />
-                  </ProtectedRoute>
-                }
-              />
 
               <Route path="/disputes" element={
                 <ProtectedRoute allowedRoles={["land_owner"]}>
