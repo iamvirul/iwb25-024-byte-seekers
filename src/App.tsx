@@ -19,6 +19,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingOverlay from "./components/LoadingOverlay";
 import NotFoundPage from "./pages/NotFoundPage";
 import { Toaster } from "react-hot-toast";
+// import 'leaflet/dist/leaflet.css';
 
 function App() {
   return (

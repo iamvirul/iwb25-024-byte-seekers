@@ -1,10 +1,10 @@
 import backend.common;
 import backend.db as DB;
+import backend.db_client as DBClient;
 import backend.interceptors as Interceptors;
 import backend.mappers as Mappers;
 import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
-import backend.db_client as DBClient;
 
 import ballerina/constraint;
 import ballerina/crypto;
@@ -32,7 +32,7 @@ public type PositiveDecimal decimal;
     },
     auth: [
         {
-            jwtValidatorConfig: 
+            jwtValidatorConfig:
             {
                 issuer: "byteseekers",
                 audience: Utils:LAND_OWNER,
@@ -163,6 +163,24 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             response = Utils:setErrorResponse(response, "Invalid user id");
             return response;
         }
+        DB:User|persist:Error userResult = self.dbClient->/users/[userId](DB:User);
+        if userResult is persist:Error {
+            if userResult is persist:NotFoundError {
+                response.statusCode = 404;
+                response = Utils:setErrorResponse(response, "User not found");
+                return response;
+            }
+            response.statusCode = 400;
+            response = Utils:setErrorResponse(response, "Failed to fetch user");
+            return response;
+        }
+        stream<DB:LandOwner, persist:Error?> landOwnerResult = self.dbClient->/landowners(DB:LandOwner, `nic=${check Utils:decryptData(userResult.nic)}`);
+        DB:LandOwner? landOwner = ();
+        var resultOwner = check landOwnerResult.next();
+        _ = check landOwnerResult.close();
+        if resultOwner is record {|DB:LandOwner value;|} {
+            landOwner = resultOwner.value;
+        }
         DB:DisputeWithRelations[] disputes = [];
         stream<DB:DisputeWithRelations, persist:Error?> streamResult = self.dbClient->/disputes(DB:DisputeWithRelations, `usersId = ${userId}`);
         check from var result in streamResult
@@ -193,7 +211,8 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             };
         check legalOfficerResult.close();
 
-         sql:ParameterizedQuery landQuery = `SELECT l.*
+        if landOwner is DB:LandOwner {
+            sql:ParameterizedQuery landQuery = `SELECT l.*
     FROM lands l
     JOIN (
         SELECT ltc.landsId, ltc.toLandOwnersId
@@ -204,7 +223,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             GROUP BY landsId
         ) lastTransfers
         ON ltc.landsId = lastTransfers.landsId AND ltc.transferDate = lastTransfers.latestDate
-        WHERE ltc.toLandOwnersId = ${userId}
+        WHERE ltc.toLandOwnersId = ${landOwner.id}
     ) AS ownedLands
     ON l.id = ownedLands.landsId`;
 
@@ -216,8 +235,12 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                 };
             _ = check landResultStream.close();
 
-        response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson(), "stats": statResult.toJson(), "legal_officers": legalOfficers.toJson(), "lands": lands.toJson()});
-        return response;
+            response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson(), "stats": statResult.toJson(), "legal_officers": legalOfficers.toJson(), "lands": lands.toJson()});
+            return response;
+        } else {
+            response = Utils:setErrorResponse(response, "Land owner not found");
+            return response;
+        }
     }
 
     resource function get precedents/legal_clauses/[int precedentId]() returns error|http:Response {
@@ -544,7 +567,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             GROUP BY landsId
         ) lastTransfers
         ON ltc.landsId = lastTransfers.landsId AND ltc.transferDate = lastTransfers.latestDate
-        WHERE ltc.toLandOwnersId = ${userId}
+        WHERE ltc.toLandOwnersId = ${landOwner.id}
     ) AS ownedLands
     ON l.id = ownedLands.landsId`;
 
