@@ -32,7 +32,8 @@ public type PositiveDecimal decimal;
     },
     auth: [
         {
-            jwtValidatorConfig: {
+            jwtValidatorConfig: 
+            {
                 issuer: "byteseekers",
                 audience: Utils:LAND_OWNER,
                 signatureConfig: {
