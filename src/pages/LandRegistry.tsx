@@ -55,7 +55,12 @@ const center = {
   lng: 80.7718,
 };
 
-const LandRegistry: React.FC = ({activeTab}) => {
+interface LandRegistryProps {
+  activeTab: string;
+}
+
+
+const LandRegistry: React.FC<LandRegistryProps> = ({activeTab}) => {
 
   const { user } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);

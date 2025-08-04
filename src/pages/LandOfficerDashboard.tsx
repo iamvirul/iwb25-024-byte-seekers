@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import {
   BarChart3,
@@ -6,24 +6,20 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
+  Landmark,
 } from "lucide-react";
 
 import DashboardHeader from "../components/legal/DashboardHeader";
 import StatsSection from "../components/legal/StatsSection";
 import TabNavigationSection from "../components/legal/TabNavigationSection";
 import DashboardOverviewSection from "../components/landofficer/DashboardOverviewSection";
-import RegistrationQueueSection from "../components/landofficer/RegistrationQueueSection";
-import VerificationPanelSection from "../components/landofficer/VerificationPanelSection";
-import NotificationsModal from "../components/legal/NotificationsModal";
-import SettingsModal from "../components/legal/SettingsModal";
 import LandRegistry from "./LandRegistry";
+import LandDocumentUpload from "../components/landofficer/LandDocumentUpload";
 
 const LandOfficerDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedTimeRange, setSelectedTimeRange] = useState("7d");
-  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [statsFromRes, setStatsFromRes] = useState({
     stats: {
       pending_lands: "0",
@@ -101,6 +97,7 @@ const LandOfficerDashboard = () => {
 
         if (data.success && data.content) {
           setStatsFromRes(data.content);
+          setRegistrations(data.content.lands);
         } else if (data.event === "Created" || data.event === "StatusUpdated") {
           const updatedLand = data.message;
           const status = (updatedLand.landStatus || "PENDING").toLowerCase();
@@ -237,7 +234,10 @@ const LandOfficerDashboard = () => {
               return [...prev, updatedRegister];
             }
           });
+
+        
         }
+          console.log("Updated registrations:", registrations);
       };
     };
 
@@ -252,29 +252,6 @@ const LandOfficerDashboard = () => {
     };
   }, [userSessionId]);
 
-  // Update registrations when lands change
-  useEffect(() => {
-    if (statsFromRes?.lands) {
-      const mappedRegistrations = statsFromRes.lands.map((land) => ({
-        id: land.landId?.toString() || Math.random().toString(),
-        propertyTitle: land.landName || "Unknown Property",
-        applicant: getCurrentOwner(land) || "Applicant not specified",
-        submittedDate: land.registerDate
-          ? new Date(
-              land.registerDate.year,
-              land.registerDate.month - 1,
-              land.registerDate.day
-            ).getTime()
-          : Date.now(),
-        status: (land.landStatus || "PENDING").toLowerCase(),
-        area: land.landSize || "N/A",
-        location: land.landPlace || "Unknown Location",
-        priority: land.priority === 1 ? "high" : "medium",
-        documents: land.landdocuments?.map((doc) => doc?.name) || [],
-      }));
-      setRegistrations(mappedRegistrations);
-    }
-  }, [statsFromRes.lands]);
 
   // Update verification items when lands change
   useEffect(() => {
@@ -419,50 +396,11 @@ const LandOfficerDashboard = () => {
 
   const tabs = [
     { id: "overview", label: "සාරාංශය", icon: BarChart3 },
-    { id: "landRegistry", label: "ලියාපදිංචිය", icon: FileText}
+    { id: "landRegistry", label: "ලියාපදිංචිය", icon: Landmark},
+    {id:"documents",label:"ලේඛන",icon:FileText}
   ];
 
-  const handleViewRegistrationDetails = (registration) => {
-    console.log("View registration details:", registration);
-  };
 
-  const handleApproveRegistration = (id) => {
-    setRegistrations((prev) =>
-      prev.map((reg) => (reg.id === id ? { ...reg, status: "verified" } : reg))
-    );
-    alert("ලියාපදිංචිය සාර්ථකව අනුමත කරන ලදී");
-  };
-
-  const handleRejectRegistration = (id) => {
-    setRegistrations((prev) =>
-      prev.map((reg) => (reg.id === id ? { ...reg, status: "rejected" } : reg))
-    );
-    alert("ලියාපදිංචිය ප්‍රතික්ෂේප කරන ලදී");
-  };
-
-  const handleVerifyDocument = (itemId, documentId, status, notes) => {
-    setVerificationItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId
-          ? {
-              ...item,
-              documents: item.documents.map((doc) =>
-                doc.id === documentId ? { ...doc, status } : doc
-              ),
-              verificationNotes: notes || item.verificationNotes,
-            }
-          : item
-      )
-    );
-    alert(
-      `ලේඛනය ${status === "verified" ? "සත්‍යාපනය" : "ප්‍රතික්ෂේප"} කරන ලදී`
-    );
-  };
-
-  const handleCompleteVerification = (itemId) => {
-    setVerificationItems((prev) => prev.filter((item) => item.id !== itemId));
-    alert("සත්‍යාපනය සම්පූර්ණ කරන ලදී");
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
@@ -470,8 +408,6 @@ const LandOfficerDashboard = () => {
         <DashboardHeader
           userName={user?.name}
           type="land_officer"
-          onNotificationsClick={() => setShowNotificationsModal(true)}
-          onSettingsClick={() => setShowSettingsModal(true)}
         />
 
         <StatsSection stats={stats} />
@@ -492,6 +428,7 @@ const LandOfficerDashboard = () => {
             recentActivities={recentActivities}
           />
           <LandRegistry activeTab={activeTab}/>
+          <LandDocumentUpload activeTab={activeTab} lands={registrations} />
         </div>
       </div>
     </div>
