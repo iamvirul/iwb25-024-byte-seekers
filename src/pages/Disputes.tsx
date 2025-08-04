@@ -308,7 +308,13 @@ const Disputes = () => {
             break;
           case "Initial":
             setDisputes(data.response?.content.disputes);
-            setStats(data.response?.content?.stats?.value);
+            setStats(data.response?.content?.stats?.value || {
+              usersId: userId ? parseInt(userId) : 0,
+              total_disputes: 0,
+              pending_disputes: 0,
+              resolved_disputes: 0,
+              total_comments: 0
+            });
             setLegalOfficers(data?.response?.content.legal_officers)
             setProperties(data.response?.content.lands)
             break;
