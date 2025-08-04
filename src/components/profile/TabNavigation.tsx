@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, FileText, Shield, Settings } from 'lucide-react';
+import { User, FileText, Shield } from 'lucide-react';
 import Card from '../ui/Card';
 
 interface Tab {
@@ -18,6 +18,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
   const tabs: Tab[] = [
     { id: 'personal', label: 'පුද්ගලික තොරතුරු', icon: User },
     { id: 'security', label: 'ආරක්ෂාව', icon: Shield },
+    { id: 'payments', label: 'ගෙවීම් ඉතිහාසය', icon: FileText },
   ];
 
   return (

@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { User, Camera, CheckCircle, Shield, Edit, Save, X } from 'lucide-react';
+import { User, CheckCircle, Shield, Edit, Save, X } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 
@@ -17,7 +17,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onEditToggle,
   onSave
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
 
   return (

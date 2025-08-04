@@ -1,58 +1,240 @@
-import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { motion } from 'framer-motion';
-import { User } from 'lucide-react';
-import ProfileHeader from '../components/profile/ProfileHeader';
-import TabNavigation from '../components/profile/TabNavigation';
-import PersonalInfoTab from '../components/profile/PersonalInfoTab';
-import SecurityTab from '../components/profile/SecurityTab';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { User, Clock } from "lucide-react";
+import ProfileHeader from "../components/profile/ProfileHeader";
+import TabNavigation from "../components/profile/TabNavigation";
+import PersonalInfoTab from "../components/profile/PersonalInfoTab";
+import SecurityTab from "../components/profile/SecurityTab";
+import PaymentHistoryTab from "../components/profile/PaymentHistoryTab";
+import toast from "react-hot-toast";
+import LoadingOverlay from "../components/LoadingOverlay";
+import { Hourglass } from "react-loader-spinner";
+
+interface Payment {
+  id: number;
+  referanceNo: string;
+  amount: number;
+  createdAt: [number, number];
+  legalOfficerId: number;
+  usersId: number;
+}
+
+interface ProfileData {
+  user: {
+    id: number;
+    userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    nic: string;
+    sludi: string;
+    contactNo: string;
+    address: string;
+  };
+  payments: Payment[];
+}
 
 const Profile = () => {
-  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState('personal');
-  const [profileData, setProfileData] = useState({
-    firstName: user?.name?.split(' ')[0] || '',
-    lastName: user?.name?.split(' ')[1] || '',
-    email: user?.email || '',
-    phone: '+94771234567',
-    address: 'කොළඹ 01, ශ්‍රී ලංකාව',
-    nic: '199512345678',
-    slUdiId: user?.slUdiId || '',
-    dateOfBirth: '1995-06-15',
-    occupation: 'ඉඩම් හිමියා',
-    emergencyContact: '+94112345678'
-  });
+  const [activeTab, setActiveTab] = useState("personal");
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSave = () => {
-    setTimeout(() => {
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const userId = localStorage.getItem("userId");
+        const token = localStorage.getItem("token");
+
+        if (!userId || !token) {
+          toast.error("Authentication required");
+          return;
+        }
+
+        const response = await fetch(
+          `http://localhost:9050/authorize/profile/${userId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch profile data");
+        }
+
+        const data = await response.json();
+        setProfileData(data.content);
+      } catch (error) {
+        toast.error("Failed to fetch profile data");
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  const handleSaveProfile = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+
+      if (!userId || !token || !profileData) return;
+
+      const payload = {
+        contact: profileData.user.contactNo,
+        ...(profileData.user.address && { address: profileData.user.address }),
+      };
+
+      const response = await fetch(
+        `http://localhost:9050/authorize/profile/update/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+
       setIsEditing(false);
-      toast.success("ප්‍රොෆයිල් සාර්ථකව යාවත්කාලීන කරන ලදී");
-    }, 1000);
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      toast.error("Failed to update profile");
+      console.error(error);
+    }
+  };
+
+  const handlePasswordChange = async (
+    oldPassword: string,
+    newPassword: string
+  ) => {
+    try {
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+
+      if (!userId || !token) return;
+
+      const response = await fetch(
+        `http://localhost:9050/authorize/password/update/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            oldPassword,
+            newPassword,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 400) {
+          const data = await response.json();
+          if(data.content.newPassword){
+            toast.error(data.content.newPassword);
+            return false;
+          }
+          if(data.content.oldPassword){
+            toast.error(data.content.oldPassword);
+            return false;
+          }
+        }
+        throw new Error("Failed to update password");
+      }
+
+      toast.success("Password updated successfully");
+      return true;
+    } catch (error) {
+      toast.error("Failed to update password");
+      console.error(error);
+      return false;
+    }
   };
 
   const renderTabContent = () => {
+    if (isLoading) {
+      return (
+        <div className="h-[500px] flex items-center justify-center">
+          <Hourglass
+            visible={true}
+            height="80"
+            width="80"
+            ariaLabel="hourglass-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+            colors={["#306cce", "#72a1ed"]}
+          />
+        </div>
+      );
+    }
+
+    if (!profileData) {
+      return <div>Error loading profile data</div>;
+    }
+
     switch (activeTab) {
-      case 'personal':
+      case "personal":
         return (
           <PersonalInfoTab
-            profileData={profileData}
+            profileData={{
+              firstName: profileData.user.firstName,
+              lastName: profileData.user.lastName,
+              email: profileData.user.email,
+              phone: profileData.user.contactNo,
+              address: profileData.user.address,
+              nic: profileData.user.nic,
+              slUdiId: profileData.user.sludi,
+            }}
             isEditing={isEditing}
-            onDataChange={setProfileData}
+            onDataChange={(data) => {
+              if (!profileData) return;
+              setProfileData({
+                ...profileData,
+                user: {
+                  ...profileData.user,
+                  firstName: data.firstName,
+                  lastName: data.lastName,
+                  contactNo: data.phone,
+                  address: data.address,
+                },
+              });
+            }}
           />
         );
-      case 'security':
-        return <SecurityTab />;
+      case "security":
+        return <SecurityTab onPasswordChange={handlePasswordChange} />;
+      case "payments":
+        return <PaymentHistoryTab payments={profileData.payments} />;
       default:
         return null;
     }
   };
 
+  const user = {
+    name: profileData
+      ? `${profileData.user.firstName} ${profileData.user.lastName}`
+      : "",
+    email: profileData?.user.email || "",
+    slUdiId: profileData?.user.sludi || "",
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Enhanced Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -70,16 +252,16 @@ const Profile = () => {
             ඔබේ පුද්ගලික තොරතුරු, ලේඛන සහ ගිණුම් සැකසුම් කළමනාකරණය කරන්න
           </p>
         </motion.div>
+
         <ProfileHeader
           user={user}
           isEditing={isEditing}
           onEditToggle={() => setIsEditing(!isEditing)}
-          onSave={handleSave}
+          onSave={handleSaveProfile}
         />
-        <TabNavigation
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+
+        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, x: 20 }}
