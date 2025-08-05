@@ -1,4 +1,5 @@
 import backend.db as DB;
+import backend.db_client as DBClient;
 
 import ballerina/http;
 import ballerina/persist;
@@ -19,7 +20,7 @@ service /audit on auditMicroservice {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     function __deinit() returns error? {

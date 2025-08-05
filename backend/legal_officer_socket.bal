@@ -49,7 +49,6 @@ service class LegalOfficerService {
 
     remote function onOpen(websocket:Caller caller) returns error? {
         Managers:legalOfficerConnectionStore.addClient(self.userID, caller);
-        check caller->writeMessage(string `Welcome ${self.userID}!`);
         string header = check self.req.getHeader("x-service-token");
         map<string> serviceHeaders = {
             "Authorization": header
@@ -58,14 +57,15 @@ service class LegalOfficerService {
 
         anydata|http:ClientError allLand = serviceClient->get("/data/" + self.userID, serviceHeaders);
         if allLand is http:ClientError {
-            log:printError("Error fetching all data: ");
+            log:printError("Error fetching all data: " + allLand.message());
+            check caller->writeMessage({"error": allLand.message()});
             return;
         }
-        check caller->writeMessage(allLand);
+        check caller->writeMessage({"event": "Initial", "message": allLand});
     }
 
     remote function onClose(websocket:Caller caller) returns error? {
-        Managers:connectionStore.removeClient(self.userID);
+        Managers:legalOfficerConnectionStore.removeClient(self.userID);
     }
 
     remote function onMessage(websocket:Caller caller, string data) returns error? {

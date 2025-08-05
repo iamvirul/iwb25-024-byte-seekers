@@ -21,7 +21,7 @@ const FormCard: React.FC<FormCardProps> = ({
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.8, delay: 0.2 }}
-      className={`w-full max-w-md mx-auto ${className}`}
+      className={`w-full mx-auto ${className}`}
     >
       <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 lg:p-10">
         {/* Form Header */}

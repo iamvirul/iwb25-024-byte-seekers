@@ -2,6 +2,7 @@ import backend.common as Common;
 import backend.db as DB;
 import backend.managers as Managers;
 import backend.utils as Utils;
+import backend.db_client as DBClient;
 
 import ballerina/http;
 import ballerina/log;
@@ -27,7 +28,7 @@ service on rabbitmqListener {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     remote function onMessage(Common:DisputeMessage disputeMessage) returns error? {
@@ -74,15 +75,19 @@ service on rabbitmqListener {
             }
             docIndex += 1;
         }
+        DB:DisputeWithRelations|persist:Error unionResult = self.dbClient->/disputes/[insertedDisputeId](DB:DisputeWithRelations);
+        if unionResult is persist:Error {
+            return error("Failed to fetch dispute with documents", unionResult);
+        }
         Common:DisputeSocketAdded disputeSocketAdded = {
-            dispute: disputeInsert,
-            documents: docArray
+            dispute: unionResult
         };
         Common:socketMessage socketNotify = {
             event: Common:DISPUTE_CREATED,
             message: disputeSocketAdded.toJson()
         };
         Managers:legalOfficerConnectionStore.broadcast(socketNotify, disputeInsert.legalOfficerId.toString());
+        Managers:landOwnerConnectionStore.broadcast(socketNotify, disputeInsert.usersId.toString());
     }
 
     private function shouldRetry(Common:DisputeMessage disputeMessage, error err) returns boolean {
@@ -127,7 +132,7 @@ service on rabbitmqListener {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     remote function onMessage(Common:DisputeEstimateTimeMessage disputeMessage) returns error? {
@@ -154,11 +159,12 @@ service on rabbitmqListener {
         if updateResult is persist:Error {
             return error("Failed to update dispute", updateResult);
         }
-        Common:socketMessage ownerSocketNotify = {
+        Common:socketMessage socketNotify = {
             event: Common:ESTIMATE_TIME_UPDATED,
             message: updateResult.toJson()
         };
-        Managers:landOwnerConnectionStore.broadcast(ownerSocketNotify, disputeMessage.dispute.usersId.toString());
+        Managers:landOwnerConnectionStore.broadcast(socketNotify, disputeMessage.dispute.usersId.toString());
+        Managers:legalOfficerConnectionStore.broadcast(socketNotify, disputeMessage.dispute.legalOfficerId.toString());
     }
 
     private function shouldRetry(Common:DisputeEstimateTimeMessage disputeMessage, error err) returns boolean {
@@ -203,7 +209,7 @@ service on rabbitmqListener {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     remote function onMessage(Common:DisputeCommentMessage message) returns error? {
@@ -285,7 +291,7 @@ service on rabbitmqListener {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     remote function onMessage(Common:LegalPrecedentMessage message) returns error? {
@@ -309,10 +315,12 @@ service on rabbitmqListener {
         if precedentResult is persist:Error {
             return error("Failed to insert legal precedent", precedentResult);
         }
+        int precedentId = precedentResult[0];
+        log:printInfo("Legal precedent ID: " + precedentId.toString());
         foreach var clause in message.legalClauses {
             DB:LegalClauseInsert clauseInsert = {
                 legalClause: clause,
-                legalPrecedentsId: precedentResult[0]
+                legalPrecedentsId: precedentId
             };
             clauseArray.push(clauseInsert);
             int[]|persist:Error clauseResult = self.dbClient->/legalclauses.post([clauseInsert]);
@@ -321,14 +329,16 @@ service on rabbitmqListener {
             }
         }
         Common:LegalPrecedentAdded legalPrecedentAdded = {
+            id: precedentId,
             precedent: message.legalPrecedent,
-            clauses: clauseArray
+            clauses: clauseArray,
+            dispute: message.dispute
         };
         Common:socketMessage socketNotify = {
             event: Common:PRECEDENT_CREATED,
             message: legalPrecedentAdded.toJson()
         };
-        Managers:legalOfficerConnectionStore.broadcast(socketNotify, message.legalOfficerId.toString());
+        Managers:legalOfficerConnectionStore.broadcast(socketNotify, message.dispute.legalOfficerId.toString());
         Common:socketMessage ownerSocketNotify = {
             event: Common:PRECEDENT_CREATED,
             message: legalPrecedentAdded.toJson()

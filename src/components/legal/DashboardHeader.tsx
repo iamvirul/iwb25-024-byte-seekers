@@ -1,18 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Settings } from 'lucide-react';
-import Button from '../ui/Button';
 
 interface DashboardHeaderProps {
     userName?: string;
-    onNotificationsClick: () => void;
-    onSettingsClick: () => void;
+    type: 'land_officer' | 'legal_officer';
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     userName,
-    onNotificationsClick,
-    onSettingsClick
+    type,
 }) => {
     return (
         <motion.div
@@ -24,13 +20,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <div className="flex flex-col md:flex-row md:items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        නීති නිලධාරී ඩෑෂ්බෝඩ්
+                        {type === 'land_officer' ? 'ඉඩම්' : 'නීති'} නිලධාරී ඩෑෂ්බෝඩ්
                     </h1>
                     <p className="text-gray-600">
                         ආයුබෝවන්, {userName}! ඔබේ නීතිමය කාර්ය සාරාංශය
                     </p>
                 </div>
-                <div className="flex items-center space-x-3 mt-4 md:mt-0">
+                {/* <div className="flex items-center space-x-3 mt-4 md:mt-0">
                     <Button
                         variant="outline"
                         icon={Bell}
@@ -47,7 +43,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     >
                         සැකසුම්
                     </Button>
-                </div>
+                </div> */}
             </div>
         </motion.div>
     );

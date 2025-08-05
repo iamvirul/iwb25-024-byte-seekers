@@ -15,7 +15,7 @@ export interface LandTransfer {
   blockIndex: number;
   blockHash: string;
   prevBlockHash: string;
-  fromLandOwner: LandOwner;
+  fromLandOwner: LandOwner | null;
   toLandOwner: LandOwner;
 }
 
@@ -29,7 +29,11 @@ export interface LandDetails {
   landSize: number;
   landValue: number;
   landType: string;
-  registerDate: string;
+  registerDate: {
+    year: number;
+    month: number;
+    day: number;
+  };
   landStatus: string;
   priority: number;
 }

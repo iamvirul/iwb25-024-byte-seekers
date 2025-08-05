@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Mail, Phone, CreditCard, Shield, Calendar, MapPin } from 'lucide-react';
+import { User, Mail, Phone, CreditCard, Shield, MapPin } from 'lucide-react';
 import Card from '../ui/Card';
 import Input from '../ui/Input';
 
@@ -68,23 +68,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           icon={Shield}
         />
 
-        <Input
-          label="උපන් දිනය"
-          type="date"
-          value={profileData.dateOfBirth}
-          onChange={(e) => onDataChange({...profileData, dateOfBirth: e.target.value})}
-          disabled={!isEditing}
-          icon={Calendar}
-        />
-
-        <Input
-          label="රැකියාව"
-          value={profileData.occupation}
-          onChange={(e) => onDataChange({...profileData, occupation: e.target.value})}
-          disabled={!isEditing}
-          icon={User}
-        />
-
         <div className="md:col-span-2">
           <Input
             label="ලිපිනය"
@@ -94,14 +77,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             icon={MapPin}
           />
         </div>
-
-        <Input
-          label="හදිසි අවස්ථා සම්බන්ධතාව"
-          value={profileData.emergencyContact}
-          onChange={(e) => onDataChange({...profileData, emergencyContact: e.target.value})}
-          disabled={!isEditing}
-          icon={Phone}
-        />
       </div>
     </Card>
   );

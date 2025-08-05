@@ -20,6 +20,17 @@ public type LoginUser record {
     int user_type;
 };
 
+public type LoginUserResponse record {|
+    string token;
+    string socketToken;
+    int userId;
+    string nic;
+    string sludi;
+    string email;
+    string userType;
+    anydata...;
+|};
+
 public type User record {|
     int id;
     string firstName;
@@ -245,7 +256,7 @@ public type LegalPrecedentMessage record {|
     DB:LegalPrecedentInsert legalPrecedent;
     string[] legalClauses;
     int retryCount = 0;
-    int legalOfficerId;
+    DB:Dispute dispute;
     int userId;
 |};
 
@@ -268,7 +279,7 @@ public type socketMessage record {|
 
 public type LegalOfficerStats record {|
     int pending;
-    int rejected;
+    int all;
     int resolved;
     int legalPrecedents;
 |};
@@ -281,13 +292,14 @@ public type statDataLandOfficer record {|
 |};
 
 public type DisputeSocketAdded record {|
-    DB:DisputeInsert dispute;
-    DB:DisputeDocumentInsert[] documents;
+    DB:DisputeWithRelations dispute;
 |};
 
 public type LegalPrecedentAdded record {|
+    int id;
     DB:LegalPrecedentInsert precedent;
     DB:LegalClauseInsert[] clauses;
+    DB:Dispute dispute;
 |};
 
 public type UpdatePassword record {|
@@ -315,3 +327,82 @@ public type DisputeStats record {|
     int resolved_disputes;
     int total_comments;
 |};
+
+public type UserSession record {|
+    string socketToken;
+    string serviceToken;
+    string userId;
+|};
+
+public type LandTransfer record {
+    int id;
+    string? transferDate;
+    string? verifiedBy;
+    int? blockIndex;
+    string? blockHash;
+    string? prevBlockHash;
+
+    int? from_id;
+    string? from_ownerId;
+    string? from_firstName;
+    string? from_lastName;
+    string? from_nic;
+    string? from_address;
+    string? from_contactNo;
+
+    int to_id;
+    string to_ownerId;
+    string to_firstName;
+    string to_lastName;
+    string to_nic;
+    string? to_address;
+    string? to_contactNo;
+};
+
+public type LandTransferRow record {|
+    int land_id;
+    string landId;
+    string landName;
+    string landPlace;
+    string landLat;
+    string landLang;
+    float landSize;
+    decimal landValue;
+    string landType;
+    string registerDate;
+    string landStatus;
+    int priority;
+
+    int? transfer_id;
+    string? transferDate;
+    string? verifiedBy;
+    int? blockIndex;
+    string? blockHash;
+    string? prevBlockHash;
+
+    int? from_owner_id;
+    string? from_owner_ownerId;
+    string? from_owner_firstName;
+    string? from_owner_lastName;
+    string? from_owner_nic;
+    string? from_owner_address;
+    string? from_owner_contactNo;
+
+    int? to_owner_id;
+    string? to_owner_ownerId;
+    string? to_owner_firstName;
+    string? to_owner_lastName;
+    string? to_owner_nic;
+    string? to_owner_address;
+    string? to_owner_contactNo;
+|};
+
+public type systemUser record {|
+    int id;
+    string firstName;
+    string lastName;
+    string nic;
+    string address;
+    string contactNo;
+|};
+

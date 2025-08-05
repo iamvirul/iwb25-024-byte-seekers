@@ -178,3 +178,8 @@ public enum USER_ERRORS {
     FAILED_TO_QUEUE_USER_FNAME = "Failed to queue user fname",
     FAILED_TO_QUEUE_USER_LNAME = "Failed to queue user lname"
 }
+public enum BLOCKCHAINERROS {
+    NO_CHAIN_FOUND = "No chain found",
+    FAILED_TO_LOAD_CHAIN = "Fail To Load Chain",
+    FAILED_TO_FETCH_BLOCK = "Failed to fetch block"
+}

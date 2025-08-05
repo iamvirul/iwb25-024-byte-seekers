@@ -28,7 +28,7 @@ const FormInput: React.FC<FormInputProps> = ({
           </div>
         )}
         <input
-          className={`block w-full ${Icon ? 'pl-12' : 'pl-4'} pr-4 py-4 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+          className={`block w-full ${Icon ? 'pl-12' : 'pl-4'} pr-4 py-3 border rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
             error 
               ? 'border-red-300 bg-red-50' 
               : 'border-gray-200 bg-gray-50/50 hover:bg-white/80'

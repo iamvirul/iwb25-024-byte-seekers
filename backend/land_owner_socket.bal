@@ -3,7 +3,6 @@ import backend.utils as Utils;
 
 import ballerina/http;
 import ballerina/log;
-// import ballerina/log;
 import ballerina/websocket;
 
 listener websocket:Listener landOwnerSocketListener = new (9065,
@@ -52,7 +51,6 @@ service class LandOwnerService {
 
     remote function onOpen(websocket:Caller caller) returns error? {
         Managers:landOwnerConnectionStore.addClient(self.userID, caller);
-        check caller->writeMessage(string `Welcome ${self.userID}!`);
         string header = check self.req.getHeader("x-service-token");
         map<string> serviceHeaders = {
             "Authorization": header
@@ -68,14 +66,15 @@ service class LandOwnerService {
             }
         }
         if response is http:ClientError {
-            log:printError("Error fetching disputes: ");
+            log:printError("Error fetching : " + response.message());
+            check caller->writeMessage({"error": response.message()});
             return;
         }
-        check caller->writeMessage(response);
+        check caller->writeMessage({"event": "Initial", response});
     }
 
     remote function onClose(websocket:Caller caller) returns error? {
-        Managers:connectionStore.removeClient(self.userID);
+        Managers:landOwnerConnectionStore.removeClient(self.userID);
     }
 
     remote function onMessage(websocket:Caller caller, string data) returns error? {
