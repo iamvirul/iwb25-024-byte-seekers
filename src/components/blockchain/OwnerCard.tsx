@@ -2,14 +2,22 @@ import { MapPin, Phone } from "lucide-react";
 import { LandOwner } from "../../types/LandTypes";
 
 export const OwnerCard: React.FC<{ 
-  owner: LandOwner; 
+  owner: LandOwner | null;
   label: string;
 }> = ({ owner, label }) => {
+  if (!owner) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full lg:w-80 flex items-center justify-center text-gray-400 italic">
+        No owner data
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 w-full lg:w-80 group">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-          {owner.firstName.charAt(0)}{owner.lastName.charAt(0)}
+          {owner.firstName?.charAt(0)}{owner.lastName?.charAt(0)}
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">

@@ -42,7 +42,7 @@ const Register = () => {
     slUdiId: "",
     phone: "",
     address: "",
-    role: "citizen" as "citizen" | "land_officer" | "legal_official",
+    role: "citizen" as "citizen" | "land_officer" | "legal_officer",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});

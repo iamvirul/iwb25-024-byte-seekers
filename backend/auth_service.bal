@@ -1,15 +1,22 @@
 import backend.common as Common;
 import backend.db as DB;
 import backend.utils as Utils;
+import backend.db_client as DBClient;
 
 import ballerina/crypto;
 import ballerina/http;
-import ballerina/io;
-import ballerina/jwt;
 import ballerina/persist;
 import ballerina/uuid;
+import ballerinax/redis;
 
 listener http:Listener authMicroservice = new (9091);
+
+redis:Client redis = check new (
+    connection = {
+        host: "localhost",
+        port: 6379
+    }
+);
 
 @http:ServiceConfig {
     cors: {
@@ -23,7 +30,7 @@ service /auth on authMicroservice {
     private final DB:Client dbClient;
 
     function init() returns error? {
-        self.dbClient = check new ();
+        self.dbClient = DBClient:getClient();
     }
 
     function __deinit() returns error? {
@@ -67,18 +74,51 @@ service /auth on authMicroservice {
                 return response;
             }
             Utils:USER_TYPES userType = check Utils:getUserType(loginUser.user_type);
+            int userTypeId = loginUser.user_type;
+            DB:LegalOfficer? legalOfficer = ();
+            if userTypeId == 4 {
+                stream<DB:LegalOfficer, persist:Error?> legalOfficerResult = self.dbClient->/legalofficers(DB:LegalOfficer, `first_name=${user.firstName} AND last_name=${user.lastName}`);
+                check from var lo in legalOfficerResult
+                    do {
+                        legalOfficer = lo;
+                    };
+                check legalOfficerResult.close();
+            }
+            int legalOfficerId = 0;
+            if legalOfficer is DB:LegalOfficer {
+                legalOfficerId = legalOfficer.id;
+            }
             string|error jwt = Utils:issueToken(userType, user.email, user.id);
             string|error socketToken = Utils:issueSocketToken(userType, user.email);
             if jwt is string {
                 if socketToken is string {
+                    string userSessionID = user.id.toString() + "_" + uuid:createType4AsString();
+                    Common:UserSession userSession = {
+                        socketToken: socketToken,
+                        serviceToken: jwt,
+                        userId: legalOfficerId == 0 ? user.id.toString() : legalOfficerId.toString()
+                    };
+                    string|redis:Error set = redis->set(userSessionID, userSession.toJsonString());
+                    if set is redis:Error {
+                        response.statusCode = 500;
+                        response = Utils:setErrorResponse(response, "Failed to set user session in Redis");
+                        return response;
+                    }
+
                     response.statusCode = 200;
                     response = Utils:setSuccessResponse(
                             response,
                             {
                                 message: "Login successful",
                                 token: jwt,
-                                socketToken: socketToken,
-                                userId: user.id
+                                userId: user.id,
+                                nic: check Utils:decryptData(user.nic),
+                                sludi: check Utils:decryptData(user.sludi),
+                                email: user.email,
+                                userType: userType,
+                                name: user.firstName + " " + user.lastName,
+                                legalOfficerId: legalOfficerId,
+                                userSessionId: userSessionID
                             }
                     );
                     return response;
@@ -198,20 +238,4 @@ service /auth on authMicroservice {
         }
     }
 
-    resource function get validate/[string token]() returns json|error {
-        string jwt = token;
-
-        jwt:ValidatorConfig validatorConfig = {
-            issuer: "byteseekers",
-            audience: Utils:LAND_OWNER,
-            clockSkew: 60,
-            signatureConfig: {
-                certFile: "resources/certificates/public.crt"
-            }
-        };
-
-        jwt:Payload result = check jwt:validate(jwt, validatorConfig);
-
-        io:println("Token is valid: ", result);
-    }
 }

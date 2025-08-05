@@ -79,7 +79,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.14.2"
+version = "2.14.3"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -525,6 +525,18 @@ modules = [
 ]
 
 [[package]]
+org = "ballerinax"
+name = "redis"
+version = "3.1.0"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerinax", packageName = "redis", moduleName = "redis"}
+]
+
+[[package]]
 org = "virulnirmala"
 name = "backend"
 version = "0.1.0"
@@ -553,12 +565,14 @@ dependencies = [
 	{org = "ballerinax", name = "mysql"},
 	{org = "ballerinax", name = "mysql.driver"},
 	{org = "ballerinax", name = "persist.sql"},
-	{org = "ballerinax", name = "rabbitmq"}
+	{org = "ballerinax", name = "rabbitmq"},
+	{org = "ballerinax", name = "redis"}
 ]
 modules = [
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.common"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.db"},
+	{org = "virulnirmala", packageName = "backend", moduleName = "backend.db_client"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.interceptors"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.managers"},
 	{org = "virulnirmala", packageName = "backend", moduleName = "backend.mappers"},

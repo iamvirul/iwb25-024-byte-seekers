@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { 
   FileText, 
   MapPin, 
-  User, 
   Calendar, 
   AlertTriangle,
   CheckCircle,
@@ -11,11 +10,8 @@ import {
   Eye,
   Download,
   Search,
-  Filter,
   SlidersHorizontal,
   X,
-  Hash,
-  Shield
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -212,10 +208,6 @@ const RegistrationQueue: React.FC<RegistrationQueueProps> = ({
               </div>
 
               <div className="space-y-3 flex-1">
-                <div className="flex items-center text-sm text-gray-600">
-                  <User className="w-4 h-4 mr-2" />
-                  {registration.applicant}
-                </div>
                 
                 <div className="flex items-center text-sm text-gray-600">
                   <MapPin className="w-4 h-4 mr-2" />
@@ -349,17 +341,6 @@ const RegistrationQueue: React.FC<RegistrationQueueProps> = ({
                 </div>
 
                 <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">තත්ත්වය</h4>
-                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
-                      {getStatusIcon(selectedRegistration.status)}
-                      <span className="text-sm font-medium">
-                        {selectedRegistration.status === 'pending_verification' && 'සත්‍යාපනය වෙමින්'}
-                        {selectedRegistration.status === 'document_review' && 'ලේඛන පරීක්ෂණය'}
-                        {selectedRegistration.status === 'survey_required' && 'සර්වේ අවශ්‍යයි'}
-                      </span>
-                    </div>
-                  </div>
 
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3">ක්‍රියාමාර්ග</h4>

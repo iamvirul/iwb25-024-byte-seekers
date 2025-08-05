@@ -4,17 +4,11 @@ import LegalPrecedents from './LegalPrecedents';
 
 interface LegalPrecedentsSectionProps {
     precedents: any[];
-    onAddPrecedent: (precedent: any) => void;
-    onUpdatePrecedent: (id: string, updates: any) => void;
-    onDeletePrecedent: (id: string) => void;
     activeTab: string;
 }
 
 const LegalPrecedentsSection: React.FC<LegalPrecedentsSectionProps> = ({
     precedents,
-    onAddPrecedent,
-    onUpdatePrecedent,
-    onDeletePrecedent,
     activeTab
 }) => {
     if (activeTab !== 'precedents') return null;
@@ -27,9 +21,6 @@ const LegalPrecedentsSection: React.FC<LegalPrecedentsSectionProps> = ({
         >
             <LegalPrecedents
                 precedents={precedents}
-                onAddPrecedent={onAddPrecedent}
-                onUpdatePrecedent={onUpdatePrecedent}
-                onDeletePrecedent={onDeletePrecedent}
             />
         </motion.div>
     );
