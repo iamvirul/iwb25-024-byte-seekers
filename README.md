@@ -2,7 +2,7 @@
 
 A comprehensive blockchain-based land registry system built with React frontend, Ballerina microservices backend, Go blockchain service, and MySQL database.
 
-## 🏗️ Project Architecture
+## Project Architecture
 
 This project consists of multiple interconnected services:
 
@@ -13,7 +13,7 @@ This project consists of multiple interconnected services:
 - **SLUDI Service**: Separate Ballerina service for SLUDI verification
 - **Database**: MySQL with Redis for caching
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before setting up the project, ensure you have the following installed:
 
@@ -25,7 +25,7 @@ Before setting up the project, ensure you have the following installed:
 - **Redis** server
 - **Docker** and **Docker Compose** (optional, for containerized MySQL)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone the Repository
 
@@ -48,15 +48,9 @@ This will start MySQL on port 3000 with the following configuration:
 - **Port**: 3000
 - **Database**: land_chain
 - **Username**: landchain_app
-- **Password**: E9GF4JmY091K8l3XJ9XotLNuPRwF3O3J
-- **Root Password**: 200528100634@Vn
+- **Password**: CONTAINER_MYSQL_PASSWORD
+- **Root Password**: SYSTEM_MYSQL_PASSWORD
 
-#### Option B: Manual MySQL Setup
-
-1. Install MySQL 8.0
-2. Create database: `land_chain`
-3. Create user: `landchain_app` with password: `E9GF4JmY091K8l3XJ9XotLNuPRwF3O3J`
-4. Import the schema: `backend/modules/db/script.sql`
 
 ### 3. Redis Setup
 
@@ -75,7 +69,7 @@ sudo systemctl start redis-server
 # Download and install Redis from https://redis.io/download
 ```
 
-## 🔧 Configuration Files
+## Configuration Files
 
 ### Frontend Configuration (vite.config.ts)
 
@@ -171,8 +165,8 @@ require (
 Create `backend/blockchain/.env`:
 
 ```env
-API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJCeXRlU2Vla2VycyIsIm5hbWUiOiJMYW5kQ2hhaW4tQmxvY2tjaGFpbiIsImFkbWluIjp0cnVlLCJpYXQiOjE1MTYyMzkwMjJ9.tzcCRcSX2bD-CB3ZYOOtnEkJj6LVEqY2NQ3nEuR7zmk
-DB_DSN=root:Hiru2005@@tcp(127.0.0.1:3306)/land_chain?parseTime=true
+API_KEY=API_KEY_FOR_BLOCKCHAIN_SERVICE
+DB_DSN=root:MYSQL_PASSWORD@@@tcp(127.0.0.1:3000)/land_chain?parseTime=true
 ```
 
 #### SLUDI Service Configuration
@@ -188,7 +182,7 @@ password = "E9GF4JmY091K8l3XJ9XotLNuPRwF3O3J"
 database = "land_chain"
 ```
 
-## 🏃‍♂️ Running the Services
+## Running the Services
 
 ### 1. Start the Frontend
 
@@ -244,7 +238,7 @@ go run main.go
 
 Service available at: http://localhost:8080
 
-## 🔗 Service Dependencies
+## Service Dependencies
 
 The services must be started in the following order:
 
@@ -255,7 +249,7 @@ The services must be started in the following order:
 5. **Proxy Service**
 6. **Frontend** (Port 5173)
 
-## 📊 Database Schema
+## Database Schema
 
 The database schema is automatically initialized from:
 - `backend/modules/db/script.sql`
@@ -268,7 +262,7 @@ Key tables include:
 - `user_types` - User role definitions
 - `users_has_user_types` - User role assignments
 
-## 🔐 Security Configuration
+## Security Configuration
 
 ### SSL/TLS Certificates
 
@@ -283,7 +277,7 @@ JWT tokens are used for authentication with:
 - Socket tokens for WebSocket connections
 - Redis-based session management
 
-## 🧪 Testing
+## Testing
 
 ### API Testing
 
@@ -306,7 +300,7 @@ cd backend/blockchain
 go test ./...
 ```
 
-## 📦 Building for Production
+## Building for Production
 
 ### Frontend Build
 
@@ -334,7 +328,7 @@ cd backend/blockchain
 go build -o blockchain-service main.go
 ```
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 The project includes Docker configuration for MySQL:
 
@@ -345,7 +339,7 @@ docker-compose up -d
 
 For full containerization, create additional Dockerfiles for each service.
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -362,23 +356,8 @@ For full containerization, create additional Dockerfiles for each service.
 - SLUDI Service: http://localhost:9096/sludi_service
 - Blockchain Service: http://localhost:8080/api/v1/transfer
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👥 Team
+## Team
 
 - **Organization**: virulnirmala (Backend & Proxy)
 - **Organization**: hiranyasemindi (SLUDI Service)
 
-## 📞 Support
-
-For support and questions, please open an issue in the GitHub repository.
