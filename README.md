@@ -177,9 +177,9 @@ Create `sludi-service/Config.toml`:
 [SLUDIDatabase]
 host = "localhost"
 port = 3306
-user = "landchain_app"
-password = "E9GF4JmY091K8l3XJ9XotLNuPRwF3O3J"
-database = "land_chain"
+user = "MYSQL_USERNAME"
+password = "MYSQL_PASSWORD"
+database = "DB_NAME"
 ```
 
 ## Running the Services
@@ -358,6 +358,7 @@ For full containerization, create additional Dockerfiles for each service.
 
 ## Team
 
-- **Organization**: virulnirmala (Backend & Proxy)
-- **Organization**: hiranyasemindi (SLUDI Service)
+- **Virul Nirmala Wickramasinghe** – [GitHub](https://github.com/iamvirul)
+- **Hiranya Semindi** – [GitHub](https://github.com/hiranyasemindi)
+- **Menara Perera** – [GitHub](https://github.com/Menaraperera)
 
