@@ -492,4 +492,32 @@ service http:InterceptableService /land_officer on landMicroservice {
         response = Utils:setSuccessResponse(response, users);
         return response;
     }
+
+    resource function get user/land/details(string landId) returns error|http:Response {
+        http:Response response = new;
+        stream<DB:LandOwner, persist:Error?> streamResult = self.dbClient->/landowners(DB:LandOwner);
+        DB:LandOwner[] landOwners = [];
+        check from var landOwner in streamResult
+            do {
+                landOwners.push(landOwner);
+            };
+        check streamResult.close();
+
+        stream<DB:LandTransferChainOptionalized, persist:Error?> streamResult2 = self.dbClient->/landtransferchains(DB:LandTransferChainOptionalized,`landsId=${landId}`);
+        DB:LandTransferChainOptionalized[] landTransferChains = [];
+        check from var landTransferChain in streamResult2
+            do {
+                landTransferChains.push(landTransferChain);
+            };
+        check streamResult2.close();
+
+        json res = {
+            landOwners: landOwners,
+            landTransferChains: landTransferChains.toJson()
+        };
+
+        response = Utils:setSuccessResponse(response, res);
+        return response;
+
+    }
 }

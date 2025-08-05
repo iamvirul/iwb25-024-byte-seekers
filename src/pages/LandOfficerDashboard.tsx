@@ -8,6 +8,7 @@ import {
   Clock,
   Landmark,
   UserPlus,
+  Share,
 } from "lucide-react";
 
 import DashboardHeader from "../components/legal/DashboardHeader";
@@ -17,6 +18,7 @@ import DashboardOverviewSection from "../components/landofficer/DashboardOvervie
 import LandRegistry from "./LandRegistry";
 import LandDocumentUpload from "../components/landofficer/LandDocumentUpload";
 import LandOwnerAdd from "../components/landofficer/LandOwnerAdd";
+import LandOwnershipTransfer from "../components/landofficer/LandOwnershipTransfer";
 
 const LandOfficerDashboard = () => {
   const { user } = useAuth();
@@ -400,7 +402,8 @@ const LandOfficerDashboard = () => {
     { id: "overview", label: "සාරාංශය", icon: BarChart3 },
     { id: "landRegistry", label: "ලියාපදිංචිය", icon: Landmark},
     {id:"documents",label:"ලේඛන",icon:FileText},
-    {id:"addLandOwner",label:"ඉඩම් හිමිකරු එකතු කිරීම",icon:UserPlus}
+    {id:"addLandOwner",label:"ඉඩම් හිමිකරු එකතු කිරීම",icon:UserPlus},
+    {id:"transfer",label:"ඉඩම් හිමිකාරිත්‍ය ගෙනයාම",icon:Share}
   ];
 
 
@@ -433,6 +436,7 @@ const LandOfficerDashboard = () => {
           <LandRegistry activeTab={activeTab}/>
           <LandDocumentUpload activeTab={activeTab} lands={registrations} />
           <LandOwnerAdd activeTab={activeTab}/>
+          <LandOwnershipTransfer activeTab={activeTab} lands={registrations} />
         </div>
       </div>
     </div>

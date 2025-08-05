@@ -33,7 +33,12 @@ export default defineConfig({
         target: "http://localhost:9098",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
-      }
+      },
+      "/api/v1/transfer": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/v1/, "/api/v1"),
+      },
     },
   },
 });
