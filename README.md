@@ -20,6 +20,11 @@ This project consists of multiple interconnected services:
 - **SLUDI Service**: Separate Ballerina service for SLUDI verification
 - **Database**: MySQL with Redis for caching
 
+## Land Chain system's interactions
+
+<img width="7422" height="7965" alt="Mermaid Code Land Chain Sequence Diagram (1)" src="https://github.com/user-attachments/assets/d71bffcd-35c3-48a4-aed9-61a2d470a2a0" />
+
+
 ## Prerequisites
 
 Before setting up the project, ensure you have the following installed:
