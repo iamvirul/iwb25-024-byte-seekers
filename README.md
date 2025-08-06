@@ -2,6 +2,10 @@
 
 A comprehensive blockchain-based land registry system built with React frontend, Ballerina microservices backend, Go blockchain service, and MySQL database.
 
+## System Overview
+
+<img width="1920" height="1080" alt="LandChain Demo Video Presentation" src="https://github.com/user-attachments/assets/e9eaed4c-9396-446c-b655-7e4036205bad" />
+
 ## Project Architecture
 
 This project consists of multiple interconnected services:
