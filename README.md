@@ -6,6 +6,9 @@ A comprehensive blockchain-based land registry system built with React frontend,
 
 This project consists of multiple interconnected services:
 
+![LandChain Demo Video Presentation](https://github.com/user-attachments/assets/5cd78ebe-9bd8-44ec-bc07-eaeebe3b1184)
+
+
 - **Frontend**: React + TypeScript + Vite application
 - **Backend**: Ballerina microservices architecture
 - **Blockchain**: Go-based blockchain service
