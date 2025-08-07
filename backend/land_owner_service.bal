@@ -589,7 +589,6 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                 return response;
             }
         } else {
-            response.statusCode = 400;
             response = Utils:setErrorResponse(response, "User is not a land owner");
             return response;
         }

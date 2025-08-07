@@ -67,7 +67,7 @@ service class LandOwnerService {
         }
         if response is http:ClientError {
             log:printError("Error fetching : " + response.message());
-            check caller->writeMessage({"error": response.message()});
+            check caller->writeMessage({"error": response.toString()});
             return;
         }
         check caller->writeMessage({"event": "Initial", response});
