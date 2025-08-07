@@ -1,17 +1,15 @@
 import backend.common;
 import backend.db as DB;
+import backend.db_client as DBClient;
 import backend.interceptors as Interceptors;
 import backend.managers as Managers;
 import backend.mappers as Mapper;
 import backend.rabbitmq as RabbitMQ;
 import backend.utils as Utils;
-import backend.db_client as DBClient;
 
 import ballerina/http;
 import ballerina/log;
-// import ballerina/jwt;
 import ballerina/persist;
-// import ballerina/regex;
 import ballerina/sql;
 import ballerina/time;
 import ballerina/url;
@@ -178,7 +176,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                     return response;
                 }
                 response.statusCode = 200;
-                response = Utils:setSuccessResponse(response, {"message": "Comment added successfully"});
+                response = Utils:setSuccessResponse(response, {"message": Utils:COMMENT_ADDED_SUCCESSFULLY});
                 return response;
             };
         check disputeStream.close();
@@ -217,7 +215,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
                 return response;
             }
             response.statusCode = 200;
-            response = Utils:setSuccessResponse(response, {"message": "Precedent added successfully"});
+            response = Utils:setSuccessResponse(response, {"message": Utils:PRECEDENT_ADDED_SUCCESSFULLY});
             return response;
         } else {
             response.statusCode = 404;
@@ -284,7 +282,7 @@ service http:InterceptableService /legal_officer on legalOfficerMicroservice {
         }
 
         response.statusCode = 200;
-        response = Utils:setSuccessResponse(response, {"message": "Dispute status updated successfully"});
+        response = Utils:setSuccessResponse(response, {"message": Utils:DISPUTE_STATUS_UPDATED});
         return response;
     }
 }

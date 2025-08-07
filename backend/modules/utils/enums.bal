@@ -234,3 +234,10 @@ public enum JWT {
     JWT_FAILED = "Failed to generate JWT",
     JWT_INVALID = "Invalid JWT"
 }
+
+public enum LEGAL_OFFICER_MESSAGES {
+    COMMENT_ADDED_SUCCESSFULLY = "Comment added successfully",
+    PRECEDENT_ADDED_SUCCESSFULLY = "Precedent added successfully",
+    LEGAL_CLAUSE_ADDED_SUCCESSFULLY = "Legal clause added successfully",
+    DISPUTE_STATUS_UPDATED = "Dispute status updated successfully"
+}
