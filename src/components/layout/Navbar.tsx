@@ -70,8 +70,8 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
-                <Shield className="w-6 h-6 text-white" />
+              <div>
+                <img src="/logo.png" alt="Land Chain Logo" className="w-10 h-10" />
               </div>
               <span className="text-xl font-bold text-gray-900">
                 ඉඩම් ලේඛනාගාරය
