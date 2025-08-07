@@ -183,3 +183,35 @@ public enum BLOCKCHAINERROS {
     FAILED_TO_LOAD_CHAIN = "Fail To Load Chain",
     FAILED_TO_FETCH_BLOCK = "Failed to fetch block"
 }
+
+public enum REDISERRORS{
+    FAILED_TO_CONNECT_REDIS = "Failed to connect to Redis",
+    FAILED_TO_DISCONNECT_REDIS = "Failed to disconnect from Redis",
+    FAILED_TO_SET_REDIS = "Failed to set Redis",
+    FAILED_TO_GET_REDIS = "Failed to get Redis",
+    FAILED_TO_DELETE_REDIS = "Failed to delete Redis",
+    FAILED_TO_FLUSH_REDIS = "Failed to flush Redis"
+}
+
+public enum SOCKETERRORS{
+    FAILED_TO_CONNECT_SOCKET = "Failed to connect to socket",
+    FAILED_TO_DISCONNECT_SOCKET = "Failed to disconnect from socket",
+    FAILED_TO_SEND_SOCKET = "Failed to send socket",
+    FAILED_TO_RECEIVE_SOCKET = "Failed to receive socket",
+    FAILED_TO_BROADCAST_SOCKET = "Failed to broadcast socket",
+    FAILED_TO_SUBSCRIBE_SOCKET = "Failed to subscribe to socket",
+    FAILED_TO_UNSUBSCRIBE_SOCKET = "Failed to unsubscribe from socket"
+}
+
+public enum AUTH{
+    LOGIN_SUCCESS = "Login successful",
+    LOGIN_FAILED = "Login failed",
+    INVALID_CREDENTIALS = "Invalid credentials",
+    FORBIDIN = "User does not have the required user type"
+}
+
+public enum JWT {
+    JWT_SUCCESS = "JWT generated successfully",
+    JWT_FAILED = "Failed to generate JWT",
+    JWT_INVALID = "Invalid JWT"
+}

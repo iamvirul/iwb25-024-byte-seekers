@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import {
-  Home, Search, Users, Gavel,
+  Home, Search, Gavel,
   Menu, X, LogOut, User, Shield, BarChart3, Scale
 } from 'lucide-react';
 import Button from '../ui/Button';

@@ -70,7 +70,7 @@ service /auth on authMicroservice {
             }
             if userTypeResult is () {
                 response.statusCode = 403;
-                response = Utils:setErrorResponse(response, "User does not have the required user type");
+                response = Utils:setErrorResponse(response, Utils:FORBIDIN);
                 return response;
             }
             Utils:USER_TYPES userType = check Utils:getUserType(loginUser.user_type);
@@ -101,7 +101,7 @@ service /auth on authMicroservice {
                     string|redis:Error set = redis->set(userSessionID, userSession.toJsonString());
                     if set is redis:Error {
                         response.statusCode = 500;
-                        response = Utils:setErrorResponse(response, "Failed to set user session in Redis");
+                        response = Utils:setErrorResponse(response, Utils:FAILED_TO_SET_REDIS);
                         return response;
                     }
 
@@ -109,7 +109,7 @@ service /auth on authMicroservice {
                     response = Utils:setSuccessResponse(
                             response,
                             {
-                                message: "Login successful",
+                                message: Utils:LOGIN_SUCCESS,
                                 token: jwt,
                                 userId: user.id,
                                 nic: check Utils:decryptData(user.nic),
@@ -124,17 +124,17 @@ service /auth on authMicroservice {
                     return response;
                 } else {
                     response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, "Failed to issue socket token");
+                    response = Utils:setErrorResponse(response, Utils:JWT_FAILED);
                     return response;
                 }
             } else {
                 response.statusCode = 500;
-                response = Utils:setErrorResponse(response, "Failed to generate tokens");
+                response = Utils:setErrorResponse(response, Utils:JWT_FAILED);
                 return response;
             }
         } else {
             response.statusCode = 401;
-            response = Utils:setErrorResponse(response, "Invalid username or password");
+            response = Utils:setErrorResponse(response, Utils:INVALID_CREDENTIALS);
             return response;
         }
     }
