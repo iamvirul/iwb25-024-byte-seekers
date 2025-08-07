@@ -1,17 +1,17 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : Local Connection
+ Source Server         : MySQL
  Source Server Type    : MySQL
- Source Server Version : 90001 (9.0.1)
+ Source Server Version : 80041 (8.0.41)
  Source Host           : localhost:3306
  Source Schema         : land_chain
 
  Target Server Type    : MySQL
- Target Server Version : 90001 (9.0.1)
+ Target Server Version : 80041 (8.0.41)
  File Encoding         : 65001
 
- Date: 07/08/2025 21:48:45
+ Date: 07/08/2025 22:13:50
 */
 
 SET NAMES utf8mb4;
@@ -33,7 +33,7 @@ CREATE TABLE `audits` (
   PRIMARY KEY (`id`),
   KEY `fk_audits_users1_idx` (`usersId`),
   CONSTRAINT `audits_ibfk_1` FOREIGN KEY (`usersId`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Records of audits
@@ -111,34 +111,23 @@ INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `reques
 INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (70, '/land_officer/user/landowners', 'GET', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{}', 'localhost:9070', '2025-08-07 12:13:55', 2);
 INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (71, '/land_officer/data/stats/all', 'GET', 'ballerina', '{}', 'localhost:9070', '2025-08-07 12:13:56', 2);
 INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (72, '/land_officer/user/land/details?landId=2', 'GET', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{}', 'localhost:9070', '2025-08-07 12:13:59', 2);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (73, '/legal_officer/data/3', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 15:26:01', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (74, '/legal_officer/data/3', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 15:26:03', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (75, '/legal_officer/data/3', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 15:27:16', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (76, '/land_owner/stats/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 15:29:26', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (77, '/land_owner/stats/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 15:29:31', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (78, '/land_owner/disputes/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 15:30:19', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (79, '/land_owner/stats/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 15:30:24', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (80, '/land_owner/checkout/1?amount=5000.00&barslId=BSL-099372', 'GET', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{}', 'localhost:9098', '2025-08-07 15:34:13', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (81, '/land_owner/dispute/add', 'POST', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{\"content:\":\"multipart/form-data\"}', 'localhost:9098', '2025-08-07 15:35:02', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (82, '/land_owner/disputes/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 15:44:34', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (83, '/land_owner/checkout/1?amount=5000.00&barslId=BSL-099372', 'GET', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{}', 'localhost:9098', '2025-08-07 15:46:03', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (84, '/land_owner/dispute/add', 'POST', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{\"content:\":\"multipart/form-data\"}', 'localhost:9098', '2025-08-07 15:46:30', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (85, '/land_owner/checkout/1?amount=5000.00&barslId=BSL-099372', 'GET', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{}', 'localhost:9098', '2025-08-07 15:49:18', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (86, '/land_owner/dispute/add', 'POST', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{\"content:\":\"multipart/form-data\"}', 'localhost:9098', '2025-08-07 15:49:40', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (87, '/land_owner/disputes/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 15:56:10', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (88, '/land_owner/disputes/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 15:56:14', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (89, '/land_owner/disputes/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 15:56:20', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (90, '/land_owner/disputes/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 15:56:23', 1);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (91, '/legal_officer/data/1', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 15:57:50', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (92, '/legal_officer/data/1', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 15:57:53', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (93, '/legal_officer/comment/add', 'POST', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{\"caseId\":\"CASE-1549406013\",\"comment\":\"මෙම විවාදය සම්බන්ධයෙන් දෙපාර්ශ්වයකින්ම හිමිකම පිළිබඳව පවසා ඇත. නමුත් ඉඩමේ භූමිකත්ති සන්ධානය හා භාවිතය පිළිබඳව පළමු පාර්ශ්වය (සමන් පෙරේරා) විසින් ගතවූ අවුරුදු 10ක කාලය තුළ ඉඩම පවත්වාගෙන ගොස් ඇති බව සඳහන් වේ. නීතිමයව, මෙම භාවිතය නීතිගත හිමිකමක් සඳහා සාධකයක් විය හැකි බැවින්, පූර්ව අයිතිවාසිකම් ලේඛන, නියෝග, හා ගනුදෙනු ලිපි සහතික ලබා ගැනීම අත්‍යවශ්‍ය වේ. දෙපාර්ශ්වයන්ගෙන් තොරතුරු රැස් කර විශේෂ පරීක්ෂණයක් සිදු කළ යුතුය.\"}', 'localhost:9080', '2025-08-07 15:59:39', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (94, '/legal_officer/comment/add', 'POST', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{\"caseId\":\"CASE-1549406013\",\"comment\":\"මෙම විවාදය සම්බන්ධයෙන් දෙපාර්ශ්වයකින්ම හිමිකම පිළිබඳව පවසා ඇත. නමුත් ඉඩමේ භූමිකත්ති සන්ධානය හා භාවිතය පිළිබඳව පළමු පාර්ශ්වය (සමන් පෙරේරා) විසින් ගතවූ අවුරුදු 10ක කාලය තුළ ඉඩම පවත්වාගෙන ගොස් ඇති බව සඳහන් වේ. නීතිමයව, මෙම භාවිතය නීතිගත හිමිකමක් සඳහා සාධකයක් විය හැකි බැවින්, පූර්ව අයිතිවාසිකම් ලේඛන, නියෝග, හා ගනුදෙනු ලිපි සහතික ලබා ගැනීම අත්‍යවශ්‍ය වේ. දෙපාර්ශ්වයන්ගෙන් තොරතුරු රැස් කර විශේෂ පරීක්ෂණයක් සිදු කළ යුතුය.\"}', 'localhost:9080', '2025-08-07 16:02:51', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (95, '/legal_officer/dispute/estimate_time/add', 'POST', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{\"caseId\":\"CASE-1549406013\",\"estimateTime\":\"සති 2\"}', 'localhost:9080', '2025-08-07 16:05:20', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (96, '/legal_officer/precedents/add', 'POST', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{\"caseId\":\"CASE-15463054027\",\"year\":\"2025\",\"headline\":\"9c6566c2-5846-4fb6-bc9a-6b45d67b6902\",\"court\":\"HIGH_COURT\",\"decision\":\"පැමිණිලිකරුට පක්ෂව \",\"summary\":\"මෙම වාර්තාව සකස් කරනු ලබන්නේ LAND-0100 ලෙස ලියාපදිංචි කළ ඉඩම සම්බන්ධව, දෙපාර්ශ්වයකින් හිමිකමක් පවසන විවාදයකට අදාළවය.\nසමන් පෙරේරා මහතා විසින් මෙම විවාදය ඉදිරිපත් කර ඇති අතර, ඔහු සඳහන් කරන්නේ අවුරුදු 10කට ආසන්න කාලයක් එම ඉඩම භාවිතා කරමින් පවත්වාගෙන ගොස් ඇති බවය.\nඑමෙන්ම තවත් පාර්ශ්වයෙකුද එම ඉඩම සම්බන්ධව හිමිකමක් පවසන අතර, එමඟින් නීතිමය විභාගයක අවශ්‍යතාවක් ඇති වී ඇත.\nඉහත තොරතුරු මත පදනම්ව,\nඅදාළ ලේඛන (ඔප්පු, ගනුදෙනු, උරුම ලිපි),\nභාවිතය පිළිබඳ සාක්ෂි,\nභූමියෙහි වත්මන් තත්ත්වය,\nපරීක්ෂා කිරීමෙන් පසු නීතිමය ක්‍රියාමාර්ග ගත යුතුය.\",\"legalClauses\":[\"මෙම වාර්තාව සකස් කරනු ලබන්නේ LAND-0100 ලෙස ලියාපදිංචි කළ ඉඩම සම්බන්ධව, දෙපාර්ශ්වයකින් හිමිකමක් පවසන විවාදයකට අදාළවය. සමන් පෙරේරා මහතා විසින් මෙම විවාදය ඉදිරිපත් කර ඇති අතර, ඔහු සඳහන් කරන්නේ අවුරුදු 10කට ආසන්න කාලයක් එම ඉඩම භාවිතා කරමින් පවත්වාගෙන ගොස් ඇති බවය. එමෙන්ම තවත් පාර්ශ්වයෙකුද එම ඉඩම සම්බන්ධව හිමිකමක් පවසන අතර, එමඟින් නීතිමය විභාගයක අවශ්‍යතාවක් ඇති වී ඇත.  ඉහත තොරතුරු මත පදනම්ව,  අදාළ ලේඛන (ඔප්පු, ගනුදෙනු, උරුම ලිපි),  භාවිතය පිළිබඳ සාක්ෂි,  භූමියෙහි වත්මන් තත්ත්වය, පරීක්ෂා කිරීමෙන් පසු නීතිමය ක්‍රියාමාර්ග ගත යුතුය.\",\"දිවයිනේ දේපළ ගනුදෙනු නීතිය (Registration of Documents Ordinance, No. 23 of 1927)\",\"නිතිමය වංචාවන් පිළිබඳ පනත (Penal Code, Section 415 & 417)\"]}', 'localhost:9080', '2025-08-07 16:12:31', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (97, '/legal_officer/precedents/add', 'POST', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{\"caseId\":\"CASE-1549406013\",\"year\":\"2025\",\"headline\":\"9c6566c2-5846-4fb6-bc9a-6b45d67b6902\",\"court\":\"HIGH_COURT\",\"decision\":\"පැමිණිලිකරුට පක්ෂව \",\"summary\":\"මෙම වාර්තාව සකස් කරනු ලබන්නේ LAND-0100 ලෙස ලියාපදිංචි කළ ඉඩම සම්බන්ධව, දෙපාර්ශ්වයකින් හිමිකමක් පවසන විවාදයකට අදාළවය.\nසමන් පෙරේරා මහතා විසින් මෙම විවාදය ඉදිරිපත් කර ඇති අතර, ඔහු සඳහන් කරන්නේ අවුරුදු 10කට ආසන්න කාලයක් එම ඉඩම භාවිතා කරමින් පවත්වාගෙන ගොස් ඇති බවය.\nඑමෙන්ම තවත් පාර්ශ්වයෙකුද එම ඉඩම සම්බන්ධව හිමිකමක් පවසන අතර, එමඟින් නීතිමය විභාගයක අවශ්‍යතාවක් ඇති වී ඇත.\nඉහත තොරතුරු මත පදනම්ව,\nඅදාළ ලේඛන (ඔප්පු, ගනුදෙනු, උරුම ලිපි),\nභාවිතය පිළිබඳ සාක්ෂි,\nභූමියෙහි වත්මන් තත්ත්වය,\nපරීක්ෂා කිරීමෙන් පසු නීතිමය ක්‍රියාමාර්ග ගත යුතුය.\",\"legalClauses\":[\"මෙම වාර්තාව සකස් කරනු ලබන්නේ LAND-0100 ලෙස ලියාපදිංචි කළ ඉඩම සම්බන්ධව, දෙපාර්ශ්වයකින් හිමිකමක් පවසන විවාදයකට අදාළවය. සමන් පෙරේරා මහතා විසින් මෙම විවාදය ඉදිරිපත් කර ඇති අතර, ඔහු සඳහන් කරන්නේ අවුරුදු 10කට ආසන්න කාලයක් එම ඉඩම භාවිතා කරමින් පවත්වාගෙන ගොස් ඇති බවය. එමෙන්ම තවත් පාර්ශ්වයෙකුද එම ඉඩම සම්බන්ධව හිමිකමක් පවසන අතර, එමඟින් නීතිමය විභාගයක අවශ්‍යතාවක් ඇති වී ඇත.  ඉහත තොරතුරු මත පදනම්ව,  අදාළ ලේඛන (ඔප්පු, ගනුදෙනු, උරුම ලිපි),  භාවිතය පිළිබඳ සාක්ෂි,  භූමියෙහි වත්මන් තත්ත්වය, පරීක්ෂා කිරීමෙන් පසු නීතිමය ක්‍රියාමාර්ග ගත යුතුය.\",\"දිවයිනේ දේපළ ගනුදෙනු නීතිය (Registration of Documents Ordinance, No. 23 of 1927)\",\"නිතිමය වංචාවන් පිළිබඳ පනත (Penal Code, Section 415 & 417)\"]}', 'localhost:9080', '2025-08-07 16:12:51', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (98, '/legal_officer/data/1', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 16:13:23', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (99, '/legal_officer/data/1', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 16:13:26', 3);
-INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (100, '/legal_officer/data/1', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 16:13:28', 3);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (73, '/land_officer/land/register', 'POST', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{\"landId\":\"LAND-1092\",\"landName\":\"කඩුවෙල ගොවි බිම\",\"landPlace\":\"කඩුවෙල\",\"landLat\":7.052319259443447,\"landLang\":79.89352326617477,\"landSize\":10,\"landValue\":100000,\"landType\":\"Home Land\",\"registerDate\":{\"year\":2025,\"month\":8,\"day\":7},\"landStatus\":\"VERIFIED\",\"priority\":1,\"from_owner\":null,\"to_owner\":{\"ownerId\":\"\",\"firstName\":\"සුනිල්\",\"lastName\":\"සිල්වා\",\"nic\":\"923456789V\",\"address\":\"Piliyandala,Colombo\",\"contactNo\":\"0765410987\"},\"verified_by\":\"REGISTRAR-01\",\"transferDate\":\"2025-08-07T12:20:00.000Z\"}', 'localhost:9070', '2025-08-07 12:23:08', 2);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (74, '/land_officer/data/stats/all', 'GET', 'ballerina', '{}', 'localhost:9070', '2025-08-07 12:56:41', 2);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (75, '/land_officer/user/landowners', 'GET', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{}', 'localhost:9070', '2025-08-07 12:56:42', 2);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (76, '/land_officer/user/landowners', 'GET', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', '{}', 'localhost:9070', '2025-08-07 12:56:42', 2);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (77, '/land_officer/data/stats/all', 'GET', 'ballerina', '{}', 'localhost:9070', '2025-08-07 12:56:43', 2);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (78, '/legal_officer/data/1', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 16:37:29', 3);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (79, '/legal_officer/data/1', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 16:37:29', 3);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (80, '/legal_officer/data/1', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 16:37:33', 3);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (81, '/legal_officer/data/1', 'GET', 'ballerina', '{}', 'localhost:9080', '2025-08-07 16:39:59', 3);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (82, '/land_owner/stats/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 16:40:55', 1);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (83, '/land_owner/stats/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 16:40:55', 1);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (84, '/land_owner/stats/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 16:41:00', 1);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (85, '/land_owner/disputes/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 16:41:14', 1);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (86, '/land_owner/stats/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 16:41:17', 1);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (87, '/land_owner/disputes/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 16:42:56', 1);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (88, '/land_owner/stats/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 16:42:58', 1);
+INSERT INTO `audits` (`id`, `requestPath`, `requestMethod`, `userAgent`, `requestPayload`, `requestHost`, `requestedTime`, `usersId`) VALUES (89, '/land_owner/stats/1', 'GET', 'ballerina', '{}', 'localhost:9098', '2025-08-07 16:43:03', 1);
 COMMIT;
 
 -- ----------------------------
@@ -147,7 +136,7 @@ COMMIT;
 DROP TABLE IF EXISTS `dispute_comments`;
 CREATE TABLE `dispute_comments` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `comment` text NOT NULL,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `createdAt` timestamp NOT NULL,
   `disputesId` int NOT NULL,
   PRIMARY KEY (`id`),
@@ -170,7 +159,7 @@ CREATE TABLE `disputes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `caseId` varchar(50) NOT NULL,
   `witnessName` varchar(60) NOT NULL,
-  `disputesDetails` text NOT NULL,
+  `disputesDetails` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `estimateTime` varchar(45) NOT NULL,
   `status` enum('PENDING','RESOLVED') NOT NULL,
   `createdAt` timestamp NOT NULL,
@@ -229,7 +218,7 @@ CREATE TABLE `land_owner` (
   `address` varchar(255) DEFAULT NULL,
   `contactNo` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Records of land_owner
@@ -238,6 +227,7 @@ BEGIN;
 INSERT INTO `land_owner` (`id`, `ownerId`, `firstName`, `lastName`, `nic`, `address`, `contactNo`) VALUES (1, 'LCLO-40216', 'කමල්', 'පෙරේරා', '200034502345', 'Colombo,Sri Lanka', '0765189765');
 INSERT INTO `land_owner` (`id`, `ownerId`, `firstName`, `lastName`, `nic`, `address`, `contactNo`) VALUES (3, 'LCLO-40228', 'අසේල', 'රත්නායක', '963456789V', 'Anuradhapura,Sri Lanka', '07681901098');
 INSERT INTO `land_owner` (`id`, `ownerId`, `firstName`, `lastName`, `nic`, `address`, `contactNo`) VALUES (4, 'LCLO-40230', 'රොෂාන්', 'ජයසිංහ', '973456789V', 'Gampaha,Sri Lanka', '0786511097');
+INSERT INTO `land_owner` (`id`, `ownerId`, `firstName`, `lastName`, `nic`, `address`, `contactNo`) VALUES (5, 'LCLO-bce8b8ba-3144-4819-a353-b0a18df7f22c', 'සුනිල්', 'සිල්වා', '923456789V', 'Piliyandala,Colombo', '0765410987');
 COMMIT;
 
 -- ----------------------------
@@ -261,7 +251,7 @@ CREATE TABLE `land_transfer_chain` (
   CONSTRAINT `land_transfer_chain_ibfk_1` FOREIGN KEY (`fromLandOwnersId`) REFERENCES `land_owner` (`id`),
   CONSTRAINT `land_transfer_chain_ibfk_2` FOREIGN KEY (`toLandOwnersId`) REFERENCES `land_owner` (`id`),
   CONSTRAINT `land_transfer_chain_ibfk_3` FOREIGN KEY (`landsId`) REFERENCES `lands` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Records of land_transfer_chain
@@ -271,6 +261,7 @@ INSERT INTO `land_transfer_chain` (`id`, `transferDate`, `verifiedBy`, `blockInd
 INSERT INTO `land_transfer_chain` (`id`, `transferDate`, `verifiedBy`, `blockIndex`, `blockHash`, `prevBlockHash`, `fromLandOwnersId`, `toLandOwnersId`, `landsId`) VALUES (2, '2025-08-07 15:12:00', '', 2, 'c50653e6969e6b31339e4dfd02bdcd459a5789f0282bcbc73ac063bbf41ffad2', '86044d146ed7f05e2a4600963f9d7d0676da381a8bc6500e64744b2ef3de6200', 3, 1, 1);
 INSERT INTO `land_transfer_chain` (`id`, `transferDate`, `verifiedBy`, `blockIndex`, `blockHash`, `prevBlockHash`, `fromLandOwnersId`, `toLandOwnersId`, `landsId`) VALUES (3, '2025-08-07 11:45:00', 'REGISTRAR-01', 1, '319344b5ae3fb885ef9f083063ff0a02b3a223d088533f089f12ef23b646c239', '0', NULL, 4, 2);
 INSERT INTO `land_transfer_chain` (`id`, `transferDate`, `verifiedBy`, `blockIndex`, `blockHash`, `prevBlockHash`, `fromLandOwnersId`, `toLandOwnersId`, `landsId`) VALUES (4, '2025-08-07 07:22:00', '', 2, 'c1d1edf39486f41dcd81f1e8c75d24c003c4c7dfb8d17c8e39cce5969a31a2b4', '319344b5ae3fb885ef9f083063ff0a02b3a223d088533f089f12ef23b646c239', 4, 1, 2);
+INSERT INTO `land_transfer_chain` (`id`, `transferDate`, `verifiedBy`, `blockIndex`, `blockHash`, `prevBlockHash`, `fromLandOwnersId`, `toLandOwnersId`, `landsId`) VALUES (5, '2025-08-07 12:20:00', 'REGISTRAR-01', 1, '81fcd98aeaa63f7e00b5a99a6c8d6d096a25136dff7f80a6a981a86100ccbec9', '0', NULL, 5, 3);
 COMMIT;
 
 -- ----------------------------
@@ -291,7 +282,7 @@ CREATE TABLE `lands` (
   `landStatus` enum('PENDING','VERIFIED','REJECTED') NOT NULL,
   `priority` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Records of lands
@@ -299,6 +290,7 @@ CREATE TABLE `lands` (
 BEGIN;
 INSERT INTO `lands` (`id`, `landId`, `landName`, `landPlace`, `landLat`, `landLang`, `landSize`, `landValue`, `landType`, `registerDate`, `landStatus`, `priority`) VALUES (1, '9c6566c2-5846-4fb6-bc9a-6b45d67b6902', 'මහරගම නිවස', 'මහරගම', 6.850923, 79.922036, 300, 2000000.000000, 'Home Land', '2025-08-07', 'VERIFIED', 1);
 INSERT INTO `lands` (`id`, `landId`, `landName`, `landPlace`, `landLat`, `landLang`, `landSize`, `landValue`, `landType`, `registerDate`, `landStatus`, `priority`) VALUES (2, '76cf7360-3ea3-4185-a743-285a9b4f8281', 'නුගේගොඩ බිම', 'නුගේගොඩ', 6.863348, 79.902120, 80, 10000000.000000, 'Home Land', '2025-08-07', 'VERIFIED', 1);
+INSERT INTO `lands` (`id`, `landId`, `landName`, `landPlace`, `landLat`, `landLang`, `landSize`, `landValue`, `landType`, `registerDate`, `landStatus`, `priority`) VALUES (3, 'ba36e5ba-9ce0-4023-87a2-2bc4ea623a67', 'කඩුවෙල ගොවි බිම', 'කඩුවෙල', 7.052319, 79.893523, 10, 100000.000000, 'Home Land', '2025-08-07', 'VERIFIED', 1);
 COMMIT;
 
 -- ----------------------------
@@ -330,7 +322,7 @@ COMMIT;
 DROP TABLE IF EXISTS `legal_clauses`;
 CREATE TABLE `legal_clauses` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `legalClause` text NOT NULL,
+  `legalClause` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `legalPrecedentsId` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_legal_clauses_legal_precedents1_idx` (`legalPrecedentsId`),
@@ -376,7 +368,7 @@ CREATE TABLE `legal_precedents` (
   `headline` varchar(100) NOT NULL,
   `court` enum('SUPREME_COURT','APPELLATE_COURT','HIGH_COURT','DISTRICT_COURT') NOT NULL,
   `decision` varchar(191) NOT NULL,
-  `summary` text NOT NULL,
+  `summary` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `disputesId` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_legal_precedents_disputes1_idx` (`disputesId`),
