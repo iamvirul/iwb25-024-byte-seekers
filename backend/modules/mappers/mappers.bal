@@ -2,7 +2,9 @@ import backend.common as Common;
 import backend.db as DB;
 import backend.utils as Utils;
 
+import ballerina/crypto;
 import ballerina/time;
+import ballerina/uuid;
 
 public function landInsertMapper(Common:LandCreate landInsert) returns DB:LandInsert {
     return {
@@ -44,5 +46,27 @@ public function legalPrecedentInsertMapper(Common:RequestPrecedent requestPreced
         decision: requestPrecedent.decision,
         summary: requestPrecedent.summary,
         disputesId: dispute.id
+    };
+}
+
+public function requestUserInsertMapper(Common:RequestUser requestUser) returns DB:UserInsert|error {
+    string hash_password = check crypto:hashArgon2(requestUser.password);
+    string userUUID = uuid:createType4AsString();
+    string userId = "LCLO-" + userUUID;
+    byte[] encryptNIC = check Utils:encryptData(requestUser.nic);
+    byte[] encryptSludi = check Utils:encryptData(requestUser.sludi);
+    byte[] encryptContactNo = check Utils:encryptData(requestUser.contact_no);
+    byte[] encryptAddress = check Utils:encryptData(requestUser.address);
+
+    return {
+        userId: userId,
+        firstName: requestUser.first_name,
+        lastName: requestUser.last_name,
+        email: requestUser.email,
+        password: hash_password,
+        nic: encryptNIC,
+        sludi: encryptSludi,
+        contactNo: encryptContactNo,
+        address: encryptAddress
     };
 }
