@@ -1269,7 +1269,7 @@ const Disputes = () => {
                                 {selectedDispute.disputedocuments.slice(0, 3).map((doc, index) => (
                                   <div key={index} className="flex items-center text-sm text-gray-600">
                                     <FileText className="w-4 h-4 mr-2" />
-                                    {doc.docPath.split('/').pop()}
+                                    {doc.docPath.split('/o/')[1]?.split('?')[0] || fullPath.split('/').pop()}
                                   </div>
                                 ))}
                                 {selectedDispute.disputedocuments.length > 3 && (
