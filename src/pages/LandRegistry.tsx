@@ -105,7 +105,7 @@ const LandRegistry: React.FC<LandRegistryProps> = ({activeTab}) => {
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: "AIzaSyCyvFLiqccbWJIzBB4rUMkK5-tUP-dHsfA",
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   });
 
   const handleChange = (field: string, value: string) => {
