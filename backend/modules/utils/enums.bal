@@ -67,7 +67,12 @@ public enum ADDRESS_ERRORS {
 
 public enum SLUDI_ERRORS {
     SLUDI_LENGTH = "SLUDI should not exceed 45 characters",
-    SLUDI_REQUIRED = "SLUDI is required"
+    SLUDI_REQUIRED = "SLUDI is required",
+    EMAIL_NIC_SLUDI_ALREADY_EXISTS = "Email, NIC or SLUDI already exists",
+    USER_NOT_FOUND_WITH_SLUDI = "User not found with SLUDI",
+    NIC_NOT_MATCH_WITH_SLUDI = "NIC does not match with SLUDI",
+    FIRST_NAME_NOT_MATCH_WITH_SLUDI = "First name does not match with SLUDI",
+    LAST_NAME_NOT_MATCH_WITH_SLUDI = "Last name does not match with SLUDI"
 }
 
 public enum COMMON_ERROR_MESSAGES {
@@ -176,15 +181,18 @@ public enum USER_ERRORS {
     FAILED_TO_QUEUE_USER_CONTACT_NO = "Failed to queue user contact no",
     FAILED_TO_QUEUE_USER_EMAIL = "Failed to queue user email",
     FAILED_TO_QUEUE_USER_FNAME = "Failed to queue user fname",
-    FAILED_TO_QUEUE_USER_LNAME = "Failed to queue user lname"
+    FAILED_TO_QUEUE_USER_LNAME = "Failed to queue user lname",
+    USER_REGISTERED_SUCCESSFULLY = "User registered successfully",
+    ERROR_WHILE_VERIFYING_USER = "Error while verifying the user"
 }
+
 public enum BLOCKCHAINERROS {
     NO_CHAIN_FOUND = "No chain found",
     FAILED_TO_LOAD_CHAIN = "Fail To Load Chain",
     FAILED_TO_FETCH_BLOCK = "Failed to fetch block"
 }
 
-public enum REDISERRORS{
+public enum REDISERRORS {
     FAILED_TO_CONNECT_REDIS = "Failed to connect to Redis",
     FAILED_TO_DISCONNECT_REDIS = "Failed to disconnect from Redis",
     FAILED_TO_SET_REDIS = "Failed to set Redis",
@@ -193,7 +201,7 @@ public enum REDISERRORS{
     FAILED_TO_FLUSH_REDIS = "Failed to flush Redis"
 }
 
-public enum SOCKETERRORS{
+public enum SOCKETERRORS {
     FAILED_TO_CONNECT_SOCKET = "Failed to connect to socket",
     FAILED_TO_DISCONNECT_SOCKET = "Failed to disconnect from socket",
     FAILED_TO_SEND_SOCKET = "Failed to send socket",
@@ -203,7 +211,7 @@ public enum SOCKETERRORS{
     FAILED_TO_UNSUBSCRIBE_SOCKET = "Failed to unsubscribe from socket"
 }
 
-public enum AUTH{
+public enum AUTH {
     LOGIN_SUCCESS = "Login successful",
     LOGIN_FAILED = "Login failed",
     INVALID_CREDENTIALS = "Invalid credentials",

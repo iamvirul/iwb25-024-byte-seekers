@@ -1,5 +1,4 @@
 import backend.db as DB;
-// import ballerina/sql;
 
 final DB:Client dbClient = check new ();
 

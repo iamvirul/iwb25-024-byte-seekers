@@ -11,7 +11,9 @@ public class LandOwnerConnectionStore {
     }
 
     public function removeClient(string userId) {
-        _ = self.clients.remove(userId);
+        if self.clients.hasKey(userId) {
+            _ = self.clients.remove(userId);
+        }
     }
 
     public function broadcast(Common:socketMessage message, string userId) {
