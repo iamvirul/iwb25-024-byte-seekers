@@ -114,7 +114,7 @@ export default function RegistrationBranding({
             </div>
             <div className="flex items-center text-blue-700">
               <CheckCircle className="w-4 h-4 mr-3 text-blue-600" />
-              <span className="text-sm">AI සහායකත්වයෙන් ගැටළු නිරාකරණය</span>
+              <span className="text-sm">ගැටළු නිරාකරණය</span>
             </div>
             <div className="flex items-center text-blue-700">
               <CheckCircle className="w-4 h-4 mr-3 text-blue-600" />

@@ -25,7 +25,7 @@ const FeaturesSection: React.FC = () => {
     {
       icon: Users,
       title: 'ගැටළු නිරාකරණය',
-      description: 'AI සහායකත්වයෙන් ඉක්මන් සහ සාධාරණ ගැටළු නිරාකරණය',
+      description: 'ඉක්මන් සහ සාධාරණ ගැටළු නිරාකරණය',
       color: 'from-orange-500 to-orange-600'
     }
   ];
