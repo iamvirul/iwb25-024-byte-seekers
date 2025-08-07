@@ -42,7 +42,7 @@ const Register = () => {
     slUdiId: "",
     phone: "",
     address: "",
-    role: "citizen" as "citizen" | "land_officer" | "legal_officer",
+    role: 2 as 2 | 3 | 4
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -68,27 +68,59 @@ const Register = () => {
 
     if (step === 1) {
       if (!formData.firstName.trim()) newErrors.firstName = "මුල් නම අවශ්‍යයි";
+      else if (formData.firstName.length < 2) newErrors.firstName = "මුල් නම ඉතා කෙටියි";
+      else if (!/^[a-zA-Z\u0D80-\u0DFF\s]+$/.test(formData.firstName))
+        newErrors.firstName = "මුල් නම වලංගු නොවේ";
+
       if (!formData.lastName.trim()) newErrors.lastName = "අග නම අවශ්‍යයි";
+      else if (formData.lastName.length < 2) newErrors.lastName = "අග නම ඉතා කෙටියි";
+      else if (!/^[a-zA-Z\u0D80-\u0DFF\s]+$/.test(formData.lastName))
+        newErrors.lastName = "අග නම වලංගු නොවේ";
+
       if (!formData.email.trim()) newErrors.email = "ඊමේල් ලිපිනය අවශ්‍යයි";
-      if (!formData.email.includes("@"))
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
         newErrors.email = "වලංගු ඊමේල් ලිපිනයක් ඇතුළත් කරන්න";
     }
 
     if (step === 2) {
       if (!formData.password) newErrors.password = "මුරපදය අවශ්‍යයි";
-      if (formData.password.length < 6)
-        newErrors.password = "මුරපදය අවම වශයෙන් අක්ෂර 6ක් තිබිය යුතුයි";
-      if (formData.password !== formData.confirmPassword) {
+      else if (formData.password.length < 8)
+        newErrors.password = "මුරපදය අවම වශයෙන් අක්ෂර 8ක් තිබිය යුතුයි";
+      else if (!/[A-Z]/.test(formData.password))
+        newErrors.password = "මුරපදයේ අකුරු 1ක්වත් විශාල අකුරෙන් තිබිය යුතුයි";
+      else if (!/[a-z]/.test(formData.password))
+        newErrors.password = "මුරපදයේ අකුරු 1ක්වත් සුළු අකුරෙන් තිබිය යුතුයි";
+      else if (!/[0-9]/.test(formData.password))
+        newErrors.password = "මුරපදයේ අංක 1ක්වත් තිබිය යුතුයි";
+      else if (!/[^A-Za-z0-9]/.test(formData.password))
+        newErrors.password = "මුරපදයේ විශේෂ අක්ෂර 1ක්වත් තිබිය යුතුයි";
+
+      if (!formData.confirmPassword)
+        newErrors.confirmPassword = "මුරපදය තහවුරු කිරීම අවශ්‍යයි";
+      else if (formData.password !== formData.confirmPassword)
         newErrors.confirmPassword = "මුරපද නොගැලපේ";
-      }
     }
 
     if (step === 3) {
       if (!formData.nic.trim())
         newErrors.nic = "ජාතික හැඳුනුම්පත් අංකය අවශ්‍යයි";
-      if (!formData.slUdiId.trim()) newErrors.slUdiId = "SL-UDI අංකය අවශ්‍යයි";
-      if (!formData.phone.trim()) newErrors.phone = "දුරකථන අංකය අවශ්‍යයි";
-      if (!formData.address.trim()) newErrors.address = "ලිපිනය අවශ්‍යයි";
+      else if (!/^([0-9]{9}[xXvV]|[0-9]{12})$/.test(formData.nic))
+        newErrors.nic = "වලංගු NIC අංකයක් ඇතුළත් කරන්න";
+
+      if (!formData.slUdiId.trim())
+        newErrors.slUdiId = "SL-UDI අංකය අවශ්‍යයි";
+      else if (!/^SL-UDI-\d{9}$/.test(formData.slUdiId))
+        newErrors.slUdiId = "SL-UDI අංකය SL-UDI-000000001 ආකාරයෙන් ඇතුළත් කරන්න";
+
+      if (!formData.phone.trim())
+        newErrors.phone = "දුරකථන අංකය අවශ්‍යයි";
+      else if (!/^(0\d{9})$/.test(formData.phone))
+        newErrors.phone = "වලංගු දුරකථන අංකයක් ඇතුළත් කරන්න (0768101007)";
+
+      if (!formData.address.trim())
+        newErrors.address = "ලිපිනය අවශ්‍යයි";
+      else if (formData.address.length < 10)
+        newErrors.address = "ලිපිනය ඉතා කෙටියි";
     }
 
     setErrors(newErrors);
@@ -112,15 +144,53 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Prepare payload according to API requirements
+      const payload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        address: formData.address,
+        contact_no: formData.phone,
+        sludi: formData.slUdiId,
+        nic: formData.nic,
+        user_type: formData.role
+      };
+
+      const response = await fetch("/api/auth/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        // Check if the response contains the specific NIC-SLUDI mismatch error
+        if (responseData.content === "NIC does not match with SLUDI") {
+          setErrors({
+            submit: "NIC අංකය SL-UDI අංකය සමග නොගැලපේ. කරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
+            nic: "NIC අංකය SL-UDI අංකය සමග නොගැලපේ",
+            slUdiId: "SL-UDI අංකය NIC අංකය සමග නොගැලපේ"
+          });
+        } else {
+          // For other errors, use the message from the response or a generic message
+          throw new Error(responseData.message || responseData.content || "Registration failed");
+        }
+        return;
+      }
 
       // Navigate to login with success message
       navigate("/login", {
         state: { message: "ගිණුම සාර්ථකව සාදන ලදී. දැන් ප්‍රවේශ වන්න." },
       });
-    } catch (error) {
-      setErrors({ submit: "ලියාපදිංචි කිරීමේදී දෝෂයක් ඇතිවිය" });
+    } catch (error: any) {
+      setErrors({
+        ...errors,
+        submit: error.message || "ලියාපදිංචි කිරීමේදී දෝෂයක් ඇතිවිය"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -219,11 +289,10 @@ const Register = () => {
                       {steps.map((_, index) => (
                         <div
                           key={index}
-                          className={`w-2 h-2 rounded-full ${
-                            index + 1 <= currentStep
+                          className={`w-2 h-2 rounded-full ${index + 1 <= currentStep
                               ? "bg-blue-600"
                               : "bg-gray-300"
-                          }`}
+                            }`}
                         />
                       ))}
                     </div>
