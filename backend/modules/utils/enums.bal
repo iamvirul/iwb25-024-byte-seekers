@@ -44,7 +44,8 @@ public enum PASSWORD_ERRORS {
     INCORRECT_OLD_PASSWORD = "Old password is incorrect",
     USER_NOT_FOUND = "User not found",
     PASSWORD_UPDATED = "Password updated successfully",
-    INVALID_PASSWORD = "Invalid password"
+    INVALID_PASSWORD = "Invalid password",
+    FAILED_TO_UPDATE_PASSWORD = "Failed to update password"
 }
 
 public enum NIC_ERRORS {
@@ -79,7 +80,9 @@ public enum COMMON_ERROR_MESSAGES {
     UNAUTHORIZED_REQUEST = "Unauthorized Request",
     INVALID_CONTENT_TYPE = "Invalid Content Type",
     INVALID_MULTIPART_REQUEST = "Invalid multipart request",
-    REQUIRED_FIELDS_MISSING = "Required fields are missing"
+    REQUIRED_FIELDS_MISSING = "Required fields are missing",
+    INVALID_TOKEN = "Invalid Token",
+    INTERNAL_SERVER_ERROR = "Internal server error"
 }
 
 public enum LAND_ERRORS {
@@ -106,14 +109,12 @@ public enum LAND_ERRORS {
     INVALID_LAND_STATUS = "Invalid land status"
 }
 
-public enum LAND_OWNER_ERRORS {
-    LAND_OWNER_ALREADY_EXISTS = "Land owner already exists",
-    FAILED_TO_REGISTER_LAND_OWNER = "Failed to register land owner",
-    LAND_OWNER_NOT_FOUND = "Land owner not found",
-    NO_LAND_OWNERS_FOUND = "No land owners found"
+public enum Profile {
+    FAILED_TO_UPDATE_PROFILE = "Failed to update profile",
+    PROFILE_UPDATED_SUCCESSFULLY = "Profile updated successfully"
 }
 
-public enum DISPUTE_ERRORS {
+public enum LAND_OWNER_MESSAGES {
     LAND_ID_REQUIRED = "Land ID is required",
     LEGAL_OFFICER_ID_REQUIRED = "Legal officer ID is required",
     WITNESS_NAME_LENGTH = "Witness name should not exceed 60 characters",
@@ -144,7 +145,17 @@ public enum DISPUTE_ERRORS {
     FAILED_TO_FETCH_DISPUTE = "Failed to fetch dispute",
     FAILED_TO_FETCH_DISPUTES = "Failed to fetch disputes",
     FAILED_TO_UPDATE_DISPUTE_STATUS = "Failed to update dispute status",
-    LEGAL_PRECEDENT_NOT_FOUND = "Legal precedent not found"
+    LEGAL_PRECEDENT_NOT_FOUND = "Legal precedent not found",
+    DISPUTE_ADDED_SUCCESSFULLY = "Dispute added successfully",
+    LAND_OWNER_ALREADY_EXISTS = "Land owner already exists",
+    FAILED_TO_REGISTER_LAND_OWNER = "Failed to register land owner",
+    LAND_OWNER_NOT_FOUND = "Land owner not found",
+    NO_LAND_OWNERS_FOUND = "No land owners found",
+    INVALID_AMOUNT = "Invalid amount: must be a positive decimal",
+    ORDER_ID_REQUIRED = "OrderId is required",
+    PAYMENT_SUCCESSFULL = "Payment successfuL",
+    NO_STATS_FOUND = "No stats found",
+    USER_IS_NOT_LAND_OWNER = "User is not a land owner"
 }
 
 public enum DOCUMENT_ERRORS {

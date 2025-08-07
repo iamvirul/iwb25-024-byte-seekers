@@ -67,7 +67,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         [jwt:Header, jwt:Payload]|jwt:Error validateToken = Utils:validateToken(token);
         if validateToken is jwt:Error {
             response.statusCode = 401;
-            response = Utils:setErrorResponse(response, "Invalid token");
+            response = Utils:setErrorResponse(response, Utils:INVALID_TOKEN);
             return response;
         }
         string? email = validateToken[1].sub;
@@ -87,7 +87,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                 return response;
             }
             string caseId = Utils:getUniqueIDByCurrentTime();
-            //check if land and legal officer exist
+            //check if land exist
             common:Land|persist:Error landResult = self.dbClient->/lands/[parsed.landsId](common:Land);
             if landResult is persist:Error {
                 if landResult is persist:NotFoundError {
@@ -138,7 +138,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                 return response;
             }
             response.statusCode = 201;
-            response = Utils:setSuccessResponse(response, {"message": "Dispute added successfully", "case_id": disputeInsert.caseId});
+            response = Utils:setSuccessResponse(response, {"message": Utils:DISPUTE_ADDED_SUCCESSFULLY, "case_id": disputeInsert.caseId});
             return response;
         }
         else {
@@ -154,24 +154,24 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         [jwt:Header, jwt:Payload]|jwt:Error validateToken = Utils:validateToken(token);
         if validateToken is jwt:Error {
             response.statusCode = 401;
-            response = Utils:setErrorResponse(response, "Invalid token");
+            response = Utils:setErrorResponse(response, Utils:INVALID_TOKEN);
             return response;
         }
         int uid = check validateToken[1].get("uid").cloneWithType(int);
         if uid != userId {
             response.statusCode = 401;
-            response = Utils:setErrorResponse(response, "Invalid user id");
+            response = Utils:setErrorResponse(response, Utils:INVALID_USER_ID);
             return response;
         }
         DB:User|persist:Error userResult = self.dbClient->/users/[userId](DB:User);
         if userResult is persist:Error {
             if userResult is persist:NotFoundError {
                 response.statusCode = 404;
-                response = Utils:setErrorResponse(response, "User not found");
+                response = Utils:setErrorResponse(response, Utils:USER_NOT_FOUND);
                 return response;
             }
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Failed to fetch user");
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_USER);
             return response;
         }
         stream<DB:LandOwner, persist:Error?> landOwnerResult = self.dbClient->/landowners(DB:LandOwner, `nic=${check Utils:decryptData(userResult.nic)}`);
@@ -238,7 +238,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
             response = Utils:setSuccessResponse(response, {"disputes": disputes.toJson(), "stats": statResult.toJson(), "legal_officers": legalOfficers.toJson(), "lands": lands.toJson()});
             return response;
         } else {
-            response = Utils:setErrorResponse(response, "Land owner not found");
+            response = Utils:setErrorResponse(response, Utils:LAND_OWNER_NOT_FOUND);
             return response;
         }
     }
@@ -252,7 +252,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                 response = Utils:setErrorResponse(response, Utils:LEGAL_PRECEDENT_NOT_FOUND);
             } else {
                 response.statusCode = 500;
-                response = Utils:setErrorResponse(response, "Internal server error");
+                response = Utils:setErrorResponse(response, Utils:INTERNAL_SERVER_ERROR);
             }
             return response;
         }
@@ -315,7 +315,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         decimal|error validated = constraint:validate(rawAmount);
         if validated is error {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Invalid amount: must be a positive decimal");
+            response = Utils:setErrorResponse(response, Utils:INVALID_AMOUNT);
             return response;
         }
         DB:User|persist:Error unionResult = self.dbClient->/users/[userId](DB:User);
@@ -356,18 +356,18 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         http:Response response = new;
         if legalOfficerId <= 0 {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Invalid legal officer id");
+            response = Utils:setErrorResponse(response, Utils:INVALID_LEGAL_OFFICER_ID);
             return response;
         }
         if orderId is "" {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "OrderId is required");
+            response = Utils:setErrorResponse(response, Utils:ORDER_ID_REQUIRED);
             return response;
         }
         decimal|error validated = constraint:validate(amount);
         if validated is error {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Invalid amount: must be a positive decimal");
+            response = Utils:setErrorResponse(response, Utils:INVALID_AMOUNT);
             return response;
         }
         DB:User|persist:Error unionResult = self.dbClient->/users/[userId](DB:User);
@@ -396,11 +396,11 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         int[]|persist:Error paymentHistory = self.dbClient->/paymenthistories.post([paymentHistoryInsert]);
         if paymentHistory is persist:Error {
             response.statusCode = 500;
-            response = Utils:setErrorResponse(response, "Internal server error");
+            response = Utils:setErrorResponse(response, Utils:INTERNAL_SERVER_ERROR);
             return response;
         }
         response.statusCode = 200;
-        response = Utils:setSuccessResponse(response, {"message": "Payment successful"});
+        response = Utils:setSuccessResponse(response, {"message": Utils:PAYMENT_SUCCESSFULL});
         return response;
     }
 
@@ -427,7 +427,7 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         }
         if crypto:verifyArgon2(updatePassword.oldPassword, unionResult.password) is false {
             response.statusCode = 401;
-            response = Utils:setErrorResponse(response, "Old password is incorrect");
+            response = Utils:setErrorResponse(response, Utils:INCORRECT_OLD_PASSWORD);
             return response;
         }
         string hashed_password = check crypto:hashArgon2(updatePassword.newPassword);
@@ -437,11 +437,11 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         DB:User|persist:Error updatedResult = self.dbClient->/users/[userId].put(userUpdate);
         if updatedResult is persist:Error {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Failed to update password");
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_PASSWORD);
             return response;
         }
         response.statusCode = 200;
-        response = Utils:setSuccessResponse(response, "Password updated successfully");
+        response = Utils:setSuccessResponse(response, Utils:PASSWORD_UPDATED);
         return response;
     }
 
@@ -473,11 +473,11 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         DB:User|persist:Error updateResult = self.dbClient->/users/[userId].put(userUpdate);
         if updateResult is persist:Error {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Failed to update profile");
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPDATE_PROFILE);
             return response;
         }
         response.statusCode = 200;
-        response = Utils:setSuccessResponse(response, "Profile updated successfully");
+        response = Utils:setSuccessResponse(response, Utils:PROFILE_UPDATED_SUCCESSFULLY);
         return response;
     }
 
@@ -492,11 +492,11 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
         if userResult is persist:Error {
             if userResult is persist:NotFoundError {
                 response.statusCode = 404;
-                response = Utils:setErrorResponse(response, "User not found");
+                response = Utils:setErrorResponse(response, Utils:USER_NOT_FOUND);
                 return response;
             }
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Failed to fetch user");
+            response = Utils:setErrorResponse(response, Utils:FAILED_TO_FETCH_USER);
             return response;
         }
         stream<DB:LandOwner, persist:Error?> landOwnerResult = self.dbClient->/landowners(DB:LandOwner, `nic=${check Utils:decryptData(userResult.nic)}`);
@@ -585,11 +585,11 @@ service http:InterceptableService /land_owner on landOwnerMicroservice {
                 return response;
             } else {
                 response.statusCode = 404;
-                response = Utils:setErrorResponse(response, "No stats found");
+                response = Utils:setErrorResponse(response, Utils:NO_STATS_FOUND);
                 return response;
             }
         } else {
-            response = Utils:setErrorResponse(response, "User is not a land owner");
+            response = Utils:setErrorResponse(response, Utils:USER_IS_NOT_LAND_OWNER);
             return response;
         }
     }
