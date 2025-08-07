@@ -1,5 +1,5 @@
-import ballerina/io;
 import ballerina/regex;
+import backend.gcs;
 
 public function getExtension(string contentType, string originalName) returns string {
     if contentType == "application/pdf" {
@@ -16,10 +16,9 @@ public function getExtension(string contentType, string originalName) returns st
     return "";
 }
 
-public isolated function uploadFile(byte[] data, string path, string baseName, string extension)
+public function uploadFile(byte[] data, string baseName, string extension)
     returns string|error {
     string name = regex:replace(baseName, "\\s+", "_") + extension;
-    string dest = "./uploads/" + path + name;
-    check io:fileWriteBytes(dest, data);
-    return path + name;
+    string storagePath = check gcs:uploadGCS(data,name);
+    return storagePath;
 }
