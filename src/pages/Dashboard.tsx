@@ -268,7 +268,6 @@ const Dashboard = () => {
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
                       <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                      <p className="text-xs text-green-600 mt-1">{stat.change} මෙම මාසයේ</p>
                     </div>
                     <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center shadow-md`}>
                       <stat.icon className="w-6 h-6 text-white" />
@@ -324,7 +323,6 @@ const Dashboard = () => {
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
                         <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                        <p className="text-xs text-green-600 mt-1">{stat.change} මෙම මාසයේ</p>
                       </div>
                       <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center shadow-md`}>
                         <stat.icon className="w-6 h-6 text-white" />
