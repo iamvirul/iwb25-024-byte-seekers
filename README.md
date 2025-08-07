@@ -2,6 +2,10 @@
 
 A comprehensive blockchain-based land registry system built with React frontend, Ballerina microservices backend, Go blockchain service, and MySQL database.
 
+## System Overview
+
+<img width="1920" height="1080" alt="LandChain Demo Video Presentation" src="https://github.com/user-attachments/assets/e9eaed4c-9396-446c-b655-7e4036205bad" />
+
 ## Project Architecture
 
 This project consists of multiple interconnected services:
@@ -15,6 +19,11 @@ This project consists of multiple interconnected services:
 - **Proxy**: Ballerina proxy service
 - **SLUDI Service**: Separate Ballerina service for SLUDI verification
 - **Database**: MySQL with Redis for caching
+
+## Land Chain system's interactions
+
+<img width="7422" height="7965" alt="Mermaid Code Land Chain Sequence Diagram (1)" src="https://github.com/user-attachments/assets/d71bffcd-35c3-48a4-aed9-61a2d470a2a0" />
+
 
 ## Prerequisites
 
