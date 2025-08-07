@@ -10,7 +10,7 @@ interface RoleOption {
 
 interface RoleSelectorProps {
   value: number;
-  onChange: (value: string) => void;
+  onChange: (value: number) => void; // Changed to accept number
 }
 
 const RoleSelector: React.FC<RoleSelectorProps> = ({ value, onChange }) => {
@@ -57,7 +57,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ value, onChange }) => {
                 name="role"
                 value={role.value}
                 checked={value === role.value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={() => onChange(role.value)} // Directly pass the number value
                 className="sr-only"
               />
               <div className="flex items-center mb-2">

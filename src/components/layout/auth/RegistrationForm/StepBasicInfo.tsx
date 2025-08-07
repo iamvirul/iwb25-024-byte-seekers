@@ -25,7 +25,10 @@ export default function StepBasicInfo({ formData, errors, handleChange, setFormD
 
       <FormInput id="email" name="email" type="email" label="ඊමේල් ලිපිනය" value={formData.email} onChange={handleChange} error={errors.email} icon={Mail} placeholder="example@email.com" required />
 
-      <RoleSelector value={formData.role} onChange={(value) => setFormData({ ...formData, role: value as any })} />
+      <RoleSelector 
+        value={formData.role} 
+        onChange={(value) => setFormData({ ...formData, role: value })} 
+      />
     </motion.div>
   )
 }

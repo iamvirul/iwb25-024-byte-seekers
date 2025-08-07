@@ -183,6 +183,7 @@ const Disputes = () => {
   });
   const [legalOfficers, setLegalOfficers] = useState([]);
   const [properties, setProperties] = useState([]);
+  const [landOwnerFound, setLandOwnerFound] = useState(false);
 
   const filteredDisputes = disputes.filter(dispute => {
     const matchesSearch =
@@ -307,16 +308,34 @@ const Disputes = () => {
             }));
             break;
           case "Initial":
-            setDisputes(data.response?.content.disputes);
-            setStats(data.response?.content?.stats?.value || {
-              usersId: userId ? parseInt(userId) : 0,
-              total_disputes: 0,
-              pending_disputes: 0,
-              resolved_disputes: 0,
-              total_comments: 0
-            });
-            setLegalOfficers(data?.response?.content.legal_officers)
-            setProperties(data.response?.content.lands)
+            if (data.response.success === false) {
+              // Handle case when land owner is not found
+              if (data.response.content === "Land owner not found") {
+                setLandOwnerFound(false);
+                setDisputes([]);
+                setStats({
+                  usersId: userId ? parseInt(userId) : 0,
+                  total_disputes: 0,
+                  pending_disputes: 0,
+                  resolved_disputes: 0,
+                  total_comments: 0
+                });
+                setLegalOfficers([]);
+                setProperties([]);
+              }
+            } else {
+              setLandOwnerFound(true);
+              setDisputes(data.response.content.disputes || []);
+              setStats(data.response.content?.stats?.value || {
+                usersId: userId ? parseInt(userId) : 0,
+                total_disputes: 0,
+                pending_disputes: 0,
+                resolved_disputes: 0,
+                total_comments: 0
+              });
+              setLegalOfficers(data.response.content?.legal_officers || []);
+              setProperties(data.response.content?.lands || []);
+            }
             break;
           case 'Status Updated':
             setDisputes(prev => {
@@ -534,6 +553,21 @@ const Disputes = () => {
           </p>
         </motion.div>
 
+        {/* Show empty state if land owner not found */}
+        {!landOwnerFound && (
+          <Card className="mb-8">
+            <EmptyState
+              icon={User}
+              title="ඔබගේ තොරතුරු හමු නොවීය"
+              description="ඔබගේ ඉඩම් හිමි තොරතුරු පද්ධතියට එක් කර නොමැත. කරුණාකර පරිපාලකවරයෙකු අමතන්න."
+              
+            />
+          </Card>
+        )}
+
+        {landOwnerFound && (<>
+
+       
         {/* Stats Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -1323,6 +1357,7 @@ const Disputes = () => {
           </div>
 
         </div>
+         </>)}
       </div>
     </div>
   );
