@@ -113,7 +113,7 @@ CREATE TABLE "audits" (
 	"id" INT AUTO_INCREMENT,
 	"requestPath" VARCHAR(60) NOT NULL,
 	"requestMethod" VARCHAR(45) NOT NULL,
-	"userAgent" VARCHAR(100) NOT NULL,
+	"userAgent" VARCHAR(191) NOT NULL,
 	"requestPayload" VARCHAR(191) NOT NULL,
 	"requestHost" VARCHAR(100) NOT NULL,
 	"requestedTime" DATETIME NOT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE "land_transfer_chain" (
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "disputes_document" (
 	"id" INT AUTO_INCREMENT,
-	"docPath" VARCHAR(100) NOT NULL,
+	"docPath" VARCHAR(191) NOT NULL,
 	"uploadedDate" TIMESTAMP NOT NULL,
 	"disputesId" INT NOT NULL,
 	FOREIGN KEY("disputesId") REFERENCES "disputes"("id"),
@@ -178,7 +178,7 @@ CREATE TABLE "disputes_document" (
     _ = check h2Client->executeNativeSQL(`
 CREATE TABLE "lands_documents" (
 	"id" INT AUTO_INCREMENT,
-	"docPath" VARCHAR(60) NOT NULL,
+	"docPath" VARCHAR(191) NOT NULL,
 	"docSize" VARCHAR(10) NOT NULL,
 	"docType" VARCHAR(45) NOT NULL,
 	"uploadedDate" TIMESTAMP NOT NULL,

@@ -30,7 +30,6 @@ public enum LandLandStatus {
 public type LandDocument record {|
     @sql:Generated
     readonly int id;
-    @sql:Varchar {length: 60}
     string docPath;
     @sql:Varchar {length: 10}
     string docSize;
@@ -119,7 +118,6 @@ public type LegalClause record {|
 public type DisputeDocument record {|
     @sql:Generated
     readonly int id;
-    @sql:Varchar {length: 100}
     string docPath;
     time:Utc uploadedDate;
     @sql:Index {name: "fk_disputes_document_disputes1_idx"}
@@ -229,7 +227,6 @@ public type Audit record {|
     string requestPath;
     @sql:Varchar {length: 45}
     string requestMethod;
-    @sql:Varchar {length: 100}
     string userAgent;
     string requestPayload;
     @sql:Varchar {length: 100}
