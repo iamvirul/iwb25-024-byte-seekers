@@ -116,6 +116,7 @@ service http:InterceptableService /land_officer on landMicroservice {
                 fromOwnerId = fromOwnerResult;
             }
 
+            requestLandInsert.to_owner.ownerId = "LCLO-"+Utils:generateShortId();
             error|int toOwnerResult = self.creatLandOwner(requestLandInsert.to_owner);
             if toOwnerResult is error {
                 response.statusCode = 500;
@@ -229,8 +230,7 @@ service http:InterceptableService /land_officer on landMicroservice {
                 foreach var doc in parseLandDocuments {
                     string ext = Utils:getExtension(doc.contentType, doc.filename);
                     string base = landId.toString() + "_doc" + docIndex.toString();
-                    string path = " landdocuments/" + landId.toString() + "/";
-                    string|error uploaded = Utils:uploadFile(doc.data, path, base, ext);
+                    string|error uploaded = Utils:uploadFile(doc.data, base, ext);
                     if uploaded is error {
                         response.statusCode = 500;
                         response = Utils:setErrorResponse(response, Utils:FAILED_TO_UPLOAD_DOCUMENT);
@@ -503,7 +503,7 @@ service http:InterceptableService /land_officer on landMicroservice {
             };
         check streamResult.close();
 
-        stream<DB:LandTransferChainOptionalized, persist:Error?> streamResult2 = self.dbClient->/landtransferchains(DB:LandTransferChainOptionalized,`landsId=${landId}`);
+        stream<DB:LandTransferChainOptionalized, persist:Error?> streamResult2 = self.dbClient->/landtransferchains(DB:LandTransferChainOptionalized, `landsId=${landId}`);
         DB:LandTransferChainOptionalized[] landTransferChains = [];
         check from var landTransferChain in streamResult2
             do {

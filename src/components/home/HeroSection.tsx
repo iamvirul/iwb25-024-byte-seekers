@@ -21,7 +21,6 @@ const HeroSection: React.FC = () => {
     'වංචා වැළැක්වීම',
     'ඉක්මන් ගැටළු නිරාකරණය',
     'මොබයිල් ප්‍රවේශය',
-    'AI සහායකත්වය',
     'නිරවද්‍ය ලේඛන'
   ];
 
@@ -162,7 +161,7 @@ const HeroSection: React.FC = () => {
               className="text-xl md:text-2xl mb-8 text-blue-100 leading-relaxed"
             >
               ආරක්ෂිත, විනිවිද දැකිය හැකි සහ කාර්යක්ෂම ඉඩම් හිමිකම් කළමනාකරණ පද්ධතිය. 
-              <span className="text-yellow-300 font-semibold"> AI සහ බ්ලොක්චේන් තාක්ෂණයෙන්</span> ශක්තිමත් කරන ලද.
+              <span className="text-yellow-300 font-semibold">බ්ලොක්චේන් තාක්ෂණයෙන්</span> ශක්තිමත් කරන ලද.
             </motion.p>
 
             {/* Enhanced Benefits List */}

@@ -59,7 +59,7 @@ service on rabbitmqListener {
         foreach var doc in disputeMessage.documents {
             string ext = Utils:getExtension(doc.contentType, doc.filename);
             string base = disputeInsert.caseId + "_doc" + docIndex.toString();
-            string|error uploaded = Utils:uploadFile(doc.data, "disputes/", base, ext);
+            string|error uploaded = Utils:uploadFile(doc.data, base, ext);
             if uploaded is error {
                 return error("Failed to upload document", uploaded);
             }

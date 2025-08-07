@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import {
   MapPin, Activity, AlertCircle, TrendingUp,
-  BarChart3, Clock, CheckCircle, X, Landmark, Ruler, Calendar, Map
+  BarChart3, Clock, CheckCircle, X, Landmark, Ruler, Calendar, Map, User
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
@@ -11,6 +11,7 @@ import PageHeader from '../components/common/PageHeader';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
+import EmptyState from '../components/common/EmptyState';
 
 interface Land {
   id: number;
@@ -74,10 +75,11 @@ const Dashboard = () => {
     lng: 79.939742
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userHasNoLands, setUserHasNoLands] = useState(false);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: "AIzaSyCyvFLiqccbWJIzBB4rUMkK5-tUP-dHsfA",
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     libraries: ['places']
   });
 
@@ -123,15 +125,12 @@ const Dashboard = () => {
   }, [lands, map]);
 
   const formatCurrency = (value: number) => {
-    // For values over 1 million, show in M (millions)
     if (value >= 1000000) {
       return `₨ ${(value / 1000000).toFixed(1)}M`;
     }
-    // For values over 1000, show in K (thousands)
     else if (value >= 1000) {
       return `₨ ${(value / 1000).toFixed(1)}K`;
     }
-    // For smaller values, show the full amount with currency formatting
     return new Intl.NumberFormat('en-LK', {
       style: 'currency',
       currency: 'LKR',
@@ -207,11 +206,20 @@ const Dashboard = () => {
         const data: SocketResponse = JSON.parse(event.data);
         console.log('Received data:', data);
 
-        if (data.event === "Initial" && data.response.success) {
-          const content = data.response.content;
-          setStatsData(content.stats);
-          setDisputesData(content.disputes);
-          setLands(content.lands);
+        if (data.event === "Initial") {
+          if (data.response.success) {
+            const content = data.response.content;
+            setStatsData(content.stats);
+            setDisputesData(content.disputes);
+            setLands(content.lands);
+            setUserHasNoLands(false);
+          } else {
+            // User is not a land owner
+            setUserHasNoLands(true);
+            setStatsData(null);
+            setDisputesData(null);
+            setLands([]);
+          }
         }
       };
 
@@ -238,6 +246,50 @@ const Dashboard = () => {
     return <div>Error loading maps</div>;
   }
 
+  if (userHasNoLands) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <PageHeader
+            title={`ආයුබෝවන්, ${user?.name || 'පරිශීලක'}! 👋`}
+            description="ඔබේ ඉඩම් ලේඛනාගාර ගිණුමේ සියල්ල මෙහි දැකිය හැකිය"
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              >
+                <Card hover>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                    </div>
+                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center shadow-md`}>
+                      <stat.icon className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <Card className="mb-8">
+            <EmptyState
+              icon={User}
+              title="ඔබගේ තොරතුරු හමු නොවීය"
+              description="ඔබගේ ඉඩම් හිමි තොරතුරු පද්ධතියට එක් කර නොමැත. කරුණාකර පරිපාලකවරයෙකු අමතන්න."
+            />
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -246,119 +298,132 @@ const Dashboard = () => {
           description="ඔබේ ඉඩම් ලේඛනාගාර ගිණුමේ සියල්ල මෙහි දැකිය හැකිය"
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-            >
-              <Card hover>
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    <p className="text-xs text-green-600 mt-1">{stat.change} මෙම මාසයේ</p>
-                  </div>
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center shadow-md`}>
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+        {lands.length === 0 && !userHasNoLands ? (
+          <>
+            <Card className="mb-8">
+              <EmptyState
+                icon={Clock}
+                title="පූරණය වෙමින් පවතී"
+                description="ඔබගේ තොරතුරු පූරණය වෙමින් පවතී. කරුණාකර ටික වේලාවක් රැඳී සිටින්න."
+              />
+            </Card>
+          </>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={stat.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
+                  <Card hover>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                        <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                      </div>
+                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center shadow-md`}>
+                        <stat.icon className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <Card>
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">ගැටළු තත්ත්වය</h3>
-                  <p className="text-sm text-gray-600">වර්තමාන ගැටළු වර්ගීකරණය</p>
-                </div>
-                <AlertCircle className="w-5 h-5 text-gray-400" />
-              </div>
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie
-                    data={disputeStatusData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {disputeStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                <Card>
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">ගැටළු තත්ත්වය</h3>
+                      <p className="text-sm text-gray-600">වර්තමාන ගැටළු වර්ගීකරණය</p>
+                    </div>
+                    <AlertCircle className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <PieChart>
+                      <Pie
+                        data={disputeStatusData}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {disputeStatusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => [`${value}`, 'ප්‍රමාණය']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex justify-center space-x-4 mt-4">
+                    {disputeStatusData.map((item, index) => (
+                      <div key={index} className="flex items-center">
+                        <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }} />
+                        <span className="text-sm text-gray-600">{item.name}</span>
+                      </div>
                     ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value}`, 'ප්‍රමාණය']} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex justify-center space-x-4 mt-4">
-                {disputeStatusData.map((item, index) => (
-                  <div key={index} className="flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }} />
-                    <span className="text-sm text-gray-600">{item.name}</span>
                   </div>
-                ))}
-              </div>
-            </Card>
-          </motion.div>
+                </Card>
+              </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <Card>
-              <div className="space-y-4">
-                {isLoaded ? (
-                  <div className="border border-gray-300 rounded-md overflow-hidden relative">
-                    <GoogleMap
-                      mapContainerStyle={containerStyle}
-                      center={mapCenter}
-                      zoom={8}
-                      onLoad={onLoad}
-                      onUnmount={onUnmount}
-                      options={{
-                        streetViewControl: false,
-                        mapTypeControl: false,
-                        fullscreenControl: false,
-                      }}
-                    >
-                      {lands.map((land) => (
-                        <Marker
-                          key={land.landId}
-                          position={{ lat: land.landLat, lng: land.landLang }}
-                          onClick={() => handleMarkerClick(land)}
-                        />
-                      ))}
-                    </GoogleMap>
-                    <button
-                      onClick={() => map && lands.length > 0 && fitBounds(map, lands)}
-                      className="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
-                      title="Show all lands"
-                    >
-                      <MapPin className="w-5 h-5 text-gray-700" />
-                    </button>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <Card>
+                  <div className="space-y-4">
+                    {isLoaded ? (
+                      <div className="border border-gray-300 rounded-md overflow-hidden relative">
+                        <GoogleMap
+                          mapContainerStyle={containerStyle}
+                          center={mapCenter}
+                          zoom={8}
+                          onLoad={onLoad}
+                          onUnmount={onUnmount}
+                          options={{
+                            streetViewControl: false,
+                            mapTypeControl: false,
+                            fullscreenControl: false,
+                          }}
+                        >
+                          {lands.map((land) => (
+                            <Marker
+                              key={land.landId}
+                              position={{ lat: land.landLat, lng: land.landLang }}
+                              onClick={() => handleMarkerClick(land)}
+                            />
+                          ))}
+                        </GoogleMap>
+                        <button
+                          onClick={() => map && lands.length > 0 && fitBounds(map, lands)}
+                          className="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
+                          title="Show all lands"
+                        >
+                          <MapPin className="w-5 h-5 text-gray-700" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="h-64 bg-gray-100 flex items-center justify-center">
+                        <p>සිතියම පූරණය වෙමින් පවතී...</p>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="h-64 bg-gray-100 flex items-center justify-center">
-                    <p>සිතියම පූරණය වෙමින් පවතී...</p>
-                  </div>
-                )}
-              </div>
-            </Card>
-          </motion.div>
-        </div>
+                </Card>
+              </motion.div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Land Details Modal */}

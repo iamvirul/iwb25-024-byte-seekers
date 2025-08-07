@@ -67,7 +67,7 @@ service class LandOwnerService {
         }
         if response is http:ClientError {
             log:printError("Error fetching : " + response.message());
-            check caller->writeMessage({"error": response.message()});
+            check caller->writeMessage({"error": response.toString()});
             return;
         }
         check caller->writeMessage({"event": "Initial", response});
@@ -75,9 +75,5 @@ service class LandOwnerService {
 
     remote function onClose(websocket:Caller caller) returns error? {
         Managers:landOwnerConnectionStore.removeClient(self.userID);
-    }
-
-    remote function onMessage(websocket:Caller caller, string data) returns error? {
-        check caller->writeMessage("Hello, How are you?" + self.userID);
     }
 }

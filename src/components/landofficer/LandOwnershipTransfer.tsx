@@ -125,8 +125,7 @@ const LandOwnershipTransfer: React.FC<LandOwnershipTransferProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-Key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJCeXRlU2Vla2VycyIsIm5hbWUiOiJMYW5kQ2hhaW4tQmxvY2tjaGFpbiIsImFkbWluIjp0cnVlLCJpYXQiOjE1MTYyMzkwMjJ9.tzcCRcSX2bD-CB3ZYOOtnEkJj6LVEqY2NQ3nEuR7zmk",
+          "X-API-Key":import.meta.env.VITE_BLOCKCHAIN_API_KEY,
         },
         body: JSON.stringify(payload),
       });

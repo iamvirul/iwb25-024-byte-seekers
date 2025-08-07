@@ -44,7 +44,8 @@ public enum PASSWORD_ERRORS {
     INCORRECT_OLD_PASSWORD = "Old password is incorrect",
     USER_NOT_FOUND = "User not found",
     PASSWORD_UPDATED = "Password updated successfully",
-    INVALID_PASSWORD = "Invalid password"
+    INVALID_PASSWORD = "Invalid password",
+    FAILED_TO_UPDATE_PASSWORD = "Failed to update password"
 }
 
 public enum NIC_ERRORS {
@@ -67,14 +68,21 @@ public enum ADDRESS_ERRORS {
 
 public enum SLUDI_ERRORS {
     SLUDI_LENGTH = "SLUDI should not exceed 45 characters",
-    SLUDI_REQUIRED = "SLUDI is required"
+    SLUDI_REQUIRED = "SLUDI is required",
+    EMAIL_NIC_SLUDI_ALREADY_EXISTS = "Email, NIC or SLUDI already exists",
+    USER_NOT_FOUND_WITH_SLUDI = "User not found with SLUDI",
+    NIC_NOT_MATCH_WITH_SLUDI = "NIC does not match with SLUDI",
+    FIRST_NAME_NOT_MATCH_WITH_SLUDI = "First name does not match with SLUDI",
+    LAST_NAME_NOT_MATCH_WITH_SLUDI = "Last name does not match with SLUDI"
 }
 
 public enum COMMON_ERROR_MESSAGES {
     UNAUTHORIZED_REQUEST = "Unauthorized Request",
     INVALID_CONTENT_TYPE = "Invalid Content Type",
     INVALID_MULTIPART_REQUEST = "Invalid multipart request",
-    REQUIRED_FIELDS_MISSING = "Required fields are missing"
+    REQUIRED_FIELDS_MISSING = "Required fields are missing",
+    INVALID_TOKEN = "Invalid Token",
+    INTERNAL_SERVER_ERROR = "Internal server error"
 }
 
 public enum LAND_ERRORS {
@@ -101,14 +109,12 @@ public enum LAND_ERRORS {
     INVALID_LAND_STATUS = "Invalid land status"
 }
 
-public enum LAND_OWNER_ERRORS {
-    LAND_OWNER_ALREADY_EXISTS = "Land owner already exists",
-    FAILED_TO_REGISTER_LAND_OWNER = "Failed to register land owner",
-    LAND_OWNER_NOT_FOUND = "Land owner not found",
-    NO_LAND_OWNERS_FOUND = "No land owners found"
+public enum Profile {
+    FAILED_TO_UPDATE_PROFILE = "Failed to update profile",
+    PROFILE_UPDATED_SUCCESSFULLY = "Profile updated successfully"
 }
 
-public enum DISPUTE_ERRORS {
+public enum LAND_OWNER_MESSAGES {
     LAND_ID_REQUIRED = "Land ID is required",
     LEGAL_OFFICER_ID_REQUIRED = "Legal officer ID is required",
     WITNESS_NAME_LENGTH = "Witness name should not exceed 60 characters",
@@ -139,7 +145,17 @@ public enum DISPUTE_ERRORS {
     FAILED_TO_FETCH_DISPUTE = "Failed to fetch dispute",
     FAILED_TO_FETCH_DISPUTES = "Failed to fetch disputes",
     FAILED_TO_UPDATE_DISPUTE_STATUS = "Failed to update dispute status",
-    LEGAL_PRECEDENT_NOT_FOUND = "Legal precedent not found"
+    LEGAL_PRECEDENT_NOT_FOUND = "Legal precedent not found",
+    DISPUTE_ADDED_SUCCESSFULLY = "Dispute added successfully",
+    LAND_OWNER_ALREADY_EXISTS = "Land owner already exists",
+    FAILED_TO_REGISTER_LAND_OWNER = "Failed to register land owner",
+    LAND_OWNER_NOT_FOUND = "Land owner not found",
+    NO_LAND_OWNERS_FOUND = "No land owners found",
+    INVALID_AMOUNT = "Invalid amount: must be a positive decimal",
+    ORDER_ID_REQUIRED = "OrderId is required",
+    PAYMENT_SUCCESSFULL = "Payment successfuL",
+    NO_STATS_FOUND = "No stats found",
+    USER_IS_NOT_LAND_OWNER = "User is not a land owner"
 }
 
 public enum DOCUMENT_ERRORS {
@@ -176,10 +192,52 @@ public enum USER_ERRORS {
     FAILED_TO_QUEUE_USER_CONTACT_NO = "Failed to queue user contact no",
     FAILED_TO_QUEUE_USER_EMAIL = "Failed to queue user email",
     FAILED_TO_QUEUE_USER_FNAME = "Failed to queue user fname",
-    FAILED_TO_QUEUE_USER_LNAME = "Failed to queue user lname"
+    FAILED_TO_QUEUE_USER_LNAME = "Failed to queue user lname",
+    USER_REGISTERED_SUCCESSFULLY = "User registered successfully",
+    ERROR_WHILE_VERIFYING_USER = "Error while verifying the user"
 }
+
 public enum BLOCKCHAINERROS {
     NO_CHAIN_FOUND = "No chain found",
     FAILED_TO_LOAD_CHAIN = "Fail To Load Chain",
     FAILED_TO_FETCH_BLOCK = "Failed to fetch block"
+}
+
+public enum REDISERRORS {
+    FAILED_TO_CONNECT_REDIS = "Failed to connect to Redis",
+    FAILED_TO_DISCONNECT_REDIS = "Failed to disconnect from Redis",
+    FAILED_TO_SET_REDIS = "Failed to set Redis",
+    FAILED_TO_GET_REDIS = "Failed to get Redis",
+    FAILED_TO_DELETE_REDIS = "Failed to delete Redis",
+    FAILED_TO_FLUSH_REDIS = "Failed to flush Redis"
+}
+
+public enum SOCKETERRORS {
+    FAILED_TO_CONNECT_SOCKET = "Failed to connect to socket",
+    FAILED_TO_DISCONNECT_SOCKET = "Failed to disconnect from socket",
+    FAILED_TO_SEND_SOCKET = "Failed to send socket",
+    FAILED_TO_RECEIVE_SOCKET = "Failed to receive socket",
+    FAILED_TO_BROADCAST_SOCKET = "Failed to broadcast socket",
+    FAILED_TO_SUBSCRIBE_SOCKET = "Failed to subscribe to socket",
+    FAILED_TO_UNSUBSCRIBE_SOCKET = "Failed to unsubscribe from socket"
+}
+
+public enum AUTH {
+    LOGIN_SUCCESS = "Login successful",
+    LOGIN_FAILED = "Login failed",
+    INVALID_CREDENTIALS = "Invalid credentials",
+    FORBIDIN = "User does not have the required user type"
+}
+
+public enum JWT {
+    JWT_SUCCESS = "JWT generated successfully",
+    JWT_FAILED = "Failed to generate JWT",
+    JWT_INVALID = "Invalid JWT"
+}
+
+public enum LEGAL_OFFICER_MESSAGES {
+    COMMENT_ADDED_SUCCESSFULLY = "Comment added successfully",
+    PRECEDENT_ADDED_SUCCESSFULLY = "Precedent added successfully",
+    LEGAL_CLAUSE_ADDED_SUCCESSFULLY = "Legal clause added successfully",
+    DISPUTE_STATUS_UPDATED = "Dispute status updated successfully"
 }

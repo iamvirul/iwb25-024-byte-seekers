@@ -1,7 +1,8 @@
 import backend.common as Common;
 import backend.db as DB;
-import backend.utils as Utils;
 import backend.db_client as DBClient;
+import backend.mappers as Mappers;
+import backend.utils as Utils;
 
 import ballerina/crypto;
 import ballerina/http;
@@ -70,7 +71,7 @@ service /auth on authMicroservice {
             }
             if userTypeResult is () {
                 response.statusCode = 403;
-                response = Utils:setErrorResponse(response, "User does not have the required user type");
+                response = Utils:setErrorResponse(response, Utils:FORBIDIN);
                 return response;
             }
             Utils:USER_TYPES userType = check Utils:getUserType(loginUser.user_type);
@@ -101,7 +102,7 @@ service /auth on authMicroservice {
                     string|redis:Error set = redis->set(userSessionID, userSession.toJsonString());
                     if set is redis:Error {
                         response.statusCode = 500;
-                        response = Utils:setErrorResponse(response, "Failed to set user session in Redis");
+                        response = Utils:setErrorResponse(response, Utils:FAILED_TO_SET_REDIS);
                         return response;
                     }
 
@@ -109,7 +110,7 @@ service /auth on authMicroservice {
                     response = Utils:setSuccessResponse(
                             response,
                             {
-                                message: "Login successful",
+                                message: Utils:LOGIN_SUCCESS,
                                 token: jwt,
                                 userId: user.id,
                                 nic: check Utils:decryptData(user.nic),
@@ -124,17 +125,17 @@ service /auth on authMicroservice {
                     return response;
                 } else {
                     response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, "Failed to issue socket token");
+                    response = Utils:setErrorResponse(response, Utils:JWT_FAILED);
                     return response;
                 }
             } else {
                 response.statusCode = 500;
-                response = Utils:setErrorResponse(response, "Failed to generate tokens");
+                response = Utils:setErrorResponse(response, Utils:JWT_FAILED);
                 return response;
             }
         } else {
             response.statusCode = 401;
-            response = Utils:setErrorResponse(response, "Invalid username or password");
+            response = Utils:setErrorResponse(response, Utils:INVALID_CREDENTIALS);
             return response;
         }
     }
@@ -156,7 +157,7 @@ service /auth on authMicroservice {
         }
         if user is Common:User {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Email, NIC or SLUDI already exists");
+            response = Utils:setErrorResponse(response, Utils:EMAIL_NIC_SLUDI_ALREADY_EXISTS);
             return response;
         }
 
@@ -167,55 +168,37 @@ service /auth on authMicroservice {
             json payload = check SLUDIresponse.getJsonPayload();
             if payload.success is false {
                 response.statusCode = 400;
-                response = Utils:setErrorResponse(response, "User not found with SLUDI");
+                response = Utils:setErrorResponse(response, Utils:USER_NOT_FOUND_WITH_SLUDI);
                 return response;
             }
             json sludiUser = check payload.user;
             if sludiUser.nic != requestUser.nic {
                 response.statusCode = 400;
-                response = Utils:setErrorResponse(response, "NIC does not match with SLUDI");
+                response = Utils:setErrorResponse(response, Utils:NIC_NOT_MATCH_WITH_SLUDI);
                 return response;
             }
             if sludiUser.fname != requestUser.first_name {
                 response.statusCode = 400;
-                response = Utils:setErrorResponse(response, "First name does not match with SLUDI");
+                response = Utils:setErrorResponse(response, Utils:FIRST_NAME_NOT_MATCH_WITH_SLUDI);
                 return response;
             }
             if sludiUser.lname != requestUser.last_name {
                 response.statusCode = 400;
-                response = Utils:setErrorResponse(response, "Last name does not match with SLUDI");
+                response = Utils:setErrorResponse(response, Utils:LAST_NAME_NOT_MATCH_WITH_SLUDI);
                 return response;
             }
 
-            string hash_password = check crypto:hashArgon2(requestUser.password);
-            string userUUID = uuid:createType4AsString();
-            string userId = "LCLO-" + userUUID;
-            byte[] encryptNIC = check Utils:encryptData(requestUser.nic);
-            byte[] encryptSludi = check Utils:encryptData(requestUser.sludi);
-            byte[] encryptContactNo = check Utils:encryptData(requestUser.contact_no);
-            byte[] encryptAddress = check Utils:encryptData(requestUser.address);
-
-            DB:UserInsert requestUserInsert = {
-                userId: userId,
-                firstName: requestUser.first_name,
-                lastName: requestUser.last_name,
-                email: requestUser.email,
-                password: hash_password,
-                nic: encryptNIC,
-                sludi: encryptSludi,
-                contactNo: encryptContactNo,
-                address: encryptAddress
-            };
+            DB:UserInsert requestUserInsert = check Mappers:requestUserInsertMapper(requestUser);
 
             transaction {
                 int[]|persist:Error insertedRecord = self.dbClient->/users.post([requestUserInsert]);
                 if insertedRecord is persist:Error {
                     if insertedRecord is persist:AlreadyExistsError {
                         response.statusCode = 400;
-                        response = Utils:setErrorResponse(response, "User already exists");
+                        response = Utils:setErrorResponse(response, Utils:USER_ALREADY_EXISTS);
                     }
                     response.statusCode = 500;
-                    response = Utils:setErrorResponse(response, "Failed to register user");
+                    response = Utils:setErrorResponse(response, Utils:FAILED_TO_REGISTER_USER);
                 }
                 if insertedRecord is int[] {
                     _ = check self.dbClient->/userhasusertypes.post([
@@ -225,7 +208,7 @@ service /auth on authMicroservice {
                         }
                     ]);
                     response.statusCode = 201;
-                    response = Utils:setSuccessResponse(response, "User registered successfully");
+                    response = Utils:setSuccessResponse(response, Utils:USER_REGISTERED_SUCCESSFULLY);
                 }
 
                 check commit;
@@ -233,7 +216,7 @@ service /auth on authMicroservice {
             }
         } else {
             response.statusCode = 400;
-            response = Utils:setErrorResponse(response, "Error while verifying the user");
+            response = Utils:setErrorResponse(response, Utils:ERROR_WHILE_VERIFYING_USER);
             return response;
         }
     }

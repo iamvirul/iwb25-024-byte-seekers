@@ -533,12 +533,7 @@ public isolated client class Client {
     };
 
     public isolated function init() returns persist:Error? {
-        sql:ConnectionPool connPool = {
-            maxOpenConnections: 100,
-            maxConnectionLifeTime: 180,
-            minIdleConnections: 5
-        };
-        mysql:Client|error dbClient = new (host = host, user = user, password = password, database = database, port = port, options = connectionOptions, connectionPool = connPool);
+        mysql:Client|error dbClient = new (host = host, user = user, password = password, database = database, port = port, options = connectionOptions);
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }
