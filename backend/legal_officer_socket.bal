@@ -67,8 +67,4 @@ service class LegalOfficerService {
     remote function onClose(websocket:Caller caller) returns error? {
         Managers:legalOfficerConnectionStore.removeClient(self.userID);
     }
-
-    remote function onMessage(websocket:Caller caller, string data) returns error? {
-        check caller->writeMessage("Hello, How are you?" + self.userID);
-    }
 }
