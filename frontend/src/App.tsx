@@ -56,8 +56,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/registry" element={<ProtectedRoute allowedRoles={["land_officer"]}>
-                <LandRegistry /></ProtectedRoute>} />
               <Route path="/search" element={<PropertySearch />} />
 
               <Route path="/disputes" element={
@@ -99,15 +97,6 @@ function App() {
             style: {
               background: '#363636',
               color: '#fff',
-            },
-
-            // Default options for specific types
-            success: {
-              duration: 3000,
-              iconTheme: {
-                primary: 'green',
-                secondary: 'black',
-              },
             },
           }}
         />

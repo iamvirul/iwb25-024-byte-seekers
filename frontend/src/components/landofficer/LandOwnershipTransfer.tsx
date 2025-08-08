@@ -5,6 +5,7 @@ import Card from "../ui/Card";
 import Select from "../ui/Select";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
+import toast from "react-hot-toast";
 
 interface Land {
   id: number;
@@ -100,7 +101,7 @@ const LandOwnershipTransfer: React.FC<LandOwnershipTransferProps> = ({
   }, [searchTerm, landOwners]);
 
   const handleTransfer = async () => {
-    if (!selectedLand || !currentOwner || !newOwner) {
+    if (!selectedLand || !newOwner) {
       setError("Please select land, current owner, and new owner");
       return;
     }
@@ -113,19 +114,17 @@ const LandOwnershipTransfer: React.FC<LandOwnershipTransferProps> = ({
       const token = localStorage.getItem("token");
       const payload = {
         LandID: selectedLand.id,
-        FromOwnerID: currentOwner.id,
+        FromOwnerID: currentOwner?.id ?? null,
         ToOwnerID: newOwner.id,
         TransferDate: new Date(transferDate).toISOString(),
-        VerifiedBy: token
-          ? JSON.parse(atob(token.split(".")[1])).name
-          : "land_officer",
+        VerifiedBy: token ? localStorage.getItem("name") : "land_officer",
       };
 
       const response = await fetch("/api/v1/transfer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-Key":import.meta.env.VITE_BLOCKCHAIN_API_KEY,
+          "X-API-Key": import.meta.env.VITE_BLOCKCHAIN_API_KEY,
         },
         body: JSON.stringify(payload),
       });
@@ -135,6 +134,7 @@ const LandOwnershipTransfer: React.FC<LandOwnershipTransferProps> = ({
       }
 
       setSuccess("Ownership transferred successfully!");
+      toast.success("Ownership transferred successfully!");
       // Reset form
       setSelectedLand(null);
       setCurrentOwner(null);
@@ -299,7 +299,7 @@ const LandOwnershipTransfer: React.FC<LandOwnershipTransferProps> = ({
                   <Button
                     onClick={handleTransfer}
                     loading={isLoading}
-                    disabled={!currentOwner || !newOwner}
+                    disabled={!newOwner}
                   >
                     {isLoading ? "සුරැකෙමින්..." : "හිමිකාරිත්‍ය ගෙනයන්න"}
                   </Button>
