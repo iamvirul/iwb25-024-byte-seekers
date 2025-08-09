@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { motion } from "framer-motion";
 import {
@@ -88,7 +88,7 @@ const Dashboard = () => {
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: ["places"],
+    libraries: ["marker"],
   });
 
   const onLoad = useCallback(function callback(map: google.maps.Map) {
