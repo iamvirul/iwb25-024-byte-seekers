@@ -4,7 +4,8 @@ A comprehensive blockchain-based land registry system built with React frontend,
 
 ## System Overview
 
-<img width="1920" height="1080" alt="LandChain Demo Video Presentation" src="https://github.com/user-attachments/assets/e9eaed4c-9396-446c-b655-7e4036205bad" />
+<img width="1920" height="1080" alt="LandChain Demo Video Presentation (1)" src="https://github.com/user-attachments/assets/8d63ac58-3bd4-4f1b-bf63-d3b79ebabdef" />
+
 
 ## Project Architecture
 
