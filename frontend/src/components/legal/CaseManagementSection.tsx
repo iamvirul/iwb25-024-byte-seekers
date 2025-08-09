@@ -1,28 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import {
-    Gavel,
-    Calendar,
-    FileText,
-    Users,
-    Clock,
-    CheckCircle,
-    AlertTriangle,
-    Search,
-    Filter,
-    Eye,
-    Edit,
-    Download,
-    MessageSquare,
-    BookOpen,
-    Scale,
-    Send,
-    Plus,
-    X
-} from 'lucide-react';
-import Card from '../ui/Card';
-import Button from '../ui/Button';
-import Select from '../ui/Select';
 import CaseManagement from './CaseManagement';
 
 interface CaseManagementSectionProps {
