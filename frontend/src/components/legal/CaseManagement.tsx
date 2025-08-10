@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 import {
   Gavel,
   Calendar,
@@ -19,63 +18,69 @@ import {
   Scale,
   Send,
   Plus,
-  X
-} from 'lucide-react';
-import Card from '../ui/Card';
-import Button from '../ui/Button';
-import Select from '../ui/Select';
-import toast from 'react-hot-toast';
-
+  X,
+} from "lucide-react";
+import Card from "../ui/Card";
+import Button from "../ui/Button";
+import Select from "../ui/Select";
+import toast from "react-hot-toast";
 
 interface CaseManagementProps {
   cases: any[];
   onCaseUpdate: (caseId: string, updates: Partial<any>) => void;
-
 }
 
 const CaseManagement: React.FC<CaseManagementProps> = ({
   cases,
   onCaseUpdate,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterPriority, setFilterPriority] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterPriority, setFilterPriority] = useState("all");
   const [selectedCase, setSelectedCase] = useState<any | null>(null);
   const [showCaseDetails, setShowCaseDetails] = useState(false);
-  const [caseNotes, setCaseNotes] = useState('');
+  const [caseNotes, setCaseNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [editableEstimateTime, setEditableEstimateTime] = useState('');
+  const [editableEstimateTime, setEditableEstimateTime] = useState("");
 
   const statusOptions = [
-    { value: 'all', label: 'සියලු තත්ත්වයන්' },
-    { value: 'PENDING', label: 'සමාලෝචනය වෙමින්' },
-    { value: 'RESOLVED', label: 'නිරාකරණය' },
+    { value: "all", label: "සියලු තත්ත්වයන්" },
+    { value: "PENDING", label: "සමාලෝචනය වෙමින්" },
+    { value: "RESOLVED", label: "නිරාකරණය" },
   ];
 
-  const filteredCases = cases.filter(case_ => {
+  const filteredCases = cases.filter((case_) => {
     const matchesSearch =
       case_.user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       case_.witnessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       case_.caseId.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = filterStatus === 'all' || case_.status === filterStatus;
-    const matchesPriority = filterPriority === 'all' || case_.priority === filterPriority;
+    const matchesStatus =
+      filterStatus === "all" || case_.status === filterStatus;
+    const matchesPriority =
+      filterPriority === "all" || case_.priority === filterPriority;
 
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">සමාලෝචනය වෙමින්</span>;
-      case 'RESOLVED':
-        return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">නිරාකරණය</span>;
+      case "PENDING":
+        return (
+          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+            සමාලෝචනය වෙමින්
+          </span>
+        );
+      case "RESOLVED":
+        return (
+          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+            නිරාකරණය
+          </span>
+        );
       default:
         return null;
     }
   };
-
 
   const formatDate = (timestampArray: any) => {
     try {
@@ -90,10 +95,10 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
         return "Invalid date";
       }
 
-      return date.toLocaleDateString('si-LK', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+      return date.toLocaleDateString("si-LK", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
     } catch (error) {
       console.error("Error formatting date:", error);
@@ -101,32 +106,31 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
     }
   };
 
-
   const handleSaveNotes = () => {
     if (selectedCase) {
       const token = localStorage.getItem("token");
       fetch(`/api/legal_officer/comment/add`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           caseId: "" + selectedCase.caseId,
-          comment: caseNotes
-        })
+          comment: caseNotes,
+        }),
       })
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => response.json())
+        .then((data) => {
           console.log(data);
           if (data.success) {
-            toast.success(data.content.message)
-            setCaseNotes("")
+            toast.success(data.content.message);
+            setCaseNotes("");
           } else {
-            toast.error(data.content.message)
+            toast.error(data.content.message);
           }
         })
-        .catch(error => console.error('Error:', error));
+        .catch((error) => console.error("Error:", error));
     }
   };
 
@@ -135,31 +139,31 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
     const token = localStorage.getItem("token");
 
     fetch(`/api/legal_officer/dispute/status/update/${caseId}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Authorization': `Bearer ${token}`,
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
-      .then(response => {
+      .then((response) => {
         setIsLoading(false);
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error("Network response was not ok");
         }
         return response.json();
       })
-      .then(data => {
+      .then((data) => {
         if (!data.success) {
           toast.error(data.message);
         } else {
           toast.success(data.content.message);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         setIsLoading(false);
-        console.error('Error:', error);
+        console.error("Error:", error);
         toast.error("Failed to update case status");
       });
-  }
+  };
 
   const handleUpdateEstimateTime = (caseId: string) => {
     if (!editableEstimateTime) return;
@@ -168,39 +172,39 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
     setIsLoading(true);
 
     fetch(`/api/legal_officer/dispute/estimate_time/add`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         caseId: caseId,
-        estimateTime: editableEstimateTime
-      })
+        estimateTime: editableEstimateTime,
+      }),
     })
-      .then(response => {
+      .then((response) => {
         setIsLoading(false);
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error("Network response was not ok");
         }
         return response.json();
       })
-      .then(data => {
+      .then((data) => {
         if (data.success) {
           toast.success(data.message || "Estimate time updated successfully");
           // Also update the local selected case
-          console.log(selectedCase)
+          console.log(selectedCase);
           setSelectedCase({
             ...selectedCase,
-            estimateTime: editableEstimateTime
+            estimateTime: editableEstimateTime,
           });
         } else {
           toast.error(data.message || "Failed to update estimate time");
         }
       })
-      .catch(error => {
+      .catch((error) => {
         setIsLoading(false);
-        console.error('Error:', error);
+        console.error("Error:", error);
         toast.error("Failed to update estimate time");
       })
       .finally(() => {
@@ -242,12 +246,15 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
           >
-            <Card hover className="h-full flex flex-col border-l-4 border-l-purple-500">
-
-
+            <Card
+              hover
+              className="h-full flex flex-col border-l-4 border-l-purple-500"
+            >
               <div className="space-y-2 mb-4 flex-1">
                 <div className="text-sm">
-                  <span className="text-gray-600 font-semibold">සිද්ධි ID:</span>
+                  <span className="text-gray-600 font-semibold">
+                    සිද්ධි ID:
+                  </span>
                   <span className="ml-2 font-medium">{case_.caseId}</span>
                 </div>
                 <div className="text-sm">
@@ -256,7 +263,9 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                 </div>
                 <div className="text-sm">
                   <span className="text-gray-600">පැමිණිලිකරු:</span>
-                  <span className="ml-2">{case_.user.firstName} {case_.user.lastName}</span>
+                  <span className="ml-2">
+                    {case_.user.firstName} {case_.user.lastName}
+                  </span>
                 </div>
                 <div className="text-sm">
                   <span className="text-gray-600">විත්තිකරු:</span>
@@ -269,9 +278,7 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
               </div>
 
               <div className="flex items-center justify-between mb-4">
-                <div>
-                  {getStatusBadge(case_.status)}
-                </div>
+                <div>{getStatusBadge(case_.status)}</div>
                 <div className="text-sm text-gray-500">
                   {case_.estimateTime} ඇස්තමේන්තුව
                 </div>
@@ -284,15 +291,15 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                   icon={Eye}
                   onClick={() => {
                     setSelectedCase(case_);
-                    setCaseNotes(case_.notes || '');
-                    setEditableEstimateTime(case_.estimateTime || '');
+                    setCaseNotes(case_.notes || "");
+                    setEditableEstimateTime(case_.estimateTime || "");
                     setShowCaseDetails(true);
                   }}
                   className="w-full"
                 >
                   සම්පූර්ණ විස්තර
                 </Button>
-                {case_.status === 'PENDING' && (
+                {case_.status === "PENDING" && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -302,7 +309,7 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                     loading={isLoading}
                     disabled={isLoading}
                   >
-                    {isLoading ? 'කරුණාකර රැඳී සිටින්න...' : 'නිරාකරණය'}
+                    {isLoading ? "කරුණාකර රැඳී සිටින්න..." : "නිරාකරණය"}
                   </Button>
                 )}
               </div>
@@ -315,7 +322,9 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
         <Card>
           <div className="text-center py-12">
             <Gavel className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">නීතිමය සිද්ධි නොමැත</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              නීතිමය සිද්ධි නොමැත
+            </h3>
             <p className="text-gray-600">
               ඔබේ සෙවුම් පදය වෙනස් කර නැවත උත්සාහ කරන්න
             </p>
@@ -334,7 +343,9 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
           >
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div>
-                <p className="text-sm text-gray-600 mt-1">සිද්ධි ID: {selectedCase.caseId}</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  සිද්ධි ID: {selectedCase.caseId}
+                </p>
               </div>
               <button
                 onClick={() => setShowCaseDetails(false)}
@@ -348,7 +359,9 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-6">
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">සිද්ධි තොරතුරු</h4>
+                    <h4 className="font-semibold text-gray-900 mb-3">
+                      සිද්ධි තොරතුරු
+                    </h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">තත්ත්වය:</span>
@@ -370,15 +383,22 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">පාර්ශ්වයන්</h4>
+                    <h4 className="font-semibold text-gray-900 mb-3">
+                      පාර්ශ්වයන්
+                    </h4>
                     <div className="space-y-2 text-sm">
                       <div>
                         <span className="text-gray-600">පැමිණිලිකරු:</span>
-                        <span className="ml-2 font-medium">{selectedCase.user.firstName} {selectedCase.user.lastName}</span>
+                        <span className="ml-2 font-medium">
+                          {selectedCase.user.firstName}{" "}
+                          {selectedCase.user.lastName}
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-600">විත්තිකරු:</span>
-                        <span className="ml-2 font-medium">{selectedCase.witnessName}</span>
+                        <span className="ml-2 font-medium">
+                          {selectedCase.witnessName}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -389,20 +409,31 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                       {selectedCase.disputedocuments.length > 0 ? (
                         selectedCase.disputedocuments.map((item, index) => {
                           const fullPath = item.docPath;
-                          const filenameWithExt = fullPath.split('/').pop() || '';
-                          const filename = filenameWithExt.split('.').slice(0, -1).join('.');
+                          const fileName =
+                            fullPath.split("/o/")[1]?.split("?")[0] ||
+                            fullPath.split("/").pop();
 
                           return (
-                            <div key={index} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                            <div
+                              key={index}
+                              className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded"
+                            >
                               <div className="flex items-center">
                                 <FileText className="w-4 h-4 mr-2 text-blue-500" />
-                                <span>{filename}</span>
+                                <span>{fileName}</span>
                               </div>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 icon={Download}
-                              // onClick={() => handleDownload(fullPath, filenameWithExt)}
+                                onClick={() => {
+                                      const link = document.createElement('a');
+                                      link.href = fullPath;
+                                      link.download = fileName;
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      document.body.removeChild(link);
+                                    }}
                               >
                                 බාගන්න
                               </Button>
@@ -419,11 +450,16 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                   </div>
 
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">නීතිමය පූර්වාදර්ශ</h4>
+                    <h4 className="font-semibold text-gray-900 mb-3">
+                      නීතිමය පූර්වාදර්ශ
+                    </h4>
                     <div className="space-y-2">
                       {selectedCase.legalprecedents.length > 0 ? (
                         selectedCase.legalprecedents.map((precedent, index) => (
-                          <div key={index} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                          <div
+                            key={index}
+                            className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded"
+                          >
                             <div className="flex items-center">
                               <BookOpen className="w-4 h-4 mr-2 text-purple-500" />
                               <span>{precedent.headline}</span>
@@ -438,14 +474,14 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                       )}
                     </div>
                   </div>
-
                 </div>
 
                 <div className="space-y-6">
-
                   {/* Case Notes */}
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">නීතිමය සටහන්</h4>
+                    <h4 className="font-semibold text-gray-900 mb-3">
+                      නීතිමය සටහන්
+                    </h4>
                     <textarea
                       value={caseNotes}
                       onChange={(e) => setCaseNotes(e.target.value)}
@@ -461,7 +497,9 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                   </div>
 
                   <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4">
-                    <h4 className="font-medium text-purple-900 mb-2">ඇස්තමේන්තු නිරාකරණ කාලය</h4>
+                    <h4 className="font-medium text-purple-900 mb-2">
+                      ඇස්තමේන්තු නිරාකරණ කාලය
+                    </h4>
                     <input
                       type="text"
                       value={editableEstimateTime}
@@ -472,11 +510,13 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                     <div className="flex justify-end mt-2">
                       <Button
                         size="sm"
-                        onClick={() => handleUpdateEstimateTime(selectedCase.caseId)}
+                        onClick={() =>
+                          handleUpdateEstimateTime(selectedCase.caseId)
+                        }
                         disabled={!editableEstimateTime || isLoading}
                         loading={isLoading}
                       >
-                        {isLoading ? 'Updating...' : 'යාවත්කාලීන කරන්න'}
+                        {isLoading ? "Updating..." : "යාවත්කාලීන කරන්න"}
                       </Button>
                     </div>
                   </div>
@@ -484,10 +524,13 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
               </div>
 
               <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
-                <Button variant="outline" onClick={() => setShowCaseDetails(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCaseDetails(false)}
+                >
                   වසන්න
                 </Button>
-                {selectedCase.status === 'PENDING' && (
+                {selectedCase.status === "PENDING" && (
                   <Button
                     icon={Gavel}
                     onClick={() => {
@@ -497,7 +540,7 @@ const CaseManagement: React.FC<CaseManagementProps> = ({
                     loading={isLoading}
                     disabled={isLoading}
                   >
-                    {isLoading ? 'කරුණාකර රැඳී සිටින්න...' : 'නිරාකරණය'}
+                    {isLoading ? "කරුණාකර රැඳී සිටින්න..." : "නිරාකරණය"}
                   </Button>
                 )}
               </div>

@@ -4,7 +4,8 @@ A comprehensive blockchain-based land registry system built with React frontend,
 
 ## System Overview
 
-<img width="1920" height="1080" alt="LandChain Demo Video Presentation" src="https://github.com/user-attachments/assets/e9eaed4c-9396-446c-b655-7e4036205bad" />
+<img width="1920" height="1080" alt="LandChain Demo Video Presentation (1)" src="https://github.com/user-attachments/assets/8d63ac58-3bd4-4f1b-bf63-d3b79ebabdef" />
+
 
 ## Project Architecture
 
@@ -35,6 +36,7 @@ Before setting up the project, ensure you have the following installed:
 - **Go** (v1.24.5 or higher)
 - **MySQL** (v8.0 or higher)
 - **Redis** server
+- **RabbitMQ** server
 - **Docker** and **Docker Compose** (optional, for containerized MySQL)
 
 ## Quick Start
@@ -80,6 +82,45 @@ sudo systemctl start redis-server
 # On Windows
 # Download and install Redis from https://redis.io/download
 ```
+Here's a similar setup guide for RabbitMQ:
+
+### RabbitMQ Setup
+
+Install and start RabbitMQ server:
+
+```bash
+# On macOS
+brew install rabbitmq
+brew services start rabbitmq
+
+# On Ubuntu/Debian
+sudo apt-get install rabbitmq-server
+sudo systemctl start rabbitmq-server
+
+# On Windows
+# Download and install RabbitMQ from https://www.rabbitmq.com/download.html
+# Make sure to install Erlang first (required dependency)
+```
+
+Additional useful commands:
+```bash
+# Enable management plugin (for web UI)
+rabbitmq-plugins enable rabbitmq_management
+
+# Default credentials for web UI (after enabling management plugin):
+# http://localhost:15672
+# Username: guest
+# Password: guest
+
+# Create a new user
+rabbitmqctl add_user username password
+
+# Set user permissions
+rabbitmqctl set_user_tags username administrator
+rabbitmqctl set_permissions -p / username ".*" ".*" ".*"
+```
+
+Note: RabbitMQ requires Erlang to be installed. The package managers (brew/apt) will typically handle this dependency automatically. For manual installations, you may need to install Erlang separately.
 
 ## Configuration Files
 
@@ -193,6 +234,52 @@ user = "MYSQL_USERNAME"
 password = "MYSQL_PASSWORD"
 database = "DB_NAME"
 ```
+#### Main Backend Service Configuration
+
+Create `backend/Config.toml`:
+
+```toml
+[backend.db]
+host = "127.0.0.1"
+port = 3306
+user = "USERNAME"
+password = "PASSWORD"
+database = "land_chain"
+
+[backend]
+blockchain_url = "http://localhost:8080/api/v1"
+blockchain_api_key = "BLOCKCHAIN_API_KEY"
+merchant_id = "1231449"
+merchant_secret = "PAYHERE_SECRET"
+sms_lenz_user_id = "SMS_LENZ_USER_ID"
+sms_lenz_api_key = "SMS_LENZ_API_KEY"
+sms_lenz_sender_id = "SMS_LENZ_SENDER_ID"
+
+[backend.rabbitmq]
+username = "guest"
+password = "guest"
+sms_lenz_user_id = "SMS_LENZ_USER_ID"
+sms_lenz_api_key = "SMS_LENZ_API_KEY"
+sms_lenz_sender_id = "SMS_LENZ_SENDER_ID"
+
+[backend.gcs]
+clientId = "CLIENT_ID"
+clientSecret = "CLIENT_SECRET_HERE"
+refreshToken = "REFREESH_TOKEN_HERE"
+bucket = "BUCKET_NAME"
+access_token = "ACCESS_TOKEN_HERE"
+```
+
+## How to Get Your OAuth Refresh Token
+
+| Step | Action                                                                                                            |
+| ---- | ----------------------------------------------------------------------------------------------------------------- |
+| 1    | Open [OAuth 2.0 Playground](https://developers.google.com/oauthplayground) and click the gear icon (⚙️)           |
+| 2    | Check **Use your own OAuth credentials** and enter your Client ID and Client Secret                               |
+| 3    | In Step 1, enter this scope: `https://www.googleapis.com/auth/devstorage.read_write`                              |
+| 4    | Click **Authorize APIs** and complete the consent flow                                                            |
+| 5    | Click **Exchange authorization code for tokens**, then copy the **refresh token**                                 |
+| 6    | Make sure your OAuth consent screen is set to **Production** in Google Cloud Console to avoid token expiry issues |
 
 ## Running the Services
 

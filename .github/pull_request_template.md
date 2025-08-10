@@ -6,7 +6,6 @@ Provide a clear and concise description of the changes introduced in this pull r
 
 - [ ] React/Vite frontend changes
 - [ ] Ballerina backend changes
-- [ ] Python service changes
 
 Closes #[Issue Number]
 
@@ -30,11 +29,6 @@ Closes #[Issue Number]
 - [ ] Endpoints tested and documented
 - [ ] Error handling and logging implemented
 - [ ] Authentication/authorization applied if required
-
-### Python Services
-- [ ] Logic tested via unit or integration tests
-- [ ] Dependencies listed in `requirements.txt`
-- [ ] Logs and exceptions handled appropriately
 
 ---
 

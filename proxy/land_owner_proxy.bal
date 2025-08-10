@@ -30,6 +30,7 @@ service class landOwnerProxy {
     }
 
     remote function onOpen(websocket:Caller caller) returns error? {
+        log:printInfo("onOpen" + self.userSessionId);
         string? jsonString = check redisClient->get(self.userSessionId);
         if jsonString is () {
             return;
