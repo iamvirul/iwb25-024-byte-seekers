@@ -43,11 +43,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <CheckCircle className="w-4 h-4 mr-1" />
                 සත්‍යාපිත ගිණුම
               </span>
-              <span className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                <Shield className="w-4 h-4 mr-1" />
-                {user?.role === 'land_owner' ? 'සාමාන්‍ය පුරවැසියා' : 
-                 user?.role === 'land_officer' ? 'ඉඩම් නිලධාරියා' : 'නීති නිලධාරියා'}
-              </span>
             </div>
           </div>
 
